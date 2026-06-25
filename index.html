@@ -495,6 +495,7 @@ select.form-control {
       </div>
       <button class="btn-primary" onclick="authLogin()">Sign In</button>
       <div class="auth-switch">No account? <a onclick="showAuthRegister()">Create one</a></div>
+      <div class="auth-switch" style="margin-top:6px;"><a onclick="showAuthReset()">Forgot password?</a></div>
     </div>
 
     <!-- Register form -->
@@ -502,6 +503,10 @@ select.form-control {
       <div class="form-group">
         <label class="form-label">Username</label>
         <input type="text" class="form-control" id="reg-username" placeholder="Choose a username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="reg-email" placeholder="you@example.com" autocomplete="email">
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
@@ -513,6 +518,28 @@ select.form-control {
       </div>
       <button class="btn-primary" onclick="authRegister()">Create Account</button>
       <div class="auth-switch">Already have an account? <a onclick="showAuthLogin()">Sign in</a></div>
+    </div>
+
+    <!-- Reset password form -->
+    <div id="auth-reset-form" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-control" id="reset-username" placeholder="Your username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="reset-email" placeholder="Email used at sign-up" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" class="form-control" id="reset-new-password" placeholder="At least 4 characters" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" class="form-control" id="reset-confirm-password" placeholder="Repeat new password" autocomplete="new-password" onkeydown="if(event.key==='Enter') authResetPassword()">
+      </div>
+      <button class="btn-primary" onclick="authResetPassword()">Reset Password</button>
+      <div class="auth-switch">Remember it? <a onclick="showAuthLogin()">Sign in</a></div>
     </div>
   </div>
 </div>
@@ -1771,6 +1798,7 @@ function hideAuthError() { $$('auth-error').classList.remove('show'); }
 function showAuthLogin() {
   $$('auth-login-form').style.display = '';
   $$('auth-register-form').style.display = 'none';
+  $$('auth-reset-form').style.display = 'none';
   $$('auth-subtitle').textContent = 'Sign in to continue';
   hideAuthError();
 }
@@ -1778,6 +1806,7 @@ function showAuthLogin() {
 function showAuthRegister() {
   $$('auth-login-form').style.display = 'none';
   $$('auth-register-form').style.display = '';
+  $$('auth-reset-form').style.display = 'none';
   $$('auth-subtitle').textContent = 'Create your account';
   hideAuthError();
 }
@@ -1796,20 +1825,50 @@ async function authLogin() {
 
 async function authRegister() {
   const username = $$('reg-username').value.trim();
+  const email    = $$('reg-email').value.trim().toLowerCase();
   const password = $$('reg-password').value;
   const confirm  = $$('reg-confirm').value;
   if (!username || username.length < 2) { showAuthError('Username must be at least 2 characters'); return; }
+  if (!email || !email.includes('@')) { showAuthError('Please enter a valid email address'); return; }
   if (!password || password.length < 4) { showAuthError('Password must be at least 4 characters'); return; }
   if (password !== confirm) { showAuthError('Passwords do not match'); return; }
   const users = getUsers();
   if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
     showAuthError('Username already taken'); return;
   }
-  users.push({ username, passwordHash: await hashPassword(password) });
+  users.push({ username, email, passwordHash: await hashPassword(password) });
   saveUsers(users);
   currentUser = username;
   sessionStorage.setItem('bt_user', currentUser);
   bootApp();
+}
+
+function showAuthReset() {
+  $$('auth-login-form').style.display = 'none';
+  $$('auth-register-form').style.display = 'none';
+  $$('auth-reset-form').style.display = '';
+  $$('auth-subtitle').textContent = 'Reset your password';
+  hideAuthError();
+}
+
+async function authResetPassword() {
+  const username = $$('reset-username').value.trim();
+  const email    = $$('reset-email').value.trim().toLowerCase();
+  const newPass  = $$('reset-new-password').value;
+  const confirm  = $$('reset-confirm-password').value;
+  if (!username || !email) { showAuthError('Please enter your username and email'); return; }
+  if (!newPass || newPass.length < 4) { showAuthError('Password must be at least 4 characters'); return; }
+  if (newPass !== confirm) { showAuthError('Passwords do not match'); return; }
+  const users = getUsers();
+  const idx = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (idx === -1) { showAuthError('Username not found'); return; }
+  if (users[idx].email !== email) { showAuthError('Email does not match our records'); return; }
+  users[idx].passwordHash = await hashPassword(newPass);
+  saveUsers(users);
+  showAuthError('Password reset! Please sign in.');
+  $$('auth-error').style.background = '#d1fae5';
+  $$('auth-error').style.color = '#065f46';
+  showAuthLogin();
 }
 
 function authLogout() {
