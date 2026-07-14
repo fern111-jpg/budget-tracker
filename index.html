@@ -783,6 +783,7 @@ select.form-control {
       <div id="bulk-bar" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:white;border-radius:var(--radius);padding:12px 16px;display:none;align-items:center;gap:10px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.3);min-width:300px;max-width:90vw;">
         <span id="bulk-count" style="font-size:13px;font-weight:600;flex:1;">0 selected</span>
         <button onclick="bulkMarkPaid()" style="padding:8px 14px;background:#10b981;color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✓ Mark Paid</button>
+        <button onclick="bulkMarkUnpaid()" style="padding:8px 14px;background:#6b7280;color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Mark Unpaid</button>
         <button onclick="openBulkSplit()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">÷ Split</button>
         <button onclick="clearBulkSelection()" style="padding:8px 10px;background:transparent;color:var(--gray-400);border:none;font-size:18px;cursor:pointer;line-height:1;">✕</button>
       </div>
@@ -2071,6 +2072,13 @@ function bulkMarkPaid() {
   if (!selectedIds.size) return;
   txs.forEach(t => { if (selectedIds.has(t.id)) { t.split = true; t.paid = true; } });
   save(); toast(`Marked ${selectedIds.size} as paid`);
+  selectedIds.clear(); clearBulkSelection();
+}
+
+function bulkMarkUnpaid() {
+  if (!selectedIds.size) return;
+  txs.forEach(t => { if (selectedIds.has(t.id)) { t.paid = false; } });
+  save(); toast(`Marked ${selectedIds.size} as unpaid`);
   selectedIds.clear(); clearBulkSelection();
 }
 
