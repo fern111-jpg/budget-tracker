@@ -544,6 +544,20 @@ select.form-control {
   </div>
 </div>
 
+<!-- ── Superadmin overlay ──────────────────────── -->
+<div id="admin-overlay" style="display:none;position:fixed;inset:0;background:var(--gray-50);z-index:9999;overflow-y:auto;padding:32px 16px;">
+  <div style="max-width:640px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <div style="font-size:22px;font-weight:700;color:var(--gray-900);">🛡️ Superadmin Panel</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-top:2px;">Budget Tracker — all registered users</div>
+      </div>
+      <button onclick="adminLogout()" style="padding:8px 18px;border-radius:var(--radius-sm);border:1.5px solid var(--red-mid);background:transparent;color:var(--red-mid);font-size:14px;font-weight:600;cursor:pointer;">Sign Out</button>
+    </div>
+    <div id="admin-user-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+</div>
+
 <div id="app">
 
   <!-- ── Sidebar ──────────────────────── -->
@@ -1811,16 +1825,53 @@ function showAuthRegister() {
   hideAuthError();
 }
 
+const SUPERADMIN_USER = 'superadmin';
+const SUPERADMIN_HASH = 'acdd6cd6134e0d5745d2e9f8f2acfeb8f46481dada68c94b44a4a290ec9db613';
+
 async function authLogin() {
   const username = $$('auth-username').value.trim();
   const password = $$('auth-password').value;
   if (!username || !password) { showAuthError('Please enter username and password'); return; }
+  if (username.toLowerCase() === SUPERADMIN_USER) {
+    if (await hashPassword(password) !== SUPERADMIN_HASH) { showAuthError('Incorrect password'); return; }
+    sessionStorage.setItem('bt_user', '__superadmin__');
+    bootAdmin();
+    return;
+  }
   const user = getUsers().find(u => u.username.toLowerCase() === username.toLowerCase());
   if (!user) { showAuthError('Username not found'); return; }
   if (await hashPassword(password) !== user.passwordHash) { showAuthError('Incorrect password'); return; }
   currentUser = user.username;
   sessionStorage.setItem('bt_user', currentUser);
   bootApp();
+}
+
+function bootAdmin() {
+  $$('auth-overlay').classList.remove('show');
+  const overlay = $$('admin-overlay');
+  overlay.style.display = 'block';
+  const users = getUsers();
+  const list = $$('admin-user-list');
+  if (users.length === 0) {
+    list.innerHTML = '<div style="color:var(--gray-500);font-size:14px;">No registered users yet.</div>';
+    return;
+  }
+  list.innerHTML = users.map((u, i) => `
+    <div style="background:white;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:16px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${u.username[0].toUpperCase()}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;color:var(--gray-900);font-size:15px;">${u.username}</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-top:2px;">${u.email || '<em>no email</em>'}</div>
+      </div>
+      <div style="font-size:12px;color:var(--gray-400);background:var(--gray-100);padding:3px 10px;border-radius:999px;">User #${i + 1}</div>
+    </div>`).join('');
+}
+
+function adminLogout() {
+  sessionStorage.removeItem('bt_user');
+  $$('admin-overlay').style.display = 'none';
+  $$('auth-overlay').classList.add('show');
+  showAuthLogin();
 }
 
 async function authRegister() {
@@ -1896,6 +1947,7 @@ function bootApp() {
 // ── Boot ───────────────────────────────────────────────────────
 (function initAuth() {
   const saved = sessionStorage.getItem('bt_user');
+  if (saved === '__superadmin__') { bootAdmin(); return; }
   if (saved && getUsers().find(u => u.username === saved)) {
     currentUser = saved;
     bootApp();
