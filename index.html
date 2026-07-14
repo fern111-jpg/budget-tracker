@@ -1577,7 +1577,9 @@ function getKnownPeople() {
 }
 function updatePeopleList() {
   const el = $$('people-list'); if (!el) return;
-  el.innerHTML = getKnownPeople().map(p=>`<option value="${esc(p)}">`).join('');
+  const people = new Set(getKnownPeople());
+  getUsers().forEach(u => { if (u.username !== currentUser) people.add(u.username); });
+  el.innerHTML = [...people].sort().map(p=>`<option value="${esc(p)}">`).join('');
 }
 function renderTags(p) {
   const el = $$(`${p}-split-tags`); if (!el) return;
