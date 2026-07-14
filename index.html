@@ -583,6 +583,10 @@ select.form-control {
         <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><line x1="6" y1="10" x2="6" y2="13"></line><line x1="10" y1="8" x2="10" y2="13"></line><line x1="14" y1="11" x2="14" y2="13"></line><line x1="18" y1="9" x2="18" y2="13"></line></svg>
         Budgeting
       </button>
+      <button class="sb-item" id="sb-manage" onclick="goTo('manage')">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        Manage
+      </button>
       <button class="sb-item" id="sb-settings" onclick="goTo('settings')">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         Settings
@@ -661,9 +665,6 @@ select.form-control {
             <label class="form-label">Account</label>
             <select class="form-control" id="f-account">
               <option value="">Select account</option>
-              <option>WPC</option>
-              <option>Commbank</option>
-              <option>Amex</option>
             </select>
           </div>
         </div>
@@ -881,6 +882,43 @@ select.form-control {
         Use <em>Export to CSV</em> regularly to back up your data.
       </div>
     </div>
+
+    <!-- MANAGE -->
+    <div class="page" id="pg-manage">
+      <div class="settings-sec">Categories</div>
+      <div class="card" style="padding:16px 20px;margin-bottom:16px;">
+        <div id="manage-cats-list"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <input type="text" class="form-control" id="new-cat-input" placeholder="New category name" style="flex:1;">
+          <button onclick="addCategory()" style="padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Add</button>
+        </div>
+      </div>
+
+      <div class="settings-sec">Sub-Categories</div>
+      <div class="card" style="padding:16px 20px;margin-bottom:16px;">
+        <div style="margin-bottom:12px;">
+          <label class="form-label">Category</label>
+          <select class="form-control" id="manage-subcat-pick" onchange="renderManageSubcats()">
+            <option value="">Select category</option>
+          </select>
+        </div>
+        <div id="manage-subcats-list"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;" id="manage-subcat-add-row">
+          <input type="text" class="form-control" id="new-subcat-input" placeholder="New sub-category name" style="flex:1;">
+          <button onclick="addSubcat()" style="padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Add</button>
+        </div>
+      </div>
+
+      <div class="settings-sec">Accounts</div>
+      <div class="card" style="padding:16px 20px;margin-bottom:16px;">
+        <div id="manage-accounts-list"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <input type="text" class="form-control" id="new-account-input" placeholder="New account name" style="flex:1;">
+          <button onclick="addAccount()" style="padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Add</button>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /.main -->
 
 </div><!-- /#app -->
@@ -899,9 +937,6 @@ select.form-control {
         <label class="form-label">Account</label>
         <select class="form-control" id="e-account">
           <option value="">Select account</option>
-          <option>WPC</option>
-          <option>Commbank</option>
-          <option>Amex</option>
         </select>
       </div>
     </div>
@@ -981,6 +1016,10 @@ select.form-control {
     <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><line x1="6" y1="10" x2="6" y2="13"></line><line x1="10" y1="8" x2="10" y2="13"></line><line x1="14" y1="11" x2="14" y2="13"></line><line x1="18" y1="9" x2="18" y2="13"></line></svg>
     Budget
   </button>
+  <button class="nav-item" id="nav-manage" onclick="goTo('manage')">
+    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+    Manage
+  </button>
   <button class="nav-item" id="nav-settings" onclick="goTo('settings')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     Settings
@@ -989,7 +1028,7 @@ select.form-control {
 
 <script>
 // ── Data ──────────────────────────────────────────────────────
-const CATS = {
+const DEFAULT_CATS = {
   'Income':                ['Main Income','Side Hustle','Extra Income','Other Income 1','Other Income 2','Other Income 3','Other Income 4','Other Income 5'],
   'Groceries & Household': ['Groceries','House & Garden','Pet care & vet'],
   'Lifestyle':             ['Coffee & tea','Lunches bought','Restaurants','Bars & clubs','Movies & music','Books & magazines','Other - Lifestyle 1','Other - Lifestyle 2','Other - Lifestyle 3','Other - Lifestyle 4','Other - Lifestyle 5'],
@@ -1002,6 +1041,9 @@ const CATS = {
   'Debt':                  ['Car Loan','Student Loan','Credit Card','Other - Debt 1','Other - Debt 2','Other - Debt 3','Other - Debt 4'],
   'Other':                 ['Other 1','Other 2','Other 3']
 };
+const DEFAULT_ACCOUNTS = ['WPC','Commbank','Amex'];
+let CATS = {};
+let userAccounts = [];
 const CAT_COLOR = {
   'Income':'#059669','Groceries & Household':'#D97706','Lifestyle':'#7C3AED',
   'Health & Wellbeing':'#DC2626','Transport':'#2563EB','Housing & Bills':'#0891B2',
@@ -1034,6 +1076,8 @@ let activePill = '';
 let sortState = { col: 'date', dir: -1 };
 
 function save() { localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs)); updateCount(); syncSave(); }
+function saveCats() { localStorage.setItem('bt_cats_' + currentUser, JSON.stringify(CATS)); }
+function saveAccounts() { localStorage.setItem('bt_accounts_' + currentUser, JSON.stringify(userAccounts)); }
 function saveBudgets() { localStorage.setItem('bt_budgets_' + currentUser, JSON.stringify(budgets)); }
 function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function $$(id) { return document.getElementById(id); }
@@ -1067,12 +1111,13 @@ function goTo(page) {
   $$('sb-' + page)?.classList.add('active');
   curPage = page;
   sessionStorage.setItem('bt_page', page);
-  const titles = { dashboard:'Overview', transactions:'Transactions', budgeting:'Budgeting', settings:'Settings' };
+  const titles = { dashboard:'Overview', transactions:'Transactions', budgeting:'Budgeting', settings:'Settings', manage:'Manage' };
   $$('hdr-title').textContent = titles[page] || page;
   $$('hdr-badge').textContent = page === 'transactions' ? txs.length + ' entries' : '';
   if (page === 'dashboard')    renderDash();
   if (page === 'transactions') renderTx();
   if (page === 'budgeting')    renderBudget();
+  if (page === 'manage')       renderManage();
 }
 
 function openAddModal() {
@@ -1305,6 +1350,7 @@ function resetAddForm() {
   splitOn.f = false;
   $$('f-sw').classList.remove('on');
   $$('f-split-fields').classList.remove('open');
+  $$('f-account').innerHTML = '<option value="">Select account</option>' + userAccounts.map(a=>`<option>${esc(a)}</option>`).join('');
   const cat = $$('f-cat');
   cat.innerHTML = '<option value="">Select category</option>' + Object.keys(CATS).map(c=>`<option>${esc(c)}</option>`).join('');
   $$('f-subcat').innerHTML = '<option value="">Select category first</option>';
@@ -1372,6 +1418,7 @@ function openEdit(id) {
   const t = txs.find(x=>x.id===id);
   if (!t) return;
   editId = id;
+  $$('e-account').innerHTML = '<option value="">Select account</option>' + userAccounts.map(a=>`<option ${a===t.account?'selected':''}>${esc(a)}</option>`).join('');
   $$('e-date').value     = t.date||'';
   $$('e-account').value  = t.account||'';
   $$('e-desc').value     = t.desc||'';
@@ -2037,6 +2084,8 @@ function bootApp() {
   budgets      = JSON.parse(localStorage.getItem('bt_budgets_'      + currentUser) || '{}');
   budgetPeriod = localStorage.getItem('bt_budget_period_' + currentUser) || 'month';
   syncCfg      = JSON.parse(localStorage.getItem('bt_sync_'         + currentUser) || 'null');
+  CATS         = JSON.parse(localStorage.getItem('bt_cats_'         + currentUser) || 'null') || JSON.parse(JSON.stringify(DEFAULT_CATS));
+  userAccounts = JSON.parse(localStorage.getItem('bt_accounts_'     + currentUser) || 'null') || [...DEFAULT_ACCOUNTS];
   $$('auth-overlay').classList.remove('show');
   const lbl = $$('current-user-label');
   if (lbl) lbl.textContent = currentUser;
@@ -2047,6 +2096,158 @@ function bootApp() {
   updateSyncUI();
   setBudgetPeriod(budgetPeriod);
   if (syncCfg?.key && syncCfg?.binId) setTimeout(syncPull, 800);
+}
+
+// ── Manage page ────────────────────────────────────────────────
+function renderManage() {
+  renderManageCats();
+  renderManageSubcats();
+  renderManageAccounts();
+  // populate category picker for subcats
+  const pick = $$('manage-subcat-pick');
+  const cur = pick.value;
+  pick.innerHTML = '<option value="">Select category</option>' +
+    Object.keys(CATS).map(c=>`<option value="${esc(c)}" ${c===cur?'selected':''}>${esc(c)}</option>`).join('');
+}
+
+function renderManageCats() {
+  const el = $$('manage-cats-list');
+  el.innerHTML = Object.keys(CATS).map(cat => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100);" id="mcat-row-${btoa(cat).replace(/=/g,'')}">
+      <span style="flex:1;font-size:14px;color:var(--gray-800);" id="mcat-label-${btoa(cat).replace(/=/g,'')}">${esc(cat)}</span>
+      <input type="text" class="form-control" style="flex:1;display:none;font-size:14px;" id="mcat-input-${btoa(cat).replace(/=/g,'')}" value="${esc(cat)}">
+      <button onclick="editCatStart('${esc(cat)}')" id="mcat-edit-${btoa(cat).replace(/=/g,'')}" style="padding:4px 10px;background:var(--gray-100);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-600);">Edit</button>
+      <button onclick="editCatSave('${esc(cat)}')" id="mcat-save-${btoa(cat).replace(/=/g,'')}" style="display:none;padding:4px 10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Save</button>
+      <button onclick="deleteCategory('${esc(cat)}')" style="padding:4px 10px;background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;" title="Delete">&times;</button>
+    </div>`).join('');
+}
+
+function catKey(cat) { return btoa(encodeURIComponent(cat)).replace(/=/g,''); }
+
+function editCatStart(cat) {
+  const k = catKey(cat);
+  $$('mcat-label-'+k).style.display = 'none';
+  $$('mcat-input-'+k).style.display = '';
+  $$('mcat-input-'+k).focus();
+  $$('mcat-edit-'+k).style.display = 'none';
+  $$('mcat-save-'+k).style.display = '';
+}
+
+function editCatSave(oldName) {
+  const k = catKey(oldName);
+  const newName = $$('mcat-input-'+k).value.trim();
+  if (!newName || newName === oldName) { renderManageCats(); return; }
+  if (CATS[newName]) { toast('Category already exists'); return; }
+  const subs = CATS[oldName];
+  const newCats = {};
+  Object.keys(CATS).forEach(c => { newCats[c === oldName ? newName : c] = CATS[c]; });
+  CATS = newCats;
+  // update existing transactions
+  txs.forEach(t => { if (t.cat === oldName) t.cat = newName; });
+  save(); saveCats(); renderManage(); toast('Category renamed');
+}
+
+function deleteCategory(cat) {
+  if (!confirm(`Delete category "${cat}"? Transactions will keep their category label.`)) return;
+  delete CATS[cat];
+  saveCats(); renderManage(); toast('Category deleted');
+}
+
+function addCategory() {
+  const name = $$('new-cat-input').value.trim();
+  if (!name) return;
+  if (CATS[name]) { toast('Already exists'); return; }
+  CATS[name] = [];
+  saveCats(); $$('new-cat-input').value = ''; renderManage(); toast('Category added');
+}
+
+function renderManageSubcats() {
+  const cat = $$('manage-subcat-pick').value;
+  const list = $$('manage-subcats-list');
+  if (!cat || !CATS[cat]) { list.innerHTML = '<p style="color:var(--gray-400);font-size:13px;margin:0;">Select a category above to manage its sub-categories.</p>'; return; }
+  const subs = CATS[cat];
+  list.innerHTML = subs.length ? subs.map((s,i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+      <span style="flex:1;font-size:14px;color:var(--gray-800);" id="msub-label-${i}">${esc(s)}</span>
+      <input type="text" class="form-control" style="flex:1;display:none;font-size:14px;" id="msub-input-${i}" value="${esc(s)}">
+      <button onclick="editSubStart(${i})" id="msub-edit-${i}" style="padding:4px 10px;background:var(--gray-100);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-600);">Edit</button>
+      <button onclick="editSubSave('${esc(cat)}',${i})" id="msub-save-${i}" style="display:none;padding:4px 10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Save</button>
+      <button onclick="deleteSubcat('${esc(cat)}',${i})" style="padding:4px 10px;background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;" title="Delete">&times;</button>
+    </div>`).join('') : '<p style="color:var(--gray-400);font-size:13px;margin:0 0 4px;">No sub-categories yet.</p>';
+}
+
+function editSubStart(i) {
+  $$('msub-label-'+i).style.display = 'none';
+  $$('msub-input-'+i).style.display = '';
+  $$('msub-input-'+i).focus();
+  $$('msub-edit-'+i).style.display = 'none';
+  $$('msub-save-'+i).style.display = '';
+}
+
+function editSubSave(cat, i) {
+  const newName = $$('msub-input-'+i).value.trim();
+  if (!newName) { renderManageSubcats(); return; }
+  const old = CATS[cat][i];
+  CATS[cat][i] = newName;
+  txs.forEach(t => { if (t.cat === cat && t.subcat === old) t.subcat = newName; });
+  save(); saveCats(); renderManageSubcats(); toast('Sub-category renamed');
+}
+
+function deleteSubcat(cat, i) {
+  CATS[cat].splice(i, 1);
+  saveCats(); renderManageSubcats(); toast('Sub-category deleted');
+}
+
+function addSubcat() {
+  const cat = $$('manage-subcat-pick').value;
+  if (!cat) { toast('Select a category first'); return; }
+  const name = $$('new-subcat-input').value.trim();
+  if (!name) return;
+  if (CATS[cat].includes(name)) { toast('Already exists'); return; }
+  CATS[cat].push(name);
+  saveCats(); $$('new-subcat-input').value = ''; renderManageSubcats(); toast('Sub-category added');
+}
+
+function renderManageAccounts() {
+  const el = $$('manage-accounts-list');
+  el.innerHTML = userAccounts.map((a,i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+      <span style="flex:1;font-size:14px;color:var(--gray-800);" id="macc-label-${i}">${esc(a)}</span>
+      <input type="text" class="form-control" style="flex:1;display:none;font-size:14px;" id="macc-input-${i}" value="${esc(a)}">
+      <button onclick="editAccStart(${i})" id="macc-edit-${i}" style="padding:4px 10px;background:var(--gray-100);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-600);">Edit</button>
+      <button onclick="editAccSave(${i})" id="macc-save-${i}" style="display:none;padding:4px 10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Save</button>
+      <button onclick="deleteAccount(${i})" style="padding:4px 10px;background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;" title="Delete">&times;</button>
+    </div>`).join('');
+}
+
+function editAccStart(i) {
+  $$('macc-label-'+i).style.display = 'none';
+  $$('macc-input-'+i).style.display = '';
+  $$('macc-input-'+i).focus();
+  $$('macc-edit-'+i).style.display = 'none';
+  $$('macc-save-'+i).style.display = '';
+}
+
+function editAccSave(i) {
+  const newName = $$('macc-input-'+i).value.trim();
+  if (!newName) { renderManageAccounts(); return; }
+  const old = userAccounts[i];
+  userAccounts[i] = newName;
+  txs.forEach(t => { if (t.account === old) t.account = newName; });
+  save(); saveAccounts(); renderManageAccounts(); toast('Account renamed');
+}
+
+function deleteAccount(i) {
+  userAccounts.splice(i, 1);
+  saveAccounts(); renderManageAccounts(); toast('Account deleted');
+}
+
+function addAccount() {
+  const name = $$('new-account-input').value.trim();
+  if (!name) return;
+  if (userAccounts.includes(name)) { toast('Already exists'); return; }
+  userAccounts.push(name);
+  saveAccounts(); $$('new-account-input').value = ''; renderManageAccounts(); toast('Account added');
 }
 
 // ── Bulk selection ─────────────────────────────────────────────
