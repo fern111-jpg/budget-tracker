@@ -601,11 +601,18 @@ select.form-control {
     <!-- DASHBOARD -->
     <div class="page active" id="pg-dashboard">
       <div class="month-picker">
-        <button class="month-btn" onclick="changeMonth(-1)">
+        <button class="month-btn" onclick="changePeriod(-1)">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
-        <span class="month-label" id="dash-month-label"></span>
-        <button class="month-btn" onclick="changeMonth(1)">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <span class="month-label" id="dash-month-label"></span>
+          <div style="display:flex;gap:4px;">
+            <button id="view-week"  onclick="setDashView('week')"  style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--gray-200);background:var(--white);font-size:11px;font-weight:600;color:var(--gray-500);cursor:pointer;">Week</button>
+            <button id="view-month" onclick="setDashView('month')" style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--primary);background:var(--primary);font-size:11px;font-weight:600;color:white;cursor:pointer;">Month</button>
+            <button id="view-year"  onclick="setDashView('year')"  style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--gray-200);background:var(--white);font-size:11px;font-weight:600;color:var(--gray-500);cursor:pointer;">Year</button>
+          </div>
+        </div>
+        <button class="month-btn" onclick="changePeriod(1)">
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
@@ -978,6 +985,12 @@ let editId = null;
 let splitOn = { f: false, e: false };
 let dashM = new Date().getMonth();
 let dashY = new Date().getFullYear();
+let dashView = 'month';
+let dashWeekStart = (function() {
+  const d = new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - d.getDay() + (d.getDay()===0?-6:1)); // Monday
+  return d;
+})();
 let activePill = '';
 let sortState = { col: 'date', dir: -1 };
 
@@ -1024,36 +1037,73 @@ function goTo(page) {
 }
 
 // ── Dashboard ──────────────────────────────────────────────────
-function changeMonth(d) {
-  dashM += d;
-  if (dashM > 11) { dashM = 0; dashY++; }
-  if (dashM < 0)  { dashM = 11; dashY--; }
+function setDashView(v) {
+  dashView = v;
+  ['week','month','year'].forEach(id => {
+    const el = $$('view-'+id);
+    const active = id === v;
+    el.style.background     = active ? 'var(--primary)' : 'var(--white)';
+    el.style.borderColor    = active ? 'var(--primary)' : 'var(--gray-200)';
+    el.style.color          = active ? 'white' : 'var(--gray-500)';
+  });
+  renderDash();
+}
+
+function changePeriod(d) {
+  if (dashView === 'month') {
+    dashM += d;
+    if (dashM > 11) { dashM = 0; dashY++; }
+    if (dashM < 0)  { dashM = 11; dashY--; }
+  } else if (dashView === 'year') {
+    dashY += d;
+  } else {
+    const w = new Date(dashWeekStart);
+    w.setDate(w.getDate() + d * 7);
+    dashWeekStart = w;
+  }
   renderDash();
 }
 
 function renderDash() {
-  $$('dash-month-label').textContent = MONTHS[dashM] + ' ' + dashY;
-  const month = txs.filter(t => {
-    const dt = new Date(t.date + 'T00:00:00');
-    return dt.getMonth() === dashM && dt.getFullYear() === dashY;
-  });
-  const income   = month.filter(t => t.cat==='Income').reduce((s,t) => s+(t.amount||0), 0);
-  const expenses = month.filter(t => t.cat!=='Income').reduce((s,t) => s+(t.trueAmt??t.amount??0), 0);
+  let period;
+  if (dashView === 'week') {
+    const end = new Date(dashWeekStart);
+    end.setDate(end.getDate() + 6);
+    const fmt2 = d => `${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}`;
+    $$('dash-month-label').textContent = fmt2(dashWeekStart) + ' – ' + fmt2(end) + ' ' + end.getFullYear();
+    period = txs.filter(t => {
+      const dt = new Date(t.date + 'T00:00:00');
+      return dt >= dashWeekStart && dt <= end;
+    });
+  } else if (dashView === 'year') {
+    $$('dash-month-label').textContent = String(dashY);
+    period = txs.filter(t => new Date(t.date + 'T00:00:00').getFullYear() === dashY);
+  } else {
+    $$('dash-month-label').textContent = MONTHS[dashM] + ' ' + dashY;
+    period = txs.filter(t => {
+      const dt = new Date(t.date + 'T00:00:00');
+      return dt.getMonth() === dashM && dt.getFullYear() === dashY;
+    });
+  }
+
+  const income   = period.filter(t => t.cat==='Income').reduce((s,t) => s+(t.amount||0), 0);
+  const expenses = period.filter(t => t.cat!=='Income').reduce((s,t) => s+(t.trueAmt??t.amount??0), 0);
   const net = income - expenses;
 
   $$('dash-income').textContent  = fmt(income);
   $$('dash-expense').textContent = fmt(expenses);
   const ne = $$('dash-net');
-  ne.textContent = (net >= 0 ? '+' : '-') + fmt(net);
+  ne.textContent = (net >= 0 ? '+' : '') + fmt(Math.abs(net));
   ne.className   = 'sum-amount ' + (net > 0 ? 'pos' : net < 0 ? 'neg' : 'neutral');
 
   // Category bars
   const totals = {};
-  month.filter(t => t.cat !== 'Income').forEach(t => {
+  period.filter(t => t.cat !== 'Income').forEach(t => {
     totals[t.cat] = (totals[t.cat]||0) + (t.trueAmt??t.amount??0);
   });
   const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
   const max = sorted[0]?.[1] || 1;
+  const emptyMsg = dashView==='week' ? 'No expenses this week' : dashView==='year' ? 'No expenses this year' : 'No expenses this month';
   $$('cat-bars').innerHTML = sorted.length
     ? sorted.map(([c,v]) => `
         <div class="cat-row">
@@ -1061,10 +1111,10 @@ function renderDash() {
           <div class="cat-track"><div class="cat-fill" style="width:${(v/max*100).toFixed(1)}%;background:${CAT_COLOR[c]||'#6B7280'}"></div></div>
           <div class="cat-val">${fmt(v)}</div>
         </div>`).join('')
-    : '<div style="text-align:center;color:var(--gray-400);font-size:13px;padding:8px 0;">No expenses this month</div>';
+    : `<div style="text-align:center;color:var(--gray-400);font-size:13px;padding:8px 0;">${emptyMsg}</div>`;
 
   // Recent 8
-  const recent = [...month].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 8);
+  const recent = [...period].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 8);
   $$('dash-recent').innerHTML = recent.length
     ? recent.map(txCardHTML).join('')
     : '<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">No transactions</div><div class="empty-sub">Tap Add to log your first</div></div>';
