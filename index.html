@@ -941,19 +941,53 @@ select.form-control {
 
       <!-- Gas panel -->
       <div id="util-panel-gas" style="display:none;">
-        <div class="empty" style="padding:48px 0;">
-          <div class="empty-icon">🔥</div>
-          <div class="empty-title">Gas coming soon</div>
-          <div class="empty-sub">Bill tracking and comparison for gas will be available here</div>
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <div id="gas-month-pills" style="display:contents;"></div>
+            <button id="gas-filter-toggle" onclick="toggleGasFilterRange()" style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;">Filter</button>
+          </div>
+          <div id="gas-filter-range" style="display:none;margin-top:8px;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="month" id="gas-filter-from" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyGasRange()">
+            <span style="font-size:12px;color:var(--gray-400);">to</span>
+            <input type="month" id="gas-filter-to" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyGasRange()">
+            <button onclick="clearGasFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div class="sec-title" style="margin:0;">Saved Bills</div>
+          <button onclick="openBillForm(null,'gas')" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Bill
+          </button>
+        </div>
+        <div id="gas-bills-list"></div>
+        <div id="gas-compare-section" style="display:none;margin-top:28px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div class="sec-title" style="margin:0;">Quote Comparison</div>
+            <button onclick="openQuoteForm(null,'gas')" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Quote
+            </button>
+          </div>
+          <div id="gas-compare-table"></div>
         </div>
       </div>
 
       <!-- Internet panel -->
       <div id="util-panel-internet" style="display:none;">
-        <div class="empty" style="padding:48px 0;">
-          <div class="empty-icon">🌐</div>
-          <div class="empty-title">Internet coming soon</div>
-          <div class="empty-sub">Bill tracking and comparison for internet will be available here</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div class="sec-title" style="margin:0;">Saved Plans</div>
+          <button onclick="openInternetBillForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Plan
+          </button>
+        </div>
+        <div id="internet-bills-list"></div>
+        <div id="internet-compare-section" style="display:none;margin-top:28px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div class="sec-title" style="margin:0;">Plan Comparison</div>
+            <button onclick="openInternetQuoteForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Quote
+            </button>
+          </div>
+          <div id="internet-compare-table"></div>
         </div>
       </div>
     </div>
@@ -1058,6 +1092,67 @@ select.form-control {
     <div style="display:flex;gap:10px;margin-top:4px;">
       <button class="btn-primary" onclick="submitBillForm()" style="flex:1;">Save Bill</button>
       <button onclick="closeBillForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Internet Plan Form Modal ─────────────────────────── -->
+<div id="internet-bill-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;">
+  <div class="card" style="width:100%;max-width:580px;margin:auto;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:16px;font-weight:700;color:var(--gray-900);" id="ibi-form-title">Add Internet Plan</span>
+      <button onclick="closeInternetBillForm()" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:22px;line-height:1;padding:2px 6px;">&times;</button>
+    </div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr;">
+      <div class="form-group">
+        <label class="form-label">Provider</label>
+        <input type="text" class="form-control" id="ibi-provider" placeholder="e.g. Aussie Broadband">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Plan Name</label>
+        <input type="text" class="form-control" id="ibi-plan" placeholder="e.g. NBN 100/20">
+      </div>
+    </div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+      <div class="form-group">
+        <label class="form-label">Monthly Rate ($)</label>
+        <input type="number" class="form-control" id="ibi-monthly" placeholder="79.00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Download (Mbps)</label>
+        <input type="number" class="form-control" id="ibi-download" placeholder="100" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Upload (Mbps)</label>
+        <input type="number" class="form-control" id="ibi-upload" placeholder="20" min="0">
+      </div>
+    </div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input type="text" class="form-control" id="ibi-data" placeholder="Unlimited or 500GB">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contract (months)</label>
+        <input type="number" class="form-control" id="ibi-contract" placeholder="0 = no lock-in" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Setup / Modem Fee ($)</label>
+        <input type="number" class="form-control" id="ibi-setup" placeholder="0" step="0.01" min="0">
+      </div>
+    </div>
+    <div style="margin-top:14px;margin-bottom:6px;">
+      <label class="form-label">Bonuses / Cashback</label>
+      <div id="ibi-bonus-rows"></div>
+      <button type="button" onclick="addIbiBonusRow()" style="margin-top:8px;padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Bonus</button>
+    </div>
+    <div class="form-group" style="margin-top:14px;">
+      <label class="form-label">Notes (optional)</label>
+      <input type="text" class="form-control" id="ibi-notes" placeholder="e.g. includes modem, typical evening speed guarantee">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn-primary" onclick="submitInternetBillForm()" style="flex:1;" id="ibi-form-submit">Save Plan</button>
+      <button onclick="closeInternetBillForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
     </div>
   </div>
 </div>
@@ -1266,6 +1361,15 @@ let utilFilterTo   = '';   // 'YYYY-MM'
 let bfRateRows = [];
 let editingBillId = null;
 let editingQuoteId = null;
+let currentFormType = 'electricity';
+let gasCompBill = null;
+let gasQuotes = [];
+let gasFilterFrom = '';
+let gasFilterTo = '';
+let internetCompBill = null;
+let internetQuotes = [];
+let editingInternetBillId = null;
+let editingInternetQuoteId = null;
 let curPage = 'dashboard';
 let editId = null;
 let splitOn = { f: false, e: false };
@@ -2318,6 +2422,8 @@ function setUtilTab(tab) {
 
 function renderUtilities() {
   if (utilTab === 'electricity') renderElectricity();
+  else if (utilTab === 'gas') renderGas();
+  else if (utilTab === 'internet') renderInternet();
 }
 
 // ── Electricity ─────────────────────────────────────────────────
@@ -2496,35 +2602,50 @@ function saveQuotes() {
 
 function deleteBill(id) {
   if (!confirm('Delete this bill?')) return;
+  const bill = utilBills.find(b => b.id === id);
   utilBills = utilBills.filter(b => b.id !== id);
   if (utilCompBill?.id === id) { utilCompBill = null; utilQuotes = []; }
-  saveUtilBills(); renderElectricity();
+  if (gasCompBill?.id === id) { gasCompBill = null; gasQuotes = []; }
+  saveUtilBills();
+  if (bill?.type === 'gas') renderGas(); else renderElectricity();
 }
 
 function editBill(id) {
   const b = utilBills.find(x => x.id === id);
   if (!b) return;
   editingBillId = id;
-  openBillForm(b);
+  openBillForm(b, b.type);
 }
 
 function renderCompareSection() {
   const sec = $$('util-compare-section');
   if (!utilCompBill) { sec.style.display = 'none'; return; }
   sec.style.display = '';
-  renderCompareTable();
+  renderCompareTable('electricity');
 }
 
-function renderCompareTable() {
-  const b = utilCompBill;
+function renderGasCompareSection() {
+  const sec = $$('gas-compare-section');
+  if (!sec) return;
+  if (!gasCompBill) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  renderCompareTable('gas');
+}
+
+function renderCompareTable(type) {
+  type = type || 'electricity';
+  const b      = type === 'gas' ? gasCompBill  : utilCompBill;
+  const quotes = type === 'gas' ? gasQuotes    : utilQuotes;
+  const elId   = type === 'gas' ? 'gas-compare-table' : 'util-compare-table';
+  const unitLabel = type === 'gas' ? 'MJ' : 'kWh';
   if (!b) return;
-  const el = $$('util-compare-table');
+  const el = $$(elId);
   const days = b.days || 90;
 
   // Build columns: current bill + each quote
   const cols = [
     { label: b.provider || 'Current Bill', isCurrent: true, supply: b.supply, ratePeriods: b.ratePeriods.map(r=>({name:r.name,rate:r.rate})), bonuses: [], total: b.total }
-  ].concat(utilQuotes.map(q => ({ ...q })));
+  ].concat(quotes.map(q => ({ ...q })));
 
   // Calculations
   const calcs = cols.map(col => {
@@ -2562,7 +2683,7 @@ function renderCompareTable() {
           ${cols.map((col,ci) => `<th style="text-align:right;padding:10px 8px;min-width:130px;${multiCol && ci===cheapestIdx ? 'background:#f0fdf4;border-bottom:2px solid #10b981;' : ''}">
             <div style="font-size:13px;font-weight:700;color:var(--gray-900);">${esc(col.label||col.provider||'Quote')}</div>
             ${multiCol && ci===cheapestIdx ? '<div style="font-size:10px;color:#10b981;font-weight:700;">★ CHEAPEST</div>' : ''}
-            ${col.isCurrent ? '<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT BILL</div>' : `<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;"><button onclick="openQuoteForm('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--primary);cursor:pointer;font-family:inherit;padding:0;">✎ Edit</button><button onclick="deleteQuote('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button></div>`}
+            ${col.isCurrent ? '<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT BILL</div>' : `<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;"><button onclick="openQuoteForm('${col.id}','${type}')" style="font-size:10px;border:none;background:none;color:var(--primary);cursor:pointer;font-family:inherit;padding:0;">✎ Edit</button><button onclick="deleteQuote('${col.id}','${type}')" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button></div>`}
           </th>`).join('')}
         </tr>
       </thead>
@@ -2573,7 +2694,7 @@ function renderCompareTable() {
         </tr>
         ${b.ratePeriods.map(bp => `
         <tr>
-          <td style="padding:8px;color:var(--gray-600);">${esc(bp.name)} <span style="color:var(--gray-400);font-size:11px;">(${bp.usage}kWh)</span></td>
+          <td style="padding:8px;color:var(--gray-600);">${esc(bp.name)} <span style="color:var(--gray-400);font-size:11px;">(${bp.usage}${unitLabel})</span></td>
           ${calcs.map((calc,ci) => {
             const bg = colBg(ci) ? `background:${colBg(ci)};` : '';
             if (cols[ci].isCurrent) return `<td style="text-align:right;padding:8px;${bg}">${bp.rate}c/kWh</td>`;
@@ -2614,7 +2735,7 @@ function renderCompareTable() {
         ${cols.some((c,ci)=>!c.isCurrent&&calcs[ci].bonusAnnual) ? `
         <tr style="border-top:1px solid var(--gray-200);background:var(--gray-50);">
           <td style="padding:8px;color:var(--gray-500);font-size:12px;" colspan="${1+cols.length}">
-            Bonuses: ${utilQuotes.map(q=>(q.bonuses||[]).map(bon=>`<strong>${esc(q.provider)}</strong>: ${esc(bon.desc||'Bonus')} $${bon.amount} ${bon.type==='one-off'?`(one-off, spread over ${bon.amortizeMonths}m)`:'(annual)'}`).join(', ')).filter(Boolean).join(' · ')}
+            Bonuses: ${quotes.map(q=>(q.bonuses||[]).map(bon=>`<strong>${esc(q.provider)}</strong>: ${esc(bon.desc||'Bonus')} $${bon.amount} ${bon.type==='one-off'?`(one-off, spread over ${bon.amortizeMonths}m)`:'(annual)'}`).join(', ')).filter(Boolean).join(' · ')}
           </td>
         </tr>` : ''}
       </tbody>
@@ -2622,16 +2743,22 @@ function renderCompareTable() {
   </div>`;
 }
 
-function deleteQuote(id) {
-  utilQuotes = utilQuotes.filter(q => q.id !== id);
-  saveQuotes();
-  renderCompareTable();
+function deleteQuote(id, type) {
+  if (type === 'gas') {
+    gasQuotes = gasQuotes.filter(q => q.id !== id);
+    saveGasQuotes(); renderGasCompareTable();
+  } else {
+    utilQuotes = utilQuotes.filter(q => q.id !== id);
+    saveQuotes(); renderCompareTable();
+  }
 }
 
 // ── Bill form ───────────────────────────────────────────────────
-function openBillForm(prefill) {
+function openBillForm(prefill, type) {
+  currentFormType = type || (prefill?.type) || 'electricity';
   editingBillId = prefill?.id || null;
-  $$('bill-form-title').textContent = editingBillId ? 'Edit Bill' : 'Add Electricity Bill';
+  const typeName = currentFormType === 'gas' ? 'Gas' : 'Electricity';
+  $$('bill-form-title').textContent = editingBillId ? `Edit ${typeName} Bill` : `Add ${typeName} Bill`;
   $$('bf-provider').value = prefill?.provider || '';
   $$('bf-total').value    = prefill?.total    || '';
   $$('bf-from').value     = prefill?.from     || '';
@@ -2642,7 +2769,7 @@ function openBillForm(prefill) {
   $$('bill-upload-status').innerHTML = '📄 Upload PDF or photo to auto-fill — <strong>click to browse</strong>';
   $$('bill-upload-preview').innerHTML = '';
   $$('bill-file-input').value = '';
-  bfRateRows = prefill?.ratePeriods ? prefill.ratePeriods.map(r=>({...r})) : [{ name:'General Usage', rate:'', usage:'' }];
+  bfRateRows = prefill?.ratePeriods ? prefill.ratePeriods.map(r=>({...r})) : [{ name: currentFormType === 'gas' ? 'General Usage' : 'General Usage', rate:'', usage:'' }];
   renderBillRateRows();
   calcBillTotal();
   $$('bill-form-modal').style.display = 'flex';
@@ -2654,14 +2781,16 @@ function closeBillForm() {
 }
 
 function renderBillRateRows() {
+  const rateUnit  = currentFormType === 'gas' ? 'c/MJ'  : 'c/kWh';
+  const usageUnit = currentFormType === 'gas' ? 'MJ'    : 'kWh';
   $$('bf-rate-rows').innerHTML = bfRateRows.map((r,i) => `
     <div style="display:grid;grid-template-columns:1fr 90px 90px 32px;gap:6px;margin-bottom:6px;align-items:center;">
       <input type="text" class="form-control" placeholder="Period name (e.g. Peak)" value="${esc(r.name||'')}" oninput="bfRateRows[${i}].name=this.value" style="font-size:13px;">
-      <input type="number" class="form-control" placeholder="c/kWh" value="${r.rate||''}" oninput="bfRateRows[${i}].rate=+this.value;calcBillTotal()" min="0" step="0.01" style="font-size:13px;" title="Rate (cents per kWh)">
-      <input type="number" class="form-control" placeholder="kWh" value="${r.usage||''}" oninput="bfRateRows[${i}].usage=+this.value;calcBillTotal()" min="0" style="font-size:13px;" title="Usage (kWh)">
+      <input type="number" class="form-control" placeholder="${rateUnit}" value="${r.rate||''}" oninput="bfRateRows[${i}].rate=+this.value;calcBillTotal()" min="0" step="0.01" style="font-size:13px;" title="Rate (${rateUnit})">
+      <input type="number" class="form-control" placeholder="${usageUnit}" value="${r.usage||''}" oninput="bfRateRows[${i}].usage=+this.value;calcBillTotal()" min="0" style="font-size:13px;" title="Usage (${usageUnit})">
       <button onclick="removeBillRateRow(${i})" style="background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;padding:0;" ${bfRateRows.length<2?'disabled style="opacity:0.3;cursor:default;"':''}>&times;</button>
     </div>
-  `).join('') + '<div style="display:grid;grid-template-columns:1fr 90px 90px 32px;gap:6px;"><span style="font-size:11px;color:var(--gray-400);">Name</span><span style="font-size:11px;color:var(--gray-400);">Rate (c/kWh)</span><span style="font-size:11px;color:var(--gray-400);">Usage (kWh)</span></div>';
+  `).join('') + `<div style="display:grid;grid-template-columns:1fr 90px 90px 32px;gap:6px;"><span style="font-size:11px;color:var(--gray-400);">Name</span><span style="font-size:11px;color:var(--gray-400);">Rate (${rateUnit})</span><span style="font-size:11px;color:var(--gray-400);">Usage (${usageUnit})</span></div>`;
 }
 
 function addBillRateRow() {
@@ -2711,7 +2840,7 @@ function submitBillForm() {
   if (isNaN(total) || total <= 0) { toast('Add rate periods with usage to calculate a total'); return; }
   const bill = {
     id: editingBillId || uid(),
-    type: 'electricity',
+    type: currentFormType,
     provider,
     total,
     from: $$('bf-from').value,
@@ -2729,7 +2858,9 @@ function submitBillForm() {
   } else {
     utilBills.push(bill);
   }
-  saveUtilBills(); closeBillForm(); renderElectricity();
+  if (currentFormType === 'gas' && editingBillId && gasCompBill?.id === editingBillId) gasCompBill = bill;
+  saveUtilBills(); closeBillForm();
+  if (currentFormType === 'gas') renderGas(); else renderElectricity();
   toast(editingBillId ? 'Bill updated' : 'Bill saved');
 }
 
@@ -2848,19 +2979,24 @@ function prefillBillForm(parsed) {
 }
 
 // ── Quote form ──────────────────────────────────────────────────
-function openQuoteForm(quoteId) {
-  if (!utilCompBill) { toast('Select a bill to compare against first'); return; }
-  const existing = quoteId ? utilQuotes.find(q => q.id === quoteId) : null;
+function openQuoteForm(quoteId, type) {
+  currentFormType = type || 'electricity';
+  const compBill  = currentFormType === 'gas' ? gasCompBill : utilCompBill;
+  const quotes    = currentFormType === 'gas' ? gasQuotes   : utilQuotes;
+  if (!compBill) { toast('Select a bill to compare against first'); return; }
+  const existing = quoteId ? quotes.find(q => q.id === quoteId) : null;
   editingQuoteId = existing ? quoteId : null;
   $$('quote-form-title').textContent = existing ? 'Edit Quote' : 'Add Quote';
   $$('quote-form-submit').textContent = existing ? 'Save Changes' : 'Add to Comparison';
   $$('qf-provider').value = existing?.provider || '';
   $$('qf-supply').value = existing?.supply || '';
-  $$('qf-rate-rows').innerHTML = utilCompBill.ratePeriods.map((r,i) => {
+  const rateUnit  = currentFormType === 'gas' ? 'c/MJ'  : 'c/kWh';
+  const usageUnit = currentFormType === 'gas' ? 'MJ'    : 'kWh';
+  $$('qf-rate-rows').innerHTML = compBill.ratePeriods.map((r,i) => {
     const savedRate = existing?.ratePeriods?.find(rp => rp.name === r.name)?.rate ?? '';
     return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-      <span style="flex:1;font-size:13px;color:var(--gray-700);">${esc(r.name)} <span style="color:var(--gray-400);font-size:11px;">(${r.usage}kWh actual)</span></span>
-      <input type="number" class="form-control" id="qr-rate-${i}" placeholder="c/kWh" min="0" step="0.01" value="${savedRate}" style="width:100px;font-size:13px;">
+      <span style="flex:1;font-size:13px;color:var(--gray-700);">${esc(r.name)} <span style="color:var(--gray-400);font-size:11px;">(${r.usage}${usageUnit} actual)</span></span>
+      <input type="number" class="form-control" id="qr-rate-${i}" placeholder="${rateUnit}" min="0" step="0.01" value="${savedRate}" style="width:100px;font-size:13px;">
     </div>`;
   }).join('');
   $$('qf-bonus-rows').innerHTML = '';
@@ -2951,7 +3087,9 @@ function addBonusRow() {
 function submitQuoteForm() {
   const provider = $$('qf-provider').value.trim();
   if (!provider) { toast('Enter a provider name'); return; }
-  const ratePeriods = utilCompBill.ratePeriods.map((r,i) => ({
+  const isGas    = currentFormType === 'gas';
+  const compBill = isGas ? gasCompBill : utilCompBill;
+  const ratePeriods = compBill.ratePeriods.map((r,i) => ({
     name: r.name,
     rate: parseFloat(document.getElementById('qr-rate-'+i)?.value) || 0
   }));
@@ -2964,16 +3102,421 @@ function submitQuoteForm() {
   const attachmentDataUrl = attachPrev.dataset.dataUrl || '';
   const attachmentName = attachPrev.dataset.fileName || '';
   const quoteData = { provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses, comment, attachmentDataUrl, attachmentName };
-  if (editingQuoteId) {
-    const idx = utilQuotes.findIndex(q => q.id === editingQuoteId);
-    if (idx >= 0) utilQuotes[idx] = { ...utilQuotes[idx], ...quoteData };
-    toast('Quote updated');
+  if (isGas) {
+    if (editingQuoteId) {
+      const idx = gasQuotes.findIndex(q => q.id === editingQuoteId);
+      if (idx >= 0) gasQuotes[idx] = { ...gasQuotes[idx], ...quoteData };
+    } else {
+      gasQuotes.push({ id: uid(), ...quoteData });
+    }
+    saveGasQuotes();
+    closeQuoteForm(); renderGasCompareSection();
   } else {
-    utilQuotes.push({ id: uid(), ...quoteData });
-    toast('Quote added');
+    if (editingQuoteId) {
+      const idx = utilQuotes.findIndex(q => q.id === editingQuoteId);
+      if (idx >= 0) utilQuotes[idx] = { ...utilQuotes[idx], ...quoteData };
+    } else {
+      utilQuotes.push({ id: uid(), ...quoteData });
+    }
+    saveQuotes();
+    closeQuoteForm(); renderCompareSection();
   }
-  saveQuotes();
-  closeQuoteForm(); renderCompareSection();
+  toast(editingQuoteId ? 'Quote updated' : 'Quote added');
+}
+
+// ── Gas ─────────────────────────────────────────────────────────
+function renderGas() {
+  renderGasFilterPills();
+  renderGasBillsList();
+  renderGasCompareSection();
+}
+
+function gasInFilter(b) {
+  if (!gasFilterFrom && !gasFilterTo) return true;
+  const bFrom = (b.from || b.to || b.savedAt || '').slice(0,7);
+  const bTo   = (b.to   || b.from || b.savedAt || '').slice(0,7);
+  const fFrom = gasFilterFrom || '0000-00';
+  const fTo   = gasFilterTo   || '9999-99';
+  return bFrom <= fTo && bTo >= fFrom;
+}
+
+function renderGasFilterPills() {
+  const el = $$('gas-month-pills');
+  if (!el) return;
+  const bills = utilBills.filter(b => b.type === 'gas');
+  const months = [...new Set(bills.map(billMonth).filter(Boolean))].sort().reverse();
+  const years  = [...new Set(months.map(m => m.slice(0,4)))];
+  const isAll  = !gasFilterFrom && !gasFilterTo;
+  const pillStyle = (active) => `padding:5px 12px;border:1.5px solid ${active?'var(--primary)':'var(--gray-200)'};border-radius:20px;background:${active?'var(--primary)':'var(--white)'};font-size:12px;font-weight:600;color:${active?'white':'var(--gray-500)'};cursor:pointer;white-space:nowrap;font-family:inherit;`;
+  const yearBtns  = years.map(y => {
+    const active = gasFilterFrom === `${y}-01` && gasFilterTo === `${y}-12`;
+    return `<button style="${pillStyle(active)}" onclick="setGasYearFilter('${y}')">${y}</button>`;
+  }).join('');
+  const monthBtns = months.map(m => {
+    const [y, mo] = m.split('-');
+    const active = gasFilterFrom === m && gasFilterTo === m;
+    return `<button style="${pillStyle(active)}" onclick="setGasMonthFilter('${m}')">${MONTHS[+mo-1].slice(0,3)+' '+y}</button>`;
+  }).join('');
+  el.innerHTML = `<button style="${pillStyle(isAll)}" onclick="clearGasFilter()">All</button>${yearBtns}${monthBtns}`;
+  if ($$('gas-filter-from')) $$('gas-filter-from').value = gasFilterFrom;
+  if ($$('gas-filter-to'))   $$('gas-filter-to').value   = gasFilterTo;
+  const btn = $$('gas-filter-toggle');
+  if (btn) { const has = gasFilterFrom || gasFilterTo; btn.style.borderColor = has?'var(--primary)':'var(--gray-200)'; btn.style.color = has?'var(--primary)':'var(--gray-400)'; }
+}
+
+function setGasMonthFilter(m)  { gasFilterFrom = m; gasFilterTo = m; renderGas(); }
+function setGasYearFilter(y)   { gasFilterFrom = `${y}-01`; gasFilterTo = `${y}-12`; renderGas(); }
+function toggleGasFilterRange() {
+  const panel = $$('gas-filter-range'); if (!panel) return;
+  const open = panel.style.display === 'flex';
+  panel.style.display = open ? 'none' : 'flex';
+  const btn = $$('gas-filter-toggle');
+  if (btn) { btn.style.borderColor = open?'var(--gray-200)':'var(--primary)'; btn.style.color = open?'var(--gray-400)':'var(--primary)'; }
+}
+function applyGasRange()  { gasFilterFrom = $$('gas-filter-from')?.value||''; gasFilterTo = $$('gas-filter-to')?.value||''; renderGas(); }
+function clearGasFilter() {
+  gasFilterFrom=''; gasFilterTo='';
+  if($$('gas-filter-from')) $$('gas-filter-from').value='';
+  if($$('gas-filter-to'))   $$('gas-filter-to').value='';
+  renderGas();
+}
+
+function renderGasBillsList() {
+  const el = $$('gas-bills-list');
+  if (!el) return;
+  const allBills = utilBills.filter(b => b.type === 'gas');
+  if (!allBills.length) {
+    el.innerHTML = `<div class="empty" style="padding:32px 0;"><div class="empty-icon">🔥</div><div class="empty-title">No gas bills saved</div><div class="empty-sub">Add your current gas bill to start comparing</div></div>`;
+    return;
+  }
+  const bills = allBills.filter(gasInFilter);
+  let summaryHTML = '';
+  if (bills.length > 1) {
+    const totalCost  = bills.reduce((s,b) => s + (+b.total||0), 0);
+    const totalDays  = bills.reduce((s,b) => s + (+b.days||0), 0);
+    const totalUsage = bills.reduce((s,b) => s + b.ratePeriods.reduce((u,r)=>u+(+r.usage||0),0), 0);
+    const annualised = totalDays ? totalCost * 365 / totalDays : null;
+    summaryHTML = `<div class="card" style="margin-bottom:14px;padding:16px 18px;background:var(--primary);color:white;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:12px;font-weight:600;opacity:0.8;margin-bottom:2px;">${bills.length} BILLS · ${totalDays} DAYS${totalUsage?` · ${totalUsage.toFixed(0)}MJ`:''}</div>
+          <div style="font-size:22px;font-weight:800;">$${totalCost.toFixed(2)} combined</div>
+          ${annualised?`<div style="font-size:12px;opacity:0.8;margin-top:2px;">≈ $${annualised.toFixed(2)}/year · $${(annualised/12).toFixed(2)}/month</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
+  if (!bills.length) { el.innerHTML = `<div style="padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">No bills in the selected period</div>`; return; }
+  el.innerHTML = summaryHTML + bills.map(b => {
+    const isComp = gasCompBill?.id === b.id;
+    const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
+    const totalUsage = b.ratePeriods.reduce((s,r) => s + (+r.usage||0), 0);
+    const annualised = b.days ? (+b.total) * 365 / b.days : null;
+    return `<div class="card" style="margin-bottom:10px;padding:16px 18px;${isComp?'border:2px solid var(--primary);':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:4px;">${esc(b.provider||'Unknown Provider')}</div>
+          <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px;">${periodLabel}${b.days?' · '+b.days+' days':''}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            ${b.supply?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Supply $${(+b.supply).toFixed(4)}/day</span>`:''}
+            ${b.ratePeriods.map(r=>`<span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;">${esc(r.name)}: ${r.rate}c · ${r.usage}MJ</span>`).join('')}
+            ${totalUsage?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Total ${totalUsage.toFixed(0)}MJ</span>`:''}
+          </div>
+          ${annualised?`<div style="margin-top:6px;font-size:12px;color:var(--gray-500);">≈ $${annualised.toFixed(2)}/year · $${(annualised/12).toFixed(2)}/month</div>`:''}
+          ${b.notes?`<div style="margin-top:4px;font-size:12px;color:var(--gray-400);font-style:italic;">${esc(b.notes)}</div>`:''}
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:20px;font-weight:800;color:var(--gray-900);">$${(+b.total).toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">total bill</div>
+          <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
+            <button onclick="selectGasCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
+            <button onclick="editBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
+            <button onclick="deleteBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectGasCompBill(id) {
+  gasCompBill = gasCompBill?.id === id ? null : utilBills.find(b => b.id === id);
+  gasQuotes = gasCompBill ? [...(gasCompBill.quotes || [])] : [];
+  renderGas();
+}
+
+function saveGasQuotes() {
+  if (!gasCompBill) return;
+  gasCompBill.quotes = gasQuotes;
+  const idx = utilBills.findIndex(b => b.id === gasCompBill.id);
+  if (idx >= 0) utilBills[idx] = gasCompBill;
+  saveUtilBills();
+}
+
+// ── Internet ─────────────────────────────────────────────────────
+function renderInternet() {
+  renderInternetBillsList();
+  renderInternetCompareSection();
+}
+
+function renderInternetBillsList() {
+  const el = $$('internet-bills-list');
+  if (!el) return;
+  const bills = utilBills.filter(b => b.type === 'internet');
+  if (!bills.length) {
+    el.innerHTML = `<div class="empty" style="padding:32px 0;"><div class="empty-icon">🌐</div><div class="empty-title">No plans saved</div><div class="empty-sub">Add your current internet plan to start comparing</div></div>`;
+    return;
+  }
+  el.innerHTML = bills.map(b => {
+    const isComp = internetCompBill?.id === b.id;
+    const speedLabel = (b.downloadSpeed || b.uploadSpeed) ? `${b.downloadSpeed||'?'}/${b.uploadSpeed||'?'} Mbps` : '';
+    const annualised = (+b.monthlyRate||0) * 12;
+    return `<div class="card" style="margin-bottom:10px;padding:16px 18px;${isComp?'border:2px solid var(--primary);':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
+          ${b.planName?`<div style="font-size:13px;color:var(--gray-500);margin-bottom:8px;">${esc(b.planName)}</div>`:''}
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+            ${speedLabel?`<span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;">${speedLabel}</span>`:''}
+            ${b.data?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">${esc(b.data)}</span>`:''}
+            ${b.contractMonths?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">${b.contractMonths}m contract</span>`:'<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">No lock-in</span>'}
+            ${b.setupFee?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Setup $${(+b.setupFee).toFixed(2)}</span>`:''}
+          </div>
+          ${annualised?`<div style="font-size:12px;color:var(--gray-500);">≈ $${annualised.toFixed(2)}/year</div>`:''}
+          ${b.notes?`<div style="margin-top:4px;font-size:12px;color:var(--gray-400);font-style:italic;">${esc(b.notes)}</div>`:''}
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:20px;font-weight:800;color:var(--gray-900);">$${(+b.monthlyRate).toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">/month</div>
+          <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
+            <button onclick="selectInternetCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
+            <button onclick="openInternetBillForm('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
+            <button onclick="deleteInternetBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectInternetCompBill(id) {
+  internetCompBill = internetCompBill?.id === id ? null : utilBills.find(b => b.id === id);
+  internetQuotes = internetCompBill ? [...(internetCompBill.quotes || [])] : [];
+  renderInternet();
+}
+
+function saveInternetQuotes() {
+  if (!internetCompBill) return;
+  internetCompBill.quotes = internetQuotes;
+  const idx = utilBills.findIndex(b => b.id === internetCompBill.id);
+  if (idx >= 0) utilBills[idx] = internetCompBill;
+  saveUtilBills();
+}
+
+function deleteInternetBill(id) {
+  if (!confirm('Delete this plan?')) return;
+  utilBills = utilBills.filter(b => b.id !== id);
+  if (internetCompBill?.id === id) { internetCompBill = null; internetQuotes = []; }
+  saveUtilBills(); renderInternet();
+}
+
+function renderInternetCompareSection() {
+  const sec = $$('internet-compare-section');
+  if (!sec) return;
+  if (!internetCompBill) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  renderInternetCompareTable();
+}
+
+function renderInternetCompareTable() {
+  const b = internetCompBill;
+  if (!b) return;
+  const el = $$('internet-compare-table');
+  if (!el) return;
+
+  const cols = [
+    { ...b, isCurrent: true, label: b.provider || 'Current Plan' }
+  ].concat(internetQuotes.map(q => ({ ...q })));
+
+  const calcEffective = (col) => {
+    const monthly = +col.monthlyRate || 0;
+    const setup   = +col.setupFee    || 0;
+    const bonusAnnual = (col.bonuses||[]).reduce((s,bon) => {
+      const amt = +bon.amount||0;
+      return s + (bon.type==='annual' ? amt : amt / ((+bon.amortizeMonths||12)/12));
+    }, 0);
+    const annualGross = monthly * 12 + setup;
+    const effectiveAnnual = annualGross - bonusAnnual;
+    return { monthly, setup, bonusAnnual, annualGross, effectiveAnnual, effectiveMonthly: effectiveAnnual/12 };
+  };
+
+  const calcs = cols.map(calcEffective);
+  const cheapestIdx = calcs.reduce((bi,c,i) => c.effectiveAnnual < calcs[bi].effectiveAnnual ? i : bi, 0);
+  const multiCol = cols.length > 1;
+  const fmtC = n => n == null ? '<span style="color:var(--gray-300);">—</span>' : `$${(+n).toFixed(2)}`;
+  const colBg = (ci) => multiCol && ci === cheapestIdx ? '#f0fdf4' : '';
+
+  el.innerHTML = `<div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--gray-200);">
+          <th style="text-align:left;padding:10px 8px;color:var(--gray-500);font-weight:600;font-size:12px;white-space:nowrap;">Metric</th>
+          ${cols.map((col,ci) => `<th style="text-align:right;padding:10px 8px;min-width:130px;${multiCol&&ci===cheapestIdx?'background:#f0fdf4;border-bottom:2px solid #10b981;':''}">
+            <div style="font-size:13px;font-weight:700;color:var(--gray-900);">${esc(col.label||col.provider||'Quote')}</div>
+            ${col.planName?`<div style="font-size:11px;color:var(--gray-500);">${esc(col.planName)}</div>`:''}
+            ${multiCol&&ci===cheapestIdx?'<div style="font-size:10px;color:#10b981;font-weight:700;">★ CHEAPEST</div>':''}
+            ${col.isCurrent?'<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT PLAN</div>':`<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;"><button onclick="openInternetQuoteForm('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--primary);cursor:pointer;font-family:inherit;padding:0;">✎ Edit</button><button onclick="deleteInternetQuote('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button></div>`}
+          </th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:8px;color:var(--gray-600);">Speed (Down/Up)</td>
+          ${cols.map((col,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${(col.downloadSpeed||col.uploadSpeed)?`${col.downloadSpeed||'?'}/${col.uploadSpeed||'?'} Mbps`:'<span style="color:var(--gray-300);">—</span>'}</td>`).join('')}
+        </tr>
+        <tr style="background:var(--gray-50);"><td style="padding:8px;color:var(--gray-600);">Data</td>
+          ${cols.map((col,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${col.data?esc(col.data):'<span style="color:var(--gray-300);">—</span>'}</td>`).join('')}
+        </tr>
+        <tr><td style="padding:8px;color:var(--gray-600);">Contract</td>
+          ${cols.map((col,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${col.contractMonths?col.contractMonths+'m':'No lock-in'}</td>`).join('')}
+        </tr>
+        <tr style="background:var(--gray-50);"><td style="padding:8px;color:var(--gray-600);">Setup Fee</td>
+          ${calcs.map((c,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${c.setup?fmtC(c.setup):fmtC(null)}</td>`).join('')}
+        </tr>
+        <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
+          <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Monthly Rate</td>
+          ${calcs.map((c,ci)=>{const cheap=multiCol&&ci===cheapestIdx;return`<td style="text-align:right;padding:10px 8px;font-weight:700;font-size:15px;${cheap?'background:#dcfce7;color:#16a34a;':'background:var(--primary-light);color:var(--primary);'}">${fmtC(c.monthly)}</td>`;}).join('')}
+        </tr>
+        <tr><td style="padding:8px;color:var(--gray-600);">Annual Cost (incl. setup)</td>
+          ${calcs.map((c,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${fmtC(c.annualGross)}</td>`).join('')}
+        </tr>
+        <tr><td style="padding:8px;color:var(--gray-600);">Bonuses / Cashback (p.a.)</td>
+          ${calcs.map((c,ci)=>`<td style="text-align:right;padding:8px;color:#10b981;font-weight:600;${colBg(ci)?'background:'+colBg(ci)+';':''}">${c.bonusAnnual?'−$'+c.bonusAnnual.toFixed(2):fmtC(null)}</td>`).join('')}
+        </tr>
+        <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
+          <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Effective Annual</td>
+          ${calcs.map((c,ci)=>{const cheap=multiCol&&ci===cheapestIdx;return`<td style="text-align:right;padding:10px 8px;font-weight:800;font-size:15px;${cheap?'background:#dcfce7;color:#16a34a;':'color:var(--primary);'}">${fmtC(c.effectiveAnnual)}</td>`;}).join('')}
+        </tr>
+        <tr style="border-top:1px solid var(--gray-200);">
+          <td style="padding:8px;color:var(--gray-600);">Effective Monthly</td>
+          ${calcs.map((c,ci)=>`<td style="text-align:right;padding:8px;font-weight:600;color:var(--gray-700);${colBg(ci)?'background:'+colBg(ci)+';':''}">${fmtC(c.effectiveMonthly)}</td>`).join('')}
+        </tr>
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function deleteInternetQuote(id) {
+  internetQuotes = internetQuotes.filter(q => q.id !== id);
+  saveInternetQuotes(); renderInternetCompareTable();
+}
+
+// ── Internet plan form ──────────────────────────────────────────
+function openInternetBillForm(idOrContext) {
+  const isQuote = idOrContext === 'quote';
+  editingInternetBillId = (!isQuote && idOrContext) ? idOrContext : null;
+  editingInternetQuoteId = null;
+  const prefill = editingInternetBillId ? utilBills.find(b => b.id === editingInternetBillId) : null;
+  $$('ibi-form-title').textContent = editingInternetBillId ? 'Edit Internet Plan' : 'Add Internet Plan';
+  $$('ibi-form-submit').textContent = editingInternetBillId ? 'Save Changes' : 'Save Plan';
+  $$('ibi-provider').value   = prefill?.provider      || '';
+  $$('ibi-plan').value       = prefill?.planName      || '';
+  $$('ibi-monthly').value    = prefill?.monthlyRate   || '';
+  $$('ibi-download').value   = prefill?.downloadSpeed || '';
+  $$('ibi-upload').value     = prefill?.uploadSpeed   || '';
+  $$('ibi-data').value       = prefill?.data          || '';
+  $$('ibi-contract').value   = prefill?.contractMonths ?? '';
+  $$('ibi-setup').value      = prefill?.setupFee      || '';
+  $$('ibi-notes').value      = prefill?.notes         || '';
+  $$('ibi-bonus-rows').innerHTML = '';
+  (prefill?.bonuses || []).forEach(b => {
+    addIbiBonusRow();
+    const rows = $$('ibi-bonus-rows').children;
+    const row = rows[rows.length - 1];
+    const inputs = row.querySelectorAll('input,select');
+    inputs[0].value = b.desc || ''; inputs[1].value = b.amount || '';
+    inputs[2].value = b.type || 'one-off'; inputs[3].value = b.amortizeMonths || 12;
+  });
+  $$('internet-bill-form-modal').style.display = 'flex';
+}
+
+function openInternetQuoteForm(quoteId) {
+  if (!internetCompBill) { toast('Select a plan to compare against first'); return; }
+  editingInternetQuoteId = quoteId || null;
+  editingInternetBillId = null;
+  const existing = quoteId ? internetQuotes.find(q => q.id === quoteId) : null;
+  $$('ibi-form-title').textContent = existing ? 'Edit Quote' : 'Add Quote';
+  $$('ibi-form-submit').textContent = existing ? 'Save Changes' : 'Add to Comparison';
+  $$('ibi-provider').value   = existing?.provider      || '';
+  $$('ibi-plan').value       = existing?.planName      || '';
+  $$('ibi-monthly').value    = existing?.monthlyRate   || '';
+  $$('ibi-download').value   = existing?.downloadSpeed || '';
+  $$('ibi-upload').value     = existing?.uploadSpeed   || '';
+  $$('ibi-data').value       = existing?.data          || '';
+  $$('ibi-contract').value   = existing?.contractMonths ?? '';
+  $$('ibi-setup').value      = existing?.setupFee      || '';
+  $$('ibi-notes').value      = existing?.notes         || '';
+  $$('ibi-bonus-rows').innerHTML = '';
+  (existing?.bonuses || []).forEach(b => {
+    addIbiBonusRow();
+    const rows = $$('ibi-bonus-rows').children;
+    const row = rows[rows.length - 1];
+    const inputs = row.querySelectorAll('input,select');
+    inputs[0].value = b.desc || ''; inputs[1].value = b.amount || '';
+    inputs[2].value = b.type || 'one-off'; inputs[3].value = b.amortizeMonths || 12;
+  });
+  $$('internet-bill-form-modal').style.display = 'flex';
+}
+
+function closeInternetBillForm() {
+  editingInternetBillId = null; editingInternetQuoteId = null;
+  $$('internet-bill-form-modal').style.display = 'none';
+}
+
+function addIbiBonusRow() {
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 80px 90px 80px 28px;gap:6px;margin-bottom:6px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" class="form-control" placeholder="Description (e.g. Sign-up credit)" style="font-size:12px;">
+    <input type="number" class="form-control" placeholder="$" min="0" step="0.01" style="font-size:12px;">
+    <select class="form-control" style="font-size:12px;"><option value="one-off">One-off</option><option value="annual">Annual</option></select>
+    <input type="number" class="form-control" placeholder="Spread (m)" min="1" value="12" style="font-size:12px;">
+    <button onclick="this.closest('div').remove()" style="background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;">&times;</button>`;
+  $$('ibi-bonus-rows').appendChild(row);
+}
+
+function submitInternetBillForm() {
+  const provider = $$('ibi-provider').value.trim();
+  if (!provider) { toast('Enter a provider name'); return; }
+  const monthlyRate = parseFloat($$('ibi-monthly').value);
+  if (isNaN(monthlyRate) || monthlyRate <= 0) { toast('Enter a monthly rate'); return; }
+  const bonuses = [...$$('ibi-bonus-rows').children].map(row => {
+    const inputs = row.querySelectorAll('input,select');
+    return { desc: inputs[0].value, amount: parseFloat(inputs[1].value)||0, type: inputs[2].value, amortizeMonths: parseInt(inputs[3].value)||12 };
+  }).filter(b => b.amount > 0);
+  const planData = {
+    provider, planName: $$('ibi-plan').value.trim(),
+    monthlyRate, downloadSpeed: parseFloat($$('ibi-download').value)||null,
+    uploadSpeed: parseFloat($$('ibi-upload').value)||null,
+    data: $$('ibi-data').value.trim(), contractMonths: parseInt($$('ibi-contract').value)||0,
+    setupFee: parseFloat($$('ibi-setup').value)||0,
+    bonuses, notes: $$('ibi-notes').value.trim(), savedAt: new Date().toISOString()
+  };
+  if (editingInternetQuoteId) {
+    const idx = internetQuotes.findIndex(q => q.id === editingInternetQuoteId);
+    if (idx >= 0) internetQuotes[idx] = { ...internetQuotes[idx], ...planData };
+    saveInternetQuotes(); closeInternetBillForm(); renderInternetCompareTable();
+    toast('Quote updated');
+  } else if (editingInternetBillId) {
+    const idx = utilBills.findIndex(b => b.id === editingInternetBillId);
+    if (idx >= 0) utilBills[idx] = { ...utilBills[idx], ...planData };
+    if (internetCompBill?.id === editingInternetBillId) internetCompBill = utilBills[idx];
+    saveUtilBills(); closeInternetBillForm(); renderInternet();
+    toast('Plan updated');
+  } else {
+    utilBills.push({ id: uid(), type: 'internet', ...planData, quotes: [] });
+    saveUtilBills(); closeInternetBillForm(); renderInternet();
+    toast('Plan saved');
+  }
 }
 
 // ── Manage page ────────────────────────────────────────────────
