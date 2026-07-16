@@ -168,16 +168,18 @@ body {
 .month-label { font-weight: 700; font-size: 15px; color: var(--gray-800); }
 
 /* ── Summary Grid ────────────────────────── */
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .sum-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 14px 16px; }
-.sum-card.full { grid-column: 1 / -1; }
-.sum-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-400); margin-bottom: 5px; }
+.sum-label { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 4px; }
 .sum-amount { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: 'Space Grotesk', sans-serif; }
 .sum-amount.income  { color: var(--green-mid); }
 .sum-amount.expense { color: var(--red-mid); }
 .sum-amount.pos     { color: var(--green-mid); }
 .sum-amount.neg     { color: var(--red-mid); }
 .sum-amount.neutral { color: var(--gray-800); }
+.sum-sub { font-size: 11.5px; color: var(--gray-400); margin-top: 3px; }
+.sum-sub.positive { color: var(--green-mid); }
+.sum-sub.negative { color: var(--red-mid); }
 
 /* ── Section title ───────────────────────── */
 .sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-400); margin: 14px 2px 7px; }
@@ -636,54 +638,77 @@ select.form-control {
 
     <!-- DASHBOARD -->
     <div class="page active" id="pg-dashboard">
-      <div class="month-picker">
-        <button class="month-btn" onclick="changePeriod(-1)">
-          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-          <span class="month-label" id="dash-month-label"></span>
-          <div style="display:flex;gap:4px;">
-            <button id="view-week"  onclick="setDashView('week')"  style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--gray-200);background:var(--white);font-size:11px;font-weight:600;color:var(--gray-500);cursor:pointer;">Week</button>
-            <button id="view-month" onclick="setDashView('month')" style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--primary);background:var(--primary);font-size:11px;font-weight:600;color:white;cursor:pointer;">Month</button>
-            <button id="view-year"  onclick="setDashView('year')"  style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--gray-200);background:var(--white);font-size:11px;font-weight:600;color:var(--gray-500);cursor:pointer;">Year</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="month-picker" style="flex:1;margin-bottom:0;">
+          <button class="month-btn" onclick="changePeriod(-1)">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <span class="month-label" id="dash-month-label"></span>
+            <div style="display:flex;gap:4px;">
+              <button id="view-week"  onclick="setDashView('week')"  style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--gray-200);background:var(--white);font-size:11px;font-weight:600;color:var(--gray-500);cursor:pointer;">Week</button>
+              <button id="view-month" onclick="setDashView('month')" style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--primary);background:var(--primary);font-size:11px;font-weight:600;color:white;cursor:pointer;">Month</button>
+              <button id="view-year"  onclick="setDashView('year')"  style="padding:3px 10px;border-radius:20px;border:1.5px solid var(--gray-200);background:var(--white);font-size:11px;font-weight:600;color:var(--gray-500);cursor:pointer;">Year</button>
+            </div>
           </div>
+          <button class="month-btn" onclick="changePeriod(1)">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
         </div>
-        <button class="month-btn" onclick="changePeriod(1)">
-          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <button onclick="openDashFilter()" style="display:flex;align-items:center;gap:6px;padding:9px 14px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);box-shadow:var(--shadow);font-size:13px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;white-space:nowrap;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter
         </button>
       </div>
 
       <div class="summary-grid">
         <div class="sum-card">
-          <div class="sum-label">Income</div>
+          <div class="sum-label" id="dash-income-label">Income</div>
           <div class="sum-amount income" id="dash-income">$0</div>
+          <div class="sum-sub positive" id="dash-income-sub"></div>
         </div>
         <div class="sum-card">
-          <div class="sum-label">Expenses</div>
+          <div class="sum-label" id="dash-expense-label">Expenses</div>
           <div class="sum-amount expense" id="dash-expense">$0</div>
+          <div class="sum-sub" id="dash-expense-sub"></div>
         </div>
-        <div class="sum-card full">
+        <div class="sum-card">
           <div class="sum-label">Net</div>
           <div class="sum-amount neutral" id="dash-net">$0</div>
+          <div class="sum-sub" id="dash-net-sub"></div>
         </div>
-      </div>
-
-      <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-        <button onclick="openAddModal()" style="padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="white" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Add Transaction
-        </button>
       </div>
 
       <!-- Dashboard bottom: 2-col on desktop -->
       <div class="dash-bottom">
         <div>
-          <div class="sec-title">Spending by Category</div>
-          <div class="card" style="padding:16px;" id="cat-bars"></div>
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;">
+              <div style="font-size:14px;font-weight:700;color:#0f172a;">Recent transactions</div>
+              <button onclick="goTo('transactions')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">View all</button>
+            </div>
+            <div id="dash-recent"></div>
+          </div>
         </div>
         <div>
-          <div class="sec-title">Recent Transactions</div>
-          <div class="card" style="padding:0;overflow:hidden;" id="dash-recent"></div>
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;padding:16px 18px;">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:14px;">Spending by category</div>
+            <div id="cat-donut" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
+            <div id="cat-legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Income vs expenses chart -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+          <div style="font-size:14px;font-weight:700;color:#0f172a;">Income vs. expenses</div>
+          <button onclick="goTo('budgeting')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">Manage budgets</button>
+        </div>
+        <div id="income-expense-chart"></div>
+        <div style="display:flex;gap:16px;margin-top:12px;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;"><div style="width:10px;height:10px;border-radius:2px;background:var(--primary);"></div>Income</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;"><div style="width:10px;height:10px;border-radius:2px;background:#cbd5e1;"></div>Expenses</div>
         </div>
       </div>
     </div>
@@ -1486,7 +1511,8 @@ function goTo(page) {
   $$('hdr-title').textContent = titles[page] || page;
   $$('hdr-badge').textContent = page === 'transactions' ? txs.length + ' entries' : '';
   const sub = $$('hdr-subtitle');
-  if (sub) { sub.textContent = page === 'utilities' ? 'Compare bills and provider quotes' : ''; sub.style.display = page === 'utilities' ? '' : 'none'; }
+  const subMap = { utilities: 'Compare bills and provider quotes', dashboard: 'Your finances at a glance' };
+  if (sub) { sub.textContent = subMap[page] || ''; sub.style.display = subMap[page] ? '' : 'none'; }
   updateHdrActions(page);
   if (page === 'dashboard')    renderDash();
   if (page === 'transactions') renderTx();
@@ -1534,20 +1560,23 @@ function changePeriod(d) {
 }
 
 function renderDash() {
-  let period;
+  let period, periodLabel;
   if (dashView === 'week') {
     const end = new Date(dashWeekStart);
     end.setDate(end.getDate() + 6);
     const fmt2 = d => `${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}`;
+    periodLabel = fmt2(dashWeekStart) + '–' + fmt2(end);
     $$('dash-month-label').textContent = fmt2(dashWeekStart) + ' – ' + fmt2(end) + ' ' + end.getFullYear();
     period = txs.filter(t => {
       const dt = new Date(t.date + 'T00:00:00');
       return dt >= dashWeekStart && dt <= end;
     });
   } else if (dashView === 'year') {
+    periodLabel = String(dashY);
     $$('dash-month-label').textContent = String(dashY);
     period = txs.filter(t => new Date(t.date + 'T00:00:00').getFullYear() === dashY);
   } else {
+    periodLabel = MONTHS[dashM].slice(0,3);
     $$('dash-month-label').textContent = MONTHS[dashM] + ' ' + dashY;
     period = txs.filter(t => {
       const dt = new Date(t.date + 'T00:00:00');
@@ -1559,34 +1588,132 @@ function renderDash() {
   const expenses = period.filter(t => t.cat!=='Income').reduce((s,t) => s+(t.trueAmt??t.amount??0), 0);
   const net = income - expenses;
 
+  // Summary labels with period
+  $$('dash-income-label').textContent = `Income (${periodLabel})`;
+  $$('dash-expense-label').textContent = `Expenses (${periodLabel})`;
+
   $$('dash-income').textContent  = fmt(income);
   $$('dash-expense').textContent = fmt(expenses);
   const ne = $$('dash-net');
   ne.textContent = (net >= 0 ? '+' : '') + fmt(Math.abs(net));
   ne.className   = 'sum-amount ' + (net > 0 ? 'pos' : net < 0 ? 'neg' : 'neutral');
 
-  // Category bars
+  // Subtexts
+  const incomeSub = $$('dash-income-sub');
+  if (incomeSub) { incomeSub.textContent = income > 0 ? 'On schedule' : ''; incomeSub.className = 'sum-sub positive'; }
+  const expSub = $$('dash-expense-sub');
+  if (expSub) {
+    if (dashView === 'month' && expenses > 0) {
+      const prevM = dashM === 0 ? 11 : dashM - 1;
+      const prevY = dashM === 0 ? dashY - 1 : dashY;
+      const prevExp = txs.filter(t => { const dt = new Date(t.date+'T00:00:00'); return dt.getMonth()===prevM && dt.getFullYear()===prevY && t.cat!=='Income'; }).reduce((s,t)=>s+(t.trueAmt??t.amount??0),0);
+      expSub.textContent = prevExp > 0 ? `vs ${fmt(prevExp)} last month` : '';
+    } else { expSub.textContent = ''; }
+    expSub.className = 'sum-sub';
+  }
+  const netSub = $$('dash-net-sub');
+  if (netSub) {
+    netSub.textContent = net > 0 ? 'Positive this month' : net < 0 ? 'Over budget' : '';
+    netSub.className = 'sum-sub ' + (net > 0 ? 'positive' : net < 0 ? 'negative' : '');
+  }
+
+  // Category donut chart
   const totals = {};
   period.filter(t => t.cat !== 'Income').forEach(t => {
     totals[t.cat] = (totals[t.cat]||0) + (t.trueAmt??t.amount??0);
   });
   const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
-  const max = sorted[0]?.[1] || 1;
+  const totalSpent = sorted.reduce((s,[,v])=>s+v,0);
   const emptyMsg = dashView==='week' ? 'No expenses this week' : dashView==='year' ? 'No expenses this year' : 'No expenses this month';
-  $$('cat-bars').innerHTML = sorted.length
-    ? sorted.map(([c,v]) => `
-        <div class="cat-row">
-          <div class="cat-name">${CAT_EMOJI[c]||''} ${c}</div>
-          <div class="cat-track"><div class="cat-fill" style="width:${(v/max*100).toFixed(1)}%;background:${CAT_COLOR[c]||'#6B7280'}"></div></div>
-          <div class="cat-val">${fmt(v)}</div>
-        </div>`).join('')
-    : `<div style="text-align:center;color:var(--gray-400);font-size:13px;padding:8px 0;">${emptyMsg}</div>`;
 
-  // Recent 8
-  const recent = [...period].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 8);
+  if (sorted.length) {
+    // Build donut SVG
+    const R = 70, r = 46, cx = 90, cy = 90;
+    let startAngle = -Math.PI / 2;
+    const paths = sorted.map(([cat, val]) => {
+      const frac = val / totalSpent;
+      const angle = frac * 2 * Math.PI;
+      const endAngle = startAngle + angle;
+      const x1 = cx + R * Math.cos(startAngle), y1 = cy + R * Math.sin(startAngle);
+      const x2 = cx + R * Math.cos(endAngle),   y2 = cy + R * Math.sin(endAngle);
+      const ix1 = cx + r * Math.cos(startAngle), iy1 = cy + r * Math.sin(startAngle);
+      const ix2 = cx + r * Math.cos(endAngle),   iy2 = cy + r * Math.sin(endAngle);
+      const largeArc = angle > Math.PI ? 1 : 0;
+      const col = CAT_COLOR[cat] || '#6B7280';
+      const d = `M${x1.toFixed(2)},${y1.toFixed(2)} A${R},${R} 0 ${largeArc},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${ix2.toFixed(2)},${iy2.toFixed(2)} A${r},${r} 0 ${largeArc},0 ${ix1.toFixed(2)},${iy1.toFixed(2)} Z`;
+      startAngle = endAngle;
+      return `<path d="${d}" fill="${col}" opacity="0.9"/>`;
+    }).join('');
+    $$('cat-donut').innerHTML = `<svg width="180" height="180" viewBox="0 0 180 180">
+      ${paths}
+      <text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="10" fill="#94a3b8" font-family="inherit">Total spent</text>
+      <text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a" font-family="'Space Grotesk',sans-serif">${fmt(totalSpent)}</text>
+    </svg>`;
+    $$('cat-legend').innerHTML = sorted.map(([cat, val]) => {
+      const pct = Math.round(val / totalSpent * 100);
+      const col = CAT_COLOR[cat] || '#6B7280';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;">
+        <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:50%;background:${col};flex-shrink:0;"></div><span style="font-size:12.5px;color:#475569;">${esc(cat)}</span></div>
+        <span style="font-size:12.5px;font-weight:600;color:#64748b;">${pct}%</span>
+      </div>`;
+    }).join('');
+  } else {
+    $$('cat-donut').innerHTML = '';
+    $$('cat-legend').innerHTML = `<div style="text-align:center;color:var(--gray-400);font-size:13px;padding:16px 0;">${emptyMsg}</div>`;
+  }
+
+  // Recent transactions (no checkboxes, avatar circle)
+  const recent = [...period].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5);
   $$('dash-recent').innerHTML = recent.length
-    ? recent.map(txCardHTML).join('')
+    ? recent.map((t, i) => {
+        const isIncome = t.cat === 'Income';
+        const col = CAT_COLOR[t.cat] || '#6B7280';
+        const initials = (t.desc||'?').trim()[0].toUpperCase();
+        const amt = t.trueAmt ?? t.amount ?? 0;
+        const isLast = i === recent.length - 1;
+        return `<div style="display:flex;align-items:center;gap:12px;padding:13px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;" onclick="goTo('transactions')" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+          <div style="width:38px;height:38px;border-radius:50%;background:${col}22;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${col};flex-shrink:0;">${initials}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13.5px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(t.desc||'No description')}</div>
+            <div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">${esc(t.cat||'')} · ${fmtShort(t.date)}</div>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:${isIncome?'var(--green-mid)':'#0f172a'};flex-shrink:0;">${isIncome?'+':''}${fmt(amt)}</div>
+        </div>`;
+      }).join('')
     : '<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">No transactions</div><div class="empty-sub">Tap Add to log your first</div></div>';
+
+  // Income vs expenses bar chart (last 6 months)
+  const now = new Date();
+  const months6 = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months6.push({ m: d.getMonth(), y: d.getFullYear(), label: MONTHS[d.getMonth()].slice(0,3) });
+  }
+  const chartData = months6.map(({ m, y, label }) => {
+    const mTxs = txs.filter(t => { const dt = new Date(t.date+'T00:00:00'); return dt.getMonth()===m && dt.getFullYear()===y; });
+    const inc = mTxs.filter(t=>t.cat==='Income').reduce((s,t)=>s+(t.amount||0),0);
+    const exp = mTxs.filter(t=>t.cat!=='Income').reduce((s,t)=>s+(t.trueAmt??t.amount??0),0);
+    return { label, inc, exp };
+  });
+  const chartMax = Math.max(...chartData.map(d => Math.max(d.inc, d.exp)), 1);
+  const barH = 80;
+  $$('income-expense-chart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:12px;height:${barH+24}px;">
+    ${chartData.map(({ label, inc, exp }) => {
+      const ih = Math.round(inc / chartMax * barH);
+      const eh = Math.round(exp / chartMax * barH);
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+        <div style="display:flex;align-items:flex-end;gap:3px;height:${barH}px;">
+          <div style="width:14px;background:var(--primary);border-radius:3px 3px 0 0;height:${ih}px;min-height:${inc>0?2:0}px;" title="${fmt(inc)}"></div>
+          <div style="width:14px;background:#cbd5e1;border-radius:3px 3px 0 0;height:${eh}px;min-height:${exp>0?2:0}px;" title="${fmt(exp)}"></div>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:6px;">${label}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function openDashFilter() {
+  // placeholder — period and view controls already on the page
 }
 
 // ── Mobile card HTML ───────────────────────────────────────────
@@ -2481,9 +2608,11 @@ function bootApp() {
 function updateHdrActions(page) {
   const el = $$('hdr-actions');
   if (!el) return;
-  if (page === 'utilities') {
-    const btnStyle = `padding:9px 18px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
-    const svgPlus = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+  const btnStyle = `padding:9px 18px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
+  const svgPlus = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+  if (page === 'dashboard') {
+    el.innerHTML = `<button onclick="openAddModal()" style="${btnStyle}">${svgPlus}Add transaction</button>`;
+  } else if (page === 'utilities') {
     if (utilTab === 'internet') {
       el.innerHTML = `<button onclick="openInternetBillForm()" style="${btnStyle}">${svgPlus}Add plan</button>`;
     } else if (utilTab === 'gas') {
