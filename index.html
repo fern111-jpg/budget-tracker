@@ -1150,9 +1150,34 @@ select.form-control {
       <label class="form-label">Notes (optional)</label>
       <input type="text" class="form-control" id="ibi-notes" placeholder="e.g. includes modem, typical evening speed guarantee">
     </div>
+    <div style="border:2px dashed var(--gray-200);border-radius:var(--radius-sm);padding:12px 16px;margin-top:14px;cursor:pointer;transition:border-color 0.15s;" onclick="$$('ibi-file-input').click()" onmouseenter="this.style.borderColor='var(--primary)'" onmouseleave="this.style.borderColor='var(--gray-200)'">
+      <input type="file" id="ibi-file-input" accept=".pdf,image/*" style="display:none" onchange="handleInternetUpload(this)">
+      <div id="ibi-upload-status" style="font-size:13px;color:var(--gray-500);">📄 Upload PDF or image to auto-fill — <strong>click to browse</strong></div>
+      <div id="ibi-upload-preview"></div>
+    </div>
     <div style="display:flex;gap:10px;margin-top:16px;">
       <button class="btn-primary" onclick="submitInternetBillForm()" style="flex:1;" id="ibi-form-submit">Save Plan</button>
       <button onclick="closeInternetBillForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Share Utility Modal ──────────────────── -->
+<div id="share-util-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;padding:20px;">
+  <div class="card" style="width:100%;max-width:420px;margin:auto;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <span style="font-size:16px;font-weight:700;color:var(--gray-900);">Share with another user</span>
+      <button onclick="$$('share-util-modal').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:22px;line-height:1;padding:2px 6px;">&times;</button>
+    </div>
+    <p style="font-size:13px;color:var(--gray-500);margin-bottom:14px;">The recipient will receive a copy of this bill/plan and all its comparison quotes in their account.</p>
+    <div class="form-group">
+      <label class="form-label">Recipient username</label>
+      <input type="text" class="form-control" id="share-target-user" placeholder="Enter username">
+    </div>
+    <input type="hidden" id="share-bill-id">
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn-primary" onclick="submitShare()" style="flex:1;">Share</button>
+      <button onclick="$$('share-util-modal').style.display='none'" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
     </div>
   </div>
 </div>
@@ -1370,6 +1395,7 @@ let internetCompBill = null;
 let internetQuotes = [];
 let editingInternetBillId = null;
 let editingInternetQuoteId = null;
+let internetFormIsQuote = false;
 let curPage = 'dashboard';
 let editId = null;
 let splitOn = { f: false, e: false };
@@ -2578,6 +2604,7 @@ function renderBillsList() {
           <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
             <button onclick="selectCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
             <button onclick="editBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
+            <button onclick="openShareModal('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Share</button>
             <button onclick="deleteBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
           </div>
         </div>
@@ -3231,6 +3258,7 @@ function renderGasBillsList() {
           <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
             <button onclick="selectGasCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
             <button onclick="editBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
+            <button onclick="openShareModal('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Share</button>
             <button onclick="deleteBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
           </div>
         </div>
@@ -3291,6 +3319,7 @@ function renderInternetBillsList() {
           <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
             <button onclick="selectInternetCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
             <button onclick="openInternetBillForm('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
+            <button onclick="openShareModal('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Share</button>
             <button onclick="deleteInternetBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
           </div>
         </div>
@@ -3441,6 +3470,7 @@ function openInternetBillForm(idOrContext) {
 
 function openInternetQuoteForm(quoteId) {
   if (!internetCompBill) { toast('Select a plan to compare against first'); return; }
+  internetFormIsQuote = true;
   editingInternetQuoteId = quoteId || null;
   editingInternetBillId = null;
   const existing = quoteId ? internetQuotes.find(q => q.id === quoteId) : null;
@@ -3468,8 +3498,10 @@ function openInternetQuoteForm(quoteId) {
 }
 
 function closeInternetBillForm() {
-  editingInternetBillId = null; editingInternetQuoteId = null;
+  editingInternetBillId = null; editingInternetQuoteId = null; internetFormIsQuote = false;
   $$('internet-bill-form-modal').style.display = 'none';
+  const status = $$('ibi-upload-status'); if (status) status.textContent = '📄 Upload PDF or image to auto-fill — click to browse';
+  const preview = $$('ibi-upload-preview'); if (preview) preview.innerHTML = '';
 }
 
 function addIbiBonusRow() {
@@ -3512,11 +3544,109 @@ function submitInternetBillForm() {
     if (internetCompBill?.id === editingInternetBillId) internetCompBill = utilBills[idx];
     saveUtilBills(); closeInternetBillForm(); renderInternet();
     toast('Plan updated');
+  } else if (internetFormIsQuote) {
+    internetQuotes.push({ id: uid(), ...planData });
+    saveInternetQuotes(); closeInternetBillForm(); renderInternetCompareTable();
+    toast('Quote added');
   } else {
     utilBills.push({ id: uid(), type: 'internet', ...planData, quotes: [] });
     saveUtilBills(); closeInternetBillForm(); renderInternet();
     toast('Plan saved');
   }
+}
+
+// ── Internet upload ────────────────────────────────────────────
+async function handleInternetUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = $$('ibi-upload-status');
+  const preview = $$('ibi-upload-preview');
+  status.textContent = '⏳ Processing…';
+  preview.innerHTML = '';
+  try {
+    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      status.textContent = '⏳ Loading PDF parser…';
+      await loadPdfJs();
+      status.textContent = '⏳ Extracting text from PDF…';
+      const text = await extractPdfText(file);
+      prefillInternetForm(parseInternetBillText(text));
+      status.innerHTML = `✅ <strong>Text extracted.</strong> Review the pre-filled fields and correct anything that looks wrong.`;
+    } else if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      preview.innerHTML = `<img src="${url}" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;margin-top:4px;">`;
+      status.innerHTML = `📷 <strong>Image loaded.</strong> Fill in the fields below using the image as reference.`;
+    } else {
+      status.textContent = '⚠️ Unsupported file type. Please upload a PDF or image.';
+    }
+  } catch(e) {
+    status.innerHTML = `⚠️ Could not auto-extract. Please fill in the fields manually. <small style="color:var(--gray-400);">(${e.message})</small>`;
+  }
+}
+
+function parseInternetBillText(text) {
+  const t = text.replace(/\s+/g,' ');
+  const result = {};
+  const knownProviders = ['Aussie Broadband','Aussie BB','Superloop','iiNet','TPG','Telstra','Optus','Vodafone','Belong','Leaptel','Exetel','Internode','Tangerine','Dodo','MyRepublic','Spintel'];
+  for (const p of knownProviders) { if (t.toLowerCase().includes(p.toLowerCase())) { result.provider = p; break; } }
+  // Monthly rate
+  const rateM = t.match(/(?:monthly\s+charge|plan\s+fee|monthly\s+plan)[^\d]{0,20}\$?(\d+(?:\.\d{2})?)/i);
+  if (rateM) result.monthlyRate = rateM[1];
+  // Download speed
+  const dlM = t.match(/(\d+)\s*(?:Mbps|mbps|mb\/s)[^\d\/]{0,10}(?:download|dl)?/i) || t.match(/(\d+)\/\d+\s*(?:Mbps|mbps)/i);
+  if (dlM) result.downloadSpeed = dlM[1];
+  // Upload speed
+  const ulM = t.match(/\d+\/(\d+)\s*(?:Mbps|mbps)/i);
+  if (ulM) result.uploadSpeed = ulM[1];
+  // Data
+  if (/unlimited/i.test(t)) result.data = 'Unlimited';
+  else {
+    const dataM = t.match(/(\d+)\s*(GB|TB)\s*(?:data|per\s+month)/i);
+    if (dataM) result.data = dataM[1] + dataM[2];
+  }
+  // Plan name
+  const planM = t.match(/(?:plan\s+name|your\s+plan)[:\s]+([A-Za-z0-9 \/\-]+?)(?:\n|  |$)/i);
+  if (planM) result.planName = planM[1].trim();
+  return result;
+}
+
+function prefillInternetForm(parsed) {
+  if (parsed.provider)     $$('ibi-provider').value  = parsed.provider;
+  if (parsed.planName)     $$('ibi-plan').value       = parsed.planName;
+  if (parsed.monthlyRate)  $$('ibi-monthly').value    = parsed.monthlyRate;
+  if (parsed.downloadSpeed)$$('ibi-download').value   = parsed.downloadSpeed;
+  if (parsed.uploadSpeed)  $$('ibi-upload').value     = parsed.uploadSpeed;
+  if (parsed.data)         $$('ibi-data').value       = parsed.data;
+}
+
+// ── Share utility ──────────────────────────────────────────────
+function openShareModal(billId) {
+  $$('share-bill-id').value = billId;
+  $$('share-target-user').value = '';
+  $$('share-util-modal').style.display = 'flex';
+}
+
+function submitShare() {
+  const targetUsername = $$('share-target-user').value.trim();
+  if (!targetUsername) { toast('Enter a username'); return; }
+  if (targetUsername === currentUser) { toast('Cannot share with yourself'); return; }
+  const users = getUsers();
+  if (!users.find(u => u.username === targetUsername)) { toast('User not found'); return; }
+  const billId = $$('share-bill-id').value;
+  const bill = utilBills.find(b => b.id === billId);
+  if (!bill) { toast('Bill not found'); return; }
+  const key = 'bt_util_bills_' + targetUsername;
+  const targetBills = JSON.parse(localStorage.getItem(key) || '[]');
+  const sharedBill = {
+    ...bill,
+    id: uid(),
+    quotes: (bill.quotes || []).map(q => ({ ...q, id: uid() })),
+    sharedFrom: currentUser,
+    sharedAt: new Date().toISOString()
+  };
+  targetBills.push(sharedBill);
+  localStorage.setItem(key, JSON.stringify(targetBills));
+  $$('share-util-modal').style.display = 'none';
+  toast(`Shared with ${targetUsername}`);
 }
 
 // ── Manage page ────────────────────────────────────────────────
