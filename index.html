@@ -6,42 +6,50 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Budget">
 <title>Budget Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --primary: #5B21B6;
-  --primary-light: #EDE9FE;
-  --primary-dark: #4C1D95;
-  --green-mid: #059669;
-  --green-light: #D1FAE5;
-  --green-dark: #065F46;
-  --red-mid: #DC2626;
-  --red-light: #FEE2E2;
-  --red-dark: #991B1B;
-  --bg: #F3F4F6;
-  --white: #FFFFFF;
-  --gray-50: #F9FAFB;
-  --gray-100: #F3F4F6;
-  --gray-200: #E5E7EB;
-  --gray-300: #D1D5DB;
-  --gray-400: #9CA3AF;
-  --gray-500: #6B7280;
-  --gray-600: #4B5563;
-  --gray-700: #374151;
-  --gray-800: #1F2937;
-  --gray-900: #111827;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-  --radius: 14px;
-  --radius-sm: 10px;
+  --primary: #1d4ed8;
+  --primary-light: #eff6ff;
+  --primary-dark: #1e3a8a;
+  --green-mid: #16a34a;
+  --green-light: #dcfce7;
+  --green-dark: #14532d;
+  --red-mid: #dc2626;
+  --red-light: #fee2e2;
+  --red-dark: #991b1b;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --shadow: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md: 0 4px 24px rgba(15,23,42,0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
   --nav-h: 66px;
   --header-h: 54px;
   --sb-w: 240px;
+  --sb-bg: #0f172a;
+  --sb-border: #1e293b;
+  --sb-text: #94a3b8;
+  --sb-text-active: #ffffff;
+  --sb-active-bg: rgba(255,255,255,0.08);
+  --sb-hover-bg: rgba(255,255,255,0.05);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--gray-800);
   min-height: 100vh;
@@ -55,46 +63,51 @@ body {
   display: none;
   width: var(--sb-w);
   min-height: 100vh;
-  background: var(--white);
-  border-right: 1px solid var(--gray-200);
+  background: var(--sb-bg);
+  border-right: none;
   flex-direction: column;
   position: fixed;
   top: 0; left: 0; bottom: 0;
   z-index: 100;
-  box-shadow: var(--shadow-md);
+  box-shadow: 4px 0 24px rgba(15,23,42,0.18);
 }
 .sb-brand {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 22px 20px 16px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--sb-border);
 }
-.sb-logo { font-size: 24px; }
-.sb-name { font-size: 17px; font-weight: 800; color: var(--gray-900); }
+.sb-logo {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--primary); display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #fff; font-size: 15px;
+  flex-shrink: 0;
+}
+.sb-name { font-size: 16px; font-weight: 600; color: #ffffff; font-family: 'Space Grotesk', sans-serif; }
 .sb-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
 .sb-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 14px;
+  gap: 11px;
+  padding: 10px 12px;
   border: none;
   background: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
-  color: var(--gray-500);
+  font-weight: 500;
+  color: var(--sb-text);
   text-align: left;
   width: 100%;
   transition: all 0.15s;
   font-family: inherit;
 }
-.sb-item:hover { background: var(--gray-50); color: var(--gray-700); }
-.sb-item.active { background: var(--primary-light); color: var(--primary); }
-.sb-item svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-.sb-item.active svg { stroke-width: 2.3; }
-.sb-footer { padding: 16px 20px; border-top: 1px solid var(--gray-100); font-size: 12px; color: var(--gray-400); }
+.sb-item:hover { background: var(--sb-hover-bg); color: #e2e8f0; }
+.sb-item.active { background: var(--sb-active-bg); color: var(--sb-text-active); font-weight: 600; }
+.sb-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.sb-item.active svg { stroke-width: 2.2; }
+.sb-footer { padding: 16px 20px; border-top: 1px solid var(--sb-border); font-size: 12px; color: var(--sb-text); }
 
 /* ── Main content ────────────────────────── */
 .main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
@@ -113,7 +126,7 @@ body {
   padding: 0 18px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
-.header-title { font-size: 17px; font-weight: 700; color: var(--gray-900); }
+.header-title { font-size: 17px; font-weight: 600; color: var(--gray-900); font-family: 'Space Grotesk', sans-serif; }
 .header-badge { font-size: 12px; font-weight: 600; color: var(--gray-400); background: var(--gray-100); padding: 4px 10px; border-radius: 20px; }
 
 /* ── Pages ───────────────────────────────── */
@@ -141,10 +154,10 @@ body {
 .nav-item.active svg { stroke-width: 2.4; }
 
 /* ── Cards ───────────────────────────────── */
-.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 10px; }
+.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 16px; margin-bottom: 10px; }
 
 /* ── Month Picker ────────────────────────── */
-.month-picker { display: flex; align-items: center; justify-content: space-between; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 16px; margin-bottom: 10px; }
+.month-picker { display: flex; align-items: center; justify-content: space-between; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 12px 16px; margin-bottom: 10px; }
 .month-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--gray-100); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--gray-600); transition: background 0.15s; }
 .month-btn:hover { background: var(--gray-200); }
 .month-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -152,10 +165,10 @@ body {
 
 /* ── Summary Grid ────────────────────────── */
 .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-.sum-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.sum-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 14px 16px; }
 .sum-card.full { grid-column: 1 / -1; }
 .sum-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-400); margin-bottom: 5px; }
-.sum-amount { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.sum-amount { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: 'Space Grotesk', sans-serif; }
 .sum-amount.income  { color: var(--green-mid); }
 .sum-amount.expense { color: var(--red-mid); }
 .sum-amount.pos     { color: var(--green-mid); }
@@ -192,6 +205,7 @@ body {
   display: none;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
   background: var(--white);
   overflow-x: auto;
   overflow-y: auto;
@@ -212,9 +226,9 @@ body {
 .tx-table thead th.r { text-align: right; }
 .tx-table tbody tr { border-bottom: 1px solid var(--gray-100); cursor: pointer; transition: background 0.1s; }
 .tx-table tbody tr:last-child { border-bottom: none; }
-.tx-table tbody tr:hover { background: #F5F3FF; }
+.tx-table tbody tr:hover { background: #eff6ff; }
 .tx-table tbody tr:nth-child(even) { background: var(--gray-50); }
-.tx-table tbody tr:nth-child(even):hover { background: #F5F3FF; }
+.tx-table tbody tr:nth-child(even):hover { background: #eff6ff; }
 .tx-table td { padding: 10px 12px; color: var(--gray-700); vertical-align: middle; }
 .tx-table td.r { text-align: right; font-weight: 600; }
 .tx-table td.income-cell  { color: var(--green-mid); font-weight: 700; text-align: right; }
@@ -233,17 +247,17 @@ body {
 }
 .budget-period-pill.active { background: var(--primary); border-color: var(--primary); color: white; }
 .budget-summary-bar {
-  background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow);
+  background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200);
   padding: 16px 18px; margin-bottom: 14px;
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
 }
 .bsum-label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-.bsum-val   { font-size: 20px; font-weight: 800; color: var(--gray-900); }
+.bsum-val   { font-size: 20px; font-weight: 700; color: var(--gray-900); font-family: 'Space Grotesk', sans-serif; }
 .bsum-val.ok  { color: var(--green-mid); }
 .bsum-val.over { color: var(--red-mid); }
 .budget-list { display: flex; flex-direction: column; gap: 10px; }
 .budget-row {
-  background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow);
+  background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200);
   padding: 14px 16px;
 }
 .budget-row-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -311,7 +325,7 @@ body {
   outline: none; transition: border-color 0.15s, box-shadow 0.15s;
   -webkit-appearance: none; appearance: none; font-family: inherit;
 }
-.form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,33,182,0.1); }
+.form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29,78,216,0.12); }
 .form-control:disabled { background: var(--gray-50); color: var(--gray-400); }
 select.form-control {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -563,7 +577,7 @@ select.form-control {
   <!-- ── Sidebar ──────────────────────── -->
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand">
-      <span class="sb-logo">💰</span>
+      <div class="sb-logo">B</div>
       <span class="sb-name">Budget Tracker</span>
     </div>
     <nav class="sb-nav">
