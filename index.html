@@ -907,12 +907,14 @@ select.form-control {
       <div id="util-panel-electricity">
         <!-- Period filter bar -->
         <div style="margin-bottom:14px;">
-          <div id="util-month-pills" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:12px;color:var(--gray-500);font-weight:600;">Range:</span>
-            <input type="month" id="util-filter-from" class="form-control" style="width:150px;font-size:13px;" onchange="applyUtilRange()">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <div id="util-month-pills" style="display:contents;"></div>
+            <button id="util-filter-toggle" onclick="toggleUtilFilterRange()" style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;">Filter</button>
+          </div>
+          <div id="util-filter-range" style="display:none;margin-top:8px;display:none;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="month" id="util-filter-from" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyUtilRange()">
             <span style="font-size:12px;color:var(--gray-400);">to</span>
-            <input type="month" id="util-filter-to" class="form-control" style="width:150px;font-size:13px;" onchange="applyUtilRange()">
+            <input type="month" id="util-filter-to" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyUtilRange()">
             <button onclick="clearUtilFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
           </div>
         </div>
@@ -2344,6 +2346,14 @@ function renderUtilMonthPills() {
   // Sync range inputs
   if ($$('util-filter-from')) $$('util-filter-from').value = utilFilterFrom;
   if ($$('util-filter-to'))   $$('util-filter-to').value   = utilFilterTo;
+
+  // Highlight Filter button if a custom range is active
+  const filterBtn = $$('util-filter-toggle');
+  if (filterBtn) {
+    const hasRange = utilFilterFrom || utilFilterTo;
+    filterBtn.style.borderColor = hasRange ? 'var(--primary)' : 'var(--gray-200)';
+    filterBtn.style.color = hasRange ? 'var(--primary)' : 'var(--gray-400)';
+  }
 }
 
 function setUtilMonthFilter(m) {
@@ -2354,6 +2364,18 @@ function setUtilMonthFilter(m) {
 function setUtilYearFilter(y) {
   utilFilterFrom = `${y}-01`; utilFilterTo = `${y}-12`;
   renderElectricity();
+}
+
+function toggleUtilFilterRange() {
+  const panel = $$('util-filter-range');
+  if (!panel) return;
+  const open = panel.style.display === 'flex';
+  panel.style.display = open ? 'none' : 'flex';
+  const btn = $$('util-filter-toggle');
+  if (btn) {
+    btn.style.borderColor = open ? 'var(--gray-200)' : 'var(--primary)';
+    btn.style.color = open ? 'var(--gray-400)' : 'var(--primary)';
+  }
 }
 
 function applyUtilRange() {
