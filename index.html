@@ -1066,7 +1066,7 @@ select.form-control {
 <div id="quote-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;">
   <div class="card" style="width:100%;max-width:520px;margin:auto;position:relative;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <span style="font-size:16px;font-weight:700;color:var(--gray-900);">Add Quote</span>
+      <span style="font-size:16px;font-weight:700;color:var(--gray-900);" id="quote-form-title">Add Quote</span>
       <button onclick="closeQuoteForm()" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:22px;line-height:1;padding:2px 6px;">&times;</button>
     </div>
     <div class="form-row" style="grid-template-columns:1fr 1fr;">
@@ -1094,7 +1094,7 @@ select.form-control {
     </div>
 
     <div style="display:flex;gap:10px;margin-top:16px;">
-      <button class="btn-primary" onclick="submitQuoteForm()" style="flex:1;">Add to Comparison</button>
+      <button class="btn-primary" onclick="submitQuoteForm()" style="flex:1;" id="quote-form-submit">Add to Comparison</button>
       <button onclick="closeQuoteForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
     </div>
   </div>
@@ -1242,6 +1242,7 @@ let utilFilterFrom = '';   // 'YYYY-MM'
 let utilFilterTo   = '';   // 'YYYY-MM'
 let bfRateRows = [];
 let editingBillId = null;
+let editingQuoteId = null;
 let curPage = 'dashboard';
 let editId = null;
 let splitOn = { f: false, e: false };
@@ -2458,8 +2459,16 @@ function renderBillsList() {
 
 function selectCompBill(id) {
   utilCompBill = utilCompBill?.id === id ? null : utilBills.find(b => b.id === id);
-  if (!utilCompBill) utilQuotes = [];
+  utilQuotes = utilCompBill ? [...(utilCompBill.quotes || [])] : [];
   renderElectricity();
+}
+
+function saveQuotes() {
+  if (!utilCompBill) return;
+  utilCompBill.quotes = utilQuotes;
+  const idx = utilBills.findIndex(b => b.id === utilCompBill.id);
+  if (idx >= 0) utilBills[idx] = utilCompBill;
+  saveUtilBills();
 }
 
 function deleteBill(id) {
@@ -2492,7 +2501,7 @@ function renderCompareTable() {
   // Build columns: current bill + each quote
   const cols = [
     { label: b.provider || 'Current Bill', isCurrent: true, supply: b.supply, ratePeriods: b.ratePeriods.map(r=>({name:r.name,rate:r.rate})), bonuses: [], total: b.total }
-  ].concat(utilQuotes.map((q,qi) => ({ ...q, qi })));
+  ].concat(utilQuotes.map(q => ({ ...q })));
 
   // Calculations
   const calcs = cols.map(col => {
@@ -2523,7 +2532,7 @@ function renderCompareTable() {
           <th style="text-align:left;padding:10px 8px;color:var(--gray-500);font-weight:600;font-size:12px;white-space:nowrap;">Metric</th>
           ${cols.map((col,ci) => `<th style="text-align:right;padding:10px 8px;min-width:130px;">
             <div style="font-size:13px;font-weight:700;color:var(--gray-900);">${esc(col.label||col.provider||'Quote')}</div>
-            ${col.isCurrent ? '<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT BILL</div>' : `<button onclick="deleteQuote(${col.qi})" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button>`}
+            ${col.isCurrent ? '<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT BILL</div>' : `<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;"><button onclick="openQuoteForm('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--primary);cursor:pointer;font-family:inherit;padding:0;">✎ Edit</button><button onclick="deleteQuote('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button></div>`}
           </th>`).join('')}
         </tr>
       </thead>
@@ -2576,8 +2585,9 @@ function renderCompareTable() {
   </div>`;
 }
 
-function deleteQuote(qi) {
-  utilQuotes.splice(qi, 1);
+function deleteQuote(id) {
+  utilQuotes = utilQuotes.filter(q => q.id !== id);
+  saveQuotes();
   renderCompareTable();
 }
 
@@ -2801,21 +2811,39 @@ function prefillBillForm(parsed) {
 }
 
 // ── Quote form ──────────────────────────────────────────────────
-function openQuoteForm() {
+function openQuoteForm(quoteId) {
   if (!utilCompBill) { toast('Select a bill to compare against first'); return; }
-  $$('qf-provider').value = '';
-  $$('qf-supply').value = '';
-  // Pre-populate rate rows from the comparison bill's periods
-  $$('qf-rate-rows').innerHTML = utilCompBill.ratePeriods.map((r,i) => `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+  const existing = quoteId ? utilQuotes.find(q => q.id === quoteId) : null;
+  editingQuoteId = existing ? quoteId : null;
+  $$('quote-form-title').textContent = existing ? 'Edit Quote' : 'Add Quote';
+  $$('quote-form-submit').textContent = existing ? 'Save Changes' : 'Add to Comparison';
+  $$('qf-provider').value = existing?.provider || '';
+  $$('qf-supply').value = existing?.supply || '';
+  $$('qf-rate-rows').innerHTML = utilCompBill.ratePeriods.map((r,i) => {
+    const savedRate = existing?.ratePeriods?.find(rp => rp.name === r.name)?.rate ?? '';
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
       <span style="flex:1;font-size:13px;color:var(--gray-700);">${esc(r.name)} <span style="color:var(--gray-400);font-size:11px;">(${r.usage}kWh actual)</span></span>
-      <input type="number" class="form-control" id="qr-rate-${i}" placeholder="c/kWh" min="0" step="0.01" style="width:100px;font-size:13px;">
-    </div>`).join('');
+      <input type="number" class="form-control" id="qr-rate-${i}" placeholder="c/kWh" min="0" step="0.01" value="${savedRate}" style="width:100px;font-size:13px;">
+    </div>`;
+  }).join('');
   $$('qf-bonus-rows').innerHTML = '';
+  (existing?.bonuses || []).forEach(b => {
+    addBonusRow();
+    const rows = $$('qf-bonus-rows').children;
+    const row = rows[rows.length - 1];
+    const inputs = row.querySelectorAll('input,select');
+    inputs[0].value = b.desc || '';
+    inputs[1].value = b.amount || '';
+    inputs[2].value = b.type || 'one-off';
+    inputs[3].value = b.amortizeMonths || 12;
+  });
   $$('quote-form-modal').style.display = 'flex';
 }
 
-function closeQuoteForm() { $$('quote-form-modal').style.display = 'none'; }
+function closeQuoteForm() {
+  editingQuoteId = null;
+  $$('quote-form-modal').style.display = 'none';
+}
 
 function addBonusRow() {
   const row = document.createElement('div');
@@ -2843,9 +2871,16 @@ function submitQuoteForm() {
     const inputs = row.querySelectorAll('input,select');
     return { desc: inputs[0].value, amount: parseFloat(inputs[1].value)||0, type: inputs[2].value, amortizeMonths: parseInt(inputs[3].value)||12 };
   }).filter(b => b.amount > 0);
-  utilQuotes.push({ provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses });
+  if (editingQuoteId) {
+    const idx = utilQuotes.findIndex(q => q.id === editingQuoteId);
+    if (idx >= 0) utilQuotes[idx] = { ...utilQuotes[idx], provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses };
+    toast('Quote updated');
+  } else {
+    utilQuotes.push({ id: uid(), provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses });
+    toast('Quote added');
+  }
+  saveQuotes();
   closeQuoteForm(); renderCompareSection();
-  toast('Quote added');
 }
 
 // ── Manage page ────────────────────────────────────────────────
