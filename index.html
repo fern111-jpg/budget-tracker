@@ -1093,6 +1093,29 @@ select.form-control {
       <button type="button" onclick="addBonusRow()" style="margin-top:8px;padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Bonus</button>
     </div>
 
+    <!-- Comment -->
+    <div class="form-group" style="margin-top:14px;">
+      <label class="form-label">Notes / Comments</label>
+      <textarea class="form-control" id="qf-comment" rows="2" placeholder="e.g. Includes green energy, requires direct debit" style="resize:vertical;font-family:inherit;font-size:13px;"></textarea>
+    </div>
+
+    <!-- Attachment -->
+    <div style="margin-top:14px;">
+      <label class="form-label">Attachment (image or PDF)</label>
+      <div id="qf-attachment-preview" style="margin-bottom:8px;display:none;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--gray-50);border-radius:var(--radius-sm);border:1px solid var(--gray-200);">
+          <span id="qf-attachment-name" style="flex:1;font-size:12px;color:var(--gray-700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+          <button type="button" onclick="clearQuoteAttachment()" style="background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:16px;line-height:1;">&times;</button>
+        </div>
+        <img id="qf-attachment-img" style="display:none;max-width:100%;max-height:120px;border-radius:var(--radius-sm);margin-top:6px;object-fit:contain;" alt="">
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--gray-100);border:1.5px dashed var(--gray-300);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--gray-600);font-weight:600;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload image or PDF
+        <input type="file" id="qf-attachment-input" accept="image/*,.pdf" style="display:none;" onchange="handleQuoteAttachment(this)">
+      </label>
+    </div>
+
     <div style="display:flex;gap:10px;margin-top:16px;">
       <button class="btn-primary" onclick="submitQuoteForm()" style="flex:1;" id="quote-form-submit">Add to Comparison</button>
       <button onclick="closeQuoteForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
@@ -2524,14 +2547,21 @@ function renderCompareTable() {
 
   const fmtC = n => n == null ? '<span style="color:var(--gray-300);">—</span>' : `$${(+n).toFixed(2)}`;
 
+  // Find cheapest column by effective annual cost
+  const cheapestIdx = calcs.reduce((bi,c,i) => c.netAnnual < calcs[bi].netAnnual ? i : bi, 0);
+  const multiCol = cols.length > 1;
+  const colBg = (ci) => multiCol && ci === cheapestIdx ? '#f0fdf4' : '';
+  const colBorder = (ci) => multiCol && ci === cheapestIdx ? '2px solid #10b981' : '';
+
   el.innerHTML = `
   <div style="overflow-x:auto;">
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead>
         <tr style="border-bottom:2px solid var(--gray-200);">
           <th style="text-align:left;padding:10px 8px;color:var(--gray-500);font-weight:600;font-size:12px;white-space:nowrap;">Metric</th>
-          ${cols.map((col,ci) => `<th style="text-align:right;padding:10px 8px;min-width:130px;">
+          ${cols.map((col,ci) => `<th style="text-align:right;padding:10px 8px;min-width:130px;${multiCol && ci===cheapestIdx ? 'background:#f0fdf4;border-bottom:2px solid #10b981;' : ''}">
             <div style="font-size:13px;font-weight:700;color:var(--gray-900);">${esc(col.label||col.provider||'Quote')}</div>
+            ${multiCol && ci===cheapestIdx ? '<div style="font-size:10px;color:#10b981;font-weight:700;">★ CHEAPEST</div>' : ''}
             ${col.isCurrent ? '<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT BILL</div>' : `<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;"><button onclick="openQuoteForm('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--primary);cursor:pointer;font-family:inherit;padding:0;">✎ Edit</button><button onclick="deleteQuote('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button></div>`}
           </th>`).join('')}
         </tr>
@@ -2539,40 +2569,47 @@ function renderCompareTable() {
       <tbody>
         <tr style="background:var(--gray-50);">
           <td style="padding:8px;color:var(--gray-600);font-weight:600;">Daily Supply</td>
-          ${cols.map(col => `<td style="text-align:right;padding:8px;">${col.supply ? `${(+col.supply).toFixed(4)}/day` : fmtC(null)}</td>`).join('')}
+          ${cols.map((col,ci) => `<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${col.supply ? `${(+col.supply).toFixed(4)}/day` : fmtC(null)}</td>`).join('')}
         </tr>
         ${b.ratePeriods.map(bp => `
         <tr>
           <td style="padding:8px;color:var(--gray-600);">${esc(bp.name)} <span style="color:var(--gray-400);font-size:11px;">(${bp.usage}kWh)</span></td>
           ${calcs.map((calc,ci) => {
-            if (cols[ci].isCurrent) return `<td style="text-align:right;padding:8px;">${bp.rate}c/kWh</td>`;
+            const bg = colBg(ci) ? `background:${colBg(ci)};` : '';
+            if (cols[ci].isCurrent) return `<td style="text-align:right;padding:8px;${bg}">${bp.rate}c/kWh</td>`;
             const p = calc.periodCosts?.find(x=>x.name===bp.name);
-            return `<td style="text-align:right;padding:8px;">${p?.rate!=null ? p.rate+'c/kWh' : '<span style="color:var(--gray-300);">no rate</span>'}</td>`;
+            return `<td style="text-align:right;padding:8px;${bg}">${p?.rate!=null ? p.rate+'c/kWh' : '<span style="color:var(--gray-300);">no rate</span>'}</td>`;
           }).join('')}
         </tr>`).join('')}
         <tr style="border-top:1px solid var(--gray-200);">
           <td style="padding:8px;color:var(--gray-600);">Supply Cost (${days}d)</td>
-          ${calcs.map(c => `<td style="text-align:right;padding:8px;">${c.supplyCost!=null ? fmtC(c.supplyCost) : fmtC(null)}</td>`).join('')}
+          ${calcs.map((c,ci) => `<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${c.supplyCost!=null ? fmtC(c.supplyCost) : fmtC(null)}</td>`).join('')}
         </tr>
-        <tr style="border-top:2px solid var(--gray-200);background:var(--gray-50);">
-          <td style="padding:10px 8px;font-weight:700;color:var(--gray-900);">Bill Period Total</td>
-          ${calcs.map(c => `<td style="text-align:right;padding:10px 8px;font-weight:700;font-size:15px;color:var(--gray-900);">${fmtC(c.gross)}</td>`).join('')}
+        <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
+          <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Bill Period Total</td>
+          ${calcs.map((c,ci) => {
+            const cheap = multiCol && ci === cheapestIdx;
+            return `<td style="text-align:right;padding:10px 8px;font-weight:700;font-size:15px;${cheap ? 'background:#dcfce7;color:#16a34a;' : 'background:var(--primary-light);color:var(--primary);'}">${fmtC(c.gross)}</td>`;
+          }).join('')}
         </tr>
         <tr>
           <td style="padding:8px;color:var(--gray-600);">Annualised Cost</td>
-          ${calcs.map(c => `<td style="text-align:right;padding:8px;color:var(--gray-700);">${fmtC(c.netAnnual + (c.bonusAnnual||0))}</td>`).join('')}
+          ${calcs.map((c,ci) => `<td style="text-align:right;padding:8px;color:var(--gray-700);${colBg(ci)?'background:'+colBg(ci)+';':''}">${fmtC(c.netAnnual + (c.bonusAnnual||0))}</td>`).join('')}
         </tr>
         <tr>
           <td style="padding:8px;color:var(--gray-600);">Bonuses / Cashback (p.a.)</td>
-          ${calcs.map(c => `<td style="text-align:right;padding:8px;color:#10b981;font-weight:600;">${c.bonusAnnual ? '−$'+(c.bonusAnnual).toFixed(2) : fmtC(null)}</td>`).join('')}
+          ${calcs.map((c,ci) => `<td style="text-align:right;padding:8px;color:#10b981;font-weight:600;${colBg(ci)?'background:'+colBg(ci)+';':''}">${c.bonusAnnual ? '−$'+(c.bonusAnnual).toFixed(2) : fmtC(null)}</td>`).join('')}
         </tr>
         <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
           <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Effective Annual</td>
-          ${calcs.map(c => `<td style="text-align:right;padding:10px 8px;font-weight:800;font-size:15px;color:var(--primary);">${fmtC(c.netAnnual)}</td>`).join('')}
+          ${calcs.map((c,ci) => {
+            const cheap = multiCol && ci === cheapestIdx;
+            return `<td style="text-align:right;padding:10px 8px;font-weight:800;font-size:15px;${cheap ? 'background:#dcfce7;color:#16a34a;' : 'color:var(--primary);'}">${fmtC(c.netAnnual)}</td>`;
+          }).join('')}
         </tr>
         <tr style="border-top:1px solid var(--gray-200);">
           <td style="padding:8px;color:var(--gray-600);">Effective Monthly</td>
-          ${calcs.map(c => `<td style="text-align:right;padding:8px;font-weight:600;color:var(--gray-700);">${fmtC(c.netMonthly)}</td>`).join('')}
+          ${calcs.map((c,ci) => `<td style="text-align:right;padding:8px;font-weight:600;color:var(--gray-700);${colBg(ci)?'background:'+colBg(ci)+';':''}">${fmtC(c.netMonthly)}</td>`).join('')}
         </tr>
         ${cols.some((c,ci)=>!c.isCurrent&&calcs[ci].bonusAnnual) ? `
         <tr style="border-top:1px solid var(--gray-200);background:var(--gray-50);">
@@ -2837,12 +2874,63 @@ function openQuoteForm(quoteId) {
     inputs[2].value = b.type || 'one-off';
     inputs[3].value = b.amortizeMonths || 12;
   });
+  $$('qf-comment').value = existing?.comment || '';
+  // Restore attachment
+  $$('qf-attachment-input').value = '';
+  const preview = $$('qf-attachment-preview');
+  if (existing?.attachmentDataUrl) {
+    $$('qf-attachment-name').textContent = existing.attachmentName || 'Attachment';
+    preview.dataset.dataUrl = existing.attachmentDataUrl;
+    preview.dataset.fileName = existing.attachmentName || 'Attachment';
+    preview.style.display = '';
+    const img = $$('qf-attachment-img');
+    if (existing.attachmentDataUrl.startsWith('data:image/')) {
+      img.src = existing.attachmentDataUrl;
+      img.style.display = '';
+    } else {
+      img.style.display = 'none';
+    }
+  } else {
+    preview.style.display = 'none';
+    delete preview.dataset.dataUrl;
+    $$('qf-attachment-img').src = '';
+  }
   $$('quote-form-modal').style.display = 'flex';
 }
 
 function closeQuoteForm() {
   editingQuoteId = null;
   $$('quote-form-modal').style.display = 'none';
+}
+
+function handleQuoteAttachment(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const preview = $$('qf-attachment-preview');
+    $$('qf-attachment-name').textContent = file.name;
+    preview.style.display = '';
+    const img = $$('qf-attachment-img');
+    if (file.type.startsWith('image/')) {
+      img.src = e.target.result;
+      img.style.display = '';
+    } else {
+      img.style.display = 'none';
+    }
+    preview.dataset.dataUrl = e.target.result;
+    preview.dataset.fileName = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearQuoteAttachment() {
+  $$('qf-attachment-input').value = '';
+  const preview = $$('qf-attachment-preview');
+  preview.style.display = 'none';
+  delete preview.dataset.dataUrl;
+  delete preview.dataset.fileName;
+  $$('qf-attachment-img').src = '';
 }
 
 function addBonusRow() {
@@ -2871,12 +2959,17 @@ function submitQuoteForm() {
     const inputs = row.querySelectorAll('input,select');
     return { desc: inputs[0].value, amount: parseFloat(inputs[1].value)||0, type: inputs[2].value, amortizeMonths: parseInt(inputs[3].value)||12 };
   }).filter(b => b.amount > 0);
+  const comment = $$('qf-comment').value.trim();
+  const attachPrev = $$('qf-attachment-preview');
+  const attachmentDataUrl = attachPrev.dataset.dataUrl || '';
+  const attachmentName = attachPrev.dataset.fileName || '';
+  const quoteData = { provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses, comment, attachmentDataUrl, attachmentName };
   if (editingQuoteId) {
     const idx = utilQuotes.findIndex(q => q.id === editingQuoteId);
-    if (idx >= 0) utilQuotes[idx] = { ...utilQuotes[idx], provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses };
+    if (idx >= 0) utilQuotes[idx] = { ...utilQuotes[idx], ...quoteData };
     toast('Quote updated');
   } else {
-    utilQuotes.push({ id: uid(), provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses });
+    utilQuotes.push({ id: uid(), ...quoteData });
     toast('Quote added');
   }
   saveQuotes();
