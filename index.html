@@ -624,8 +624,14 @@ select.form-control {
   <!-- ── Main ─────────────────────────── -->
   <div class="main">
     <header class="header">
-      <div class="header-title" id="hdr-title">Overview</div>
-      <div class="header-badge" id="hdr-badge"></div>
+      <div>
+        <div class="header-title" id="hdr-title">Overview</div>
+        <div id="hdr-subtitle" style="font-size:13px;color:var(--gray-500);margin-top:1px;display:none;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="header-badge" id="hdr-badge"></div>
+        <div id="hdr-actions"></div>
+      </div>
     </header>
 
     <!-- DASHBOARD -->
@@ -949,9 +955,8 @@ select.form-control {
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="margin-bottom:12px;">
           <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Saved Bills</div>
-          <button onclick="openBillForm()" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Bill</button>
         </div>
         <div id="util-bills-list"></div>
 
@@ -979,9 +984,8 @@ select.form-control {
             <button onclick="clearGasFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
           </div>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="margin-bottom:12px;">
           <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Saved Bills</div>
-          <button onclick="openBillForm(null,'gas')" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Bill</button>
         </div>
         <div id="gas-bills-list"></div>
         <div id="gas-compare-section" style="display:none;margin-top:24px;">
@@ -995,9 +999,8 @@ select.form-control {
 
       <!-- Internet panel -->
       <div id="util-panel-internet" style="display:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="margin-bottom:12px;">
           <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Saved Plans</div>
-          <button onclick="openInternetBillForm()" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Plan</button>
         </div>
         <div id="internet-bills-list"></div>
         <div id="internet-compare-section" style="display:none;margin-top:24px;">
@@ -1107,9 +1110,13 @@ select.form-control {
       <input type="number" class="form-control" id="bf-total" placeholder="auto" step="0.01" min="0" readonly style="background:var(--gray-50);color:var(--gray-700);">
     </div>
 
-    <div style="display:flex;gap:10px;margin-top:4px;">
+    <div style="display:flex;gap:10px;margin-top:4px;align-items:center;">
       <button class="btn-primary" onclick="submitBillForm()" style="flex:1;">Save Bill</button>
       <button onclick="closeBillForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
+      <div id="bill-form-edit-actions" style="display:none;display:flex;gap:6px;">
+        <button id="bill-form-share-btn" onclick="billFormShare()" title="Share" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);background:var(--white);font-size:13px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Share</button>
+        <button id="bill-form-delete-btn" onclick="billFormDelete()" title="Delete" style="padding:10px 14px;border:none;background:none;font-size:13px;font-weight:600;color:var(--red-mid);cursor:pointer;font-family:inherit;">Delete</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1173,9 +1180,13 @@ select.form-control {
       <div id="ibi-upload-status" style="font-size:13px;color:var(--gray-500);">📄 Upload PDF or image to auto-fill — <strong>click to browse</strong></div>
       <div id="ibi-upload-preview"></div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:16px;">
+    <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
       <button class="btn-primary" onclick="submitInternetBillForm()" style="flex:1;" id="ibi-form-submit">Save Plan</button>
       <button onclick="closeInternetBillForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
+      <div id="ibi-form-edit-actions" style="display:none;gap:6px;">
+        <button onclick="ibiFormShare()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);background:var(--white);font-size:13px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Share</button>
+        <button onclick="ibiFormDelete()" style="padding:10px 14px;border:none;background:none;font-size:13px;font-weight:600;color:var(--red-mid);cursor:pointer;font-family:inherit;">Delete</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1473,6 +1484,9 @@ function goTo(page) {
   const titles = { dashboard:'Overview', transactions:'Transactions', budgeting:'Budgeting', settings:'Settings', manage:'Manage', utilities:'Utilities' };
   $$('hdr-title').textContent = titles[page] || page;
   $$('hdr-badge').textContent = page === 'transactions' ? txs.length + ' entries' : '';
+  const sub = $$('hdr-subtitle');
+  if (sub) { sub.textContent = page === 'utilities' ? 'Compare bills and provider quotes' : ''; sub.style.display = page === 'utilities' ? '' : 'none'; }
+  updateHdrActions(page);
   if (page === 'dashboard')    renderDash();
   if (page === 'transactions') renderTx();
   if (page === 'budgeting')    renderBudget();
@@ -2463,12 +2477,31 @@ function bootApp() {
 }
 
 // ── Utilities page ─────────────────────────────────────────────
+function updateHdrActions(page) {
+  const el = $$('hdr-actions');
+  if (!el) return;
+  if (page === 'utilities') {
+    const btnStyle = `padding:9px 18px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
+    const svgPlus = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+    if (utilTab === 'internet') {
+      el.innerHTML = `<button onclick="openInternetBillForm()" style="${btnStyle}">${svgPlus}Add plan</button>`;
+    } else if (utilTab === 'gas') {
+      el.innerHTML = `<button onclick="openBillForm(null,'gas')" style="${btnStyle}">${svgPlus}Add bill</button>`;
+    } else {
+      el.innerHTML = `<button onclick="openBillForm()" style="${btnStyle}">${svgPlus}Add bill</button>`;
+    }
+  } else {
+    el.innerHTML = '';
+  }
+}
+
 function setUtilTab(tab) {
   utilTab = tab;
   document.querySelectorAll('#util-type-tabs .pill').forEach(b => b.classList.remove('active'));
   $$('utab-' + tab)?.classList.add('active');
   document.querySelectorAll('[id^="util-panel-"]').forEach(p => p.style.display = 'none');
   $$('util-panel-' + tab).style.display = '';
+  updateHdrActions('utilities');
   renderUtilities();
 }
 
@@ -2589,26 +2622,17 @@ function renderBillsList() {
   }
 
   const rows = bills.map((b, i) => {
-    const isComp = utilCompBill?.id === b.id;
+    const isLast = i === bills.length - 1;
     const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
     const perDay = b.days ? `$${((+b.total)/b.days).toFixed(2)}/day` : '';
-    const isLast = i === bills.length - 1;
-    return `<div onclick="selectCompBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;background:${isComp?'var(--primary-light)':'transparent'};" onmouseover="if(!${isComp})this.style.background='#f8fafc'" onmouseout="this.style.background='${isComp?'var(--primary-light)':'transparent'}'">
+    return `<div onclick="editBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
       <div style="flex:1;min-width:0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-          <div style="font-size:13.5px;font-weight:600;color:#0f172a;">${esc(b.provider||'Unknown Provider')}</div>
-          ${isComp?`<span style="font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 6px;border-radius:4px;border:1px solid var(--primary);">CURRENT</span>`:''}
-        </div>
+        <div style="font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
         <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
       </div>
-      <div style="text-align:right;flex-shrink:0;margin-right:4px;">
+      <div style="text-align:right;flex-shrink:0;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
         ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
-      </div>
-      <div style="display:flex;gap:2px;flex-shrink:0;" onclick="event.stopPropagation()">
-        <button onclick="editBill('${b.id}')" title="Edit" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✎</button>
-        <button onclick="openShareModal('${b.id}')" title="Share" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:13px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">↗</button>
-        <button onclick="deleteBill('${b.id}')" title="Delete" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='#fee2e2';this.style.color='var(--red-mid)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✕</button>
       </div>
     </div>`;
   }).join('');
@@ -2646,9 +2670,25 @@ function editBill(id) {
   openBillForm(b, b.type);
 }
 
+function autoSelectCompBill(type) {
+  const all = utilBills.filter(b => b.type === type);
+  if (!all.length) return null;
+  // Pick most recent by 'to' date, then 'from', then savedAt
+  return all.slice().sort((a, b) => {
+    const da = (a.to || a.from || a.savedAt || '');
+    const db = (b.to || b.from || b.savedAt || '');
+    return db < da ? -1 : db > da ? 1 : 0;
+  })[0];
+}
+
 function renderCompareSection() {
   const sec = $$('util-compare-section');
-  if (!utilCompBill) { sec.style.display = 'none'; return; }
+  const bills = utilBills.filter(b => b.type === 'electricity');
+  if (!bills.length) { sec.style.display = 'none'; return; }
+  if (!utilCompBill || !bills.find(b => b.id === utilCompBill.id)) {
+    utilCompBill = autoSelectCompBill('electricity');
+    utilQuotes = utilCompBill ? [...(utilCompBill.quotes || [])] : [];
+  }
   sec.style.display = '';
   renderCompareTable('electricity');
 }
@@ -2656,7 +2696,12 @@ function renderCompareSection() {
 function renderGasCompareSection() {
   const sec = $$('gas-compare-section');
   if (!sec) return;
-  if (!gasCompBill) { sec.style.display = 'none'; return; }
+  const bills = utilBills.filter(b => b.type === 'gas');
+  if (!bills.length) { sec.style.display = 'none'; return; }
+  if (!gasCompBill || !bills.find(b => b.id === gasCompBill.id)) {
+    gasCompBill = autoSelectCompBill('gas');
+    gasQuotes = gasCompBill ? [...(gasCompBill.quotes || [])] : [];
+  }
   sec.style.display = '';
   renderCompareTable('gas');
 }
@@ -2801,12 +2846,22 @@ function openBillForm(prefill, type) {
   bfRateRows = prefill?.ratePeriods ? prefill.ratePeriods.map(r=>({...r})) : [{ name: currentFormType === 'gas' ? 'General Usage' : 'General Usage', rate:'', usage:'' }];
   renderBillRateRows();
   calcBillTotal();
+  const editActions = $$('bill-form-edit-actions');
+  if (editActions) editActions.style.display = editingBillId ? 'flex' : 'none';
   $$('bill-form-modal').style.display = 'flex';
 }
 
 function closeBillForm() {
   $$('bill-form-modal').style.display = 'none';
   editingBillId = null;
+}
+
+function billFormShare() {
+  if (editingBillId) { closeBillForm(); openShareModal(editingBillId); }
+}
+
+function billFormDelete() {
+  if (editingBillId) { closeBillForm(); deleteBill(editingBillId); }
 }
 
 function renderBillRateRows() {
@@ -3221,26 +3276,17 @@ function renderGasBillsList() {
   const bills = allBills.filter(gasInFilter);
   if (!bills.length) { el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">No bills in the selected period</div>`; return; }
   const rows = bills.map((b, i) => {
-    const isComp = gasCompBill?.id === b.id;
+    const isLast = i === bills.length - 1;
     const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
     const perDay = b.days ? `$${((+b.total)/b.days).toFixed(2)}/day` : '';
-    const isLast = i === bills.length - 1;
-    return `<div onclick="selectGasCompBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;background:${isComp?'var(--primary-light)':'transparent'};" onmouseover="if(!${isComp})this.style.background='#f8fafc'" onmouseout="this.style.background='${isComp?'var(--primary-light)':'transparent'}'">
+    return `<div onclick="editBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
       <div style="flex:1;min-width:0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-          <div style="font-size:13.5px;font-weight:600;color:#0f172a;">${esc(b.provider||'Unknown Provider')}</div>
-          ${isComp?`<span style="font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 6px;border-radius:4px;border:1px solid var(--primary);">CURRENT</span>`:''}
-        </div>
+        <div style="font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
         <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
       </div>
-      <div style="text-align:right;flex-shrink:0;margin-right:4px;">
+      <div style="text-align:right;flex-shrink:0;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
         ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
-      </div>
-      <div style="display:flex;gap:2px;flex-shrink:0;" onclick="event.stopPropagation()">
-        <button onclick="editBill('${b.id}')" title="Edit" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✎</button>
-        <button onclick="openShareModal('${b.id}')" title="Share" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:13px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">↗</button>
-        <button onclick="deleteBill('${b.id}')" title="Delete" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='#fee2e2';this.style.color='var(--red-mid)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✕</button>
       </div>
     </div>`;
   }).join('');
@@ -3276,25 +3322,16 @@ function renderInternetBillsList() {
     return;
   }
   const rows = bills.map((b, i) => {
-    const isComp = internetCompBill?.id === b.id;
-    const subtitle = b.planName ? esc(b.planName) : (b.data || '');
     const isLast = i === bills.length - 1;
-    return `<div onclick="selectInternetCompBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;background:${isComp?'var(--primary-light)':'transparent'};" onmouseover="if(!${isComp})this.style.background='#f8fafc'" onmouseout="this.style.background='${isComp?'var(--primary-light)':'transparent'}'">
+    const subtitle = b.planName ? esc(b.planName) : (b.data || '');
+    return `<div onclick="openInternetBillForm('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
       <div style="flex:1;min-width:0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-          <div style="font-size:13.5px;font-weight:600;color:#0f172a;">${esc(b.provider||'Unknown Provider')}</div>
-          ${isComp?`<span style="font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 6px;border-radius:4px;border:1px solid var(--primary);">CURRENT</span>`:''}
-        </div>
+        <div style="font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
         ${subtitle?`<div style="font-size:12px;color:#64748b;">${subtitle}</div>`:''}
       </div>
-      <div style="text-align:right;flex-shrink:0;margin-right:4px;">
+      <div style="text-align:right;flex-shrink:0;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.monthlyRate).toFixed(2)}</div>
         <div style="font-size:12px;color:#64748b;margin-top:2px;">/month</div>
-      </div>
-      <div style="display:flex;gap:2px;flex-shrink:0;" onclick="event.stopPropagation()">
-        <button onclick="openInternetBillForm('${b.id}')" title="Edit" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✎</button>
-        <button onclick="openShareModal('${b.id}')" title="Share" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:13px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">↗</button>
-        <button onclick="deleteInternetBill('${b.id}')" title="Delete" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='#fee2e2';this.style.color='var(--red-mid)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✕</button>
       </div>
     </div>`;
   }).join('');
@@ -3325,7 +3362,15 @@ function deleteInternetBill(id) {
 function renderInternetCompareSection() {
   const sec = $$('internet-compare-section');
   if (!sec) return;
-  if (!internetCompBill) { sec.style.display = 'none'; return; }
+  const bills = utilBills.filter(b => b.type === 'internet');
+  if (!bills.length) { sec.style.display = 'none'; return; }
+  if (!internetCompBill || !bills.find(b => b.id === internetCompBill.id)) {
+    internetCompBill = bills.slice().sort((a, b) => {
+      const da = a.savedAt || ''; const db = b.savedAt || '';
+      return db < da ? -1 : db > da ? 1 : 0;
+    })[0];
+    internetQuotes = internetCompBill ? [...(internetCompBill.quotes || [])] : [];
+  }
   sec.style.display = '';
   renderInternetCompareTable();
 }
@@ -3438,7 +3483,17 @@ function openInternetBillForm(idOrContext) {
     inputs[0].value = b.desc || ''; inputs[1].value = b.amount || '';
     inputs[2].value = b.type || 'one-off'; inputs[3].value = b.amortizeMonths || 12;
   });
+  const editActions = $$('ibi-form-edit-actions');
+  if (editActions) editActions.style.display = editingInternetBillId ? 'flex' : 'none';
   $$('internet-bill-form-modal').style.display = 'flex';
+}
+
+function ibiFormShare() {
+  if (editingInternetBillId) { closeInternetBillForm(); openShareModal(editingInternetBillId); }
+}
+
+function ibiFormDelete() {
+  if (editingInternetBillId) { closeInternetBillForm(); deleteInternetBill(editingInternetBillId); }
 }
 
 function openInternetQuoteForm(quoteId) {
