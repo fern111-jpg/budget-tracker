@@ -928,9 +928,9 @@ select.form-control {
     <div class="page" id="pg-utilities">
       <!-- Utility type tabs -->
       <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="util-type-tabs">
-        <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">⚡ Electricity</button>
-        <button class="pill" id="utab-gas" onclick="setUtilTab('gas')">🔥 Gas</button>
-        <button class="pill" id="utab-internet" onclick="setUtilTab('internet')">🌐 Internet</button>
+        <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">Electricity</button>
+        <button class="pill" id="utab-gas" onclick="setUtilTab('gas')">Gas</button>
+        <button class="pill" id="utab-internet" onclick="setUtilTab('internet')">Internet</button>
       </div>
 
       <!-- Electricity panel -->
@@ -949,21 +949,17 @@ select.form-control {
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-          <div class="sec-title" style="margin:0;">Saved Bills</div>
-          <button onclick="openBillForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Bill
-          </button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Saved Bills</div>
+          <button onclick="openBillForm()" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Bill</button>
         </div>
         <div id="util-bills-list"></div>
 
         <!-- Comparison section (shown when a bill is selected) -->
-        <div id="util-compare-section" style="display:none;margin-top:28px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-            <div class="sec-title" style="margin:0;">Quote Comparison</div>
-            <button onclick="openQuoteForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Quote
-            </button>
+        <div id="util-compare-section" style="display:none;margin-top:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Quote Comparison</div>
+            <button onclick="openQuoteForm()" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Quote</button>
           </div>
           <div id="util-compare-table"></div>
         </div>
@@ -983,19 +979,15 @@ select.form-control {
             <button onclick="clearGasFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
           </div>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-          <div class="sec-title" style="margin:0;">Saved Bills</div>
-          <button onclick="openBillForm(null,'gas')" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Bill
-          </button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Saved Bills</div>
+          <button onclick="openBillForm(null,'gas')" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Bill</button>
         </div>
         <div id="gas-bills-list"></div>
-        <div id="gas-compare-section" style="display:none;margin-top:28px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-            <div class="sec-title" style="margin:0;">Quote Comparison</div>
-            <button onclick="openQuoteForm(null,'gas')" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Quote
-            </button>
+        <div id="gas-compare-section" style="display:none;margin-top:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Quote Comparison</div>
+            <button onclick="openQuoteForm(null,'gas')" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Quote</button>
           </div>
           <div id="gas-compare-table"></div>
         </div>
@@ -1003,19 +995,15 @@ select.form-control {
 
       <!-- Internet panel -->
       <div id="util-panel-internet" style="display:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-          <div class="sec-title" style="margin:0;">Saved Plans</div>
-          <button onclick="openInternetBillForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Plan
-          </button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Saved Plans</div>
+          <button onclick="openInternetBillForm()" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Plan</button>
         </div>
         <div id="internet-bills-list"></div>
-        <div id="internet-compare-section" style="display:none;margin-top:28px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-            <div class="sec-title" style="margin:0;">Plan Comparison</div>
-            <button onclick="openInternetQuoteForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Quote
-            </button>
+        <div id="internet-compare-section" style="display:none;margin-top:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Plan Comparison</div>
+            <button onclick="openInternetQuoteForm()" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Quote</button>
           </div>
           <div id="internet-compare-table"></div>
         </div>
@@ -2589,66 +2577,42 @@ function renderBillsList() {
   const el = $$('util-bills-list');
   const allBills = utilBills.filter(b => b.type === 'electricity');
   if (!allBills.length) {
-    el.innerHTML = `<div class="empty" style="padding:32px 0;"><div class="empty-icon">⚡</div><div class="empty-title">No bills saved</div><div class="empty-sub">Add your current bill to start comparing</div></div>`;
+    el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:32px;text-align:center;"><div style="font-size:28px;margin-bottom:8px;">⚡</div><div style="font-size:14px;font-weight:600;color:var(--gray-700);">No bills saved</div><div style="font-size:13px;color:var(--gray-400);margin-top:4px;">Add your current bill to start comparing</div></div>`;
     return;
   }
 
   const bills = allBills.filter(billInFilter);
 
-  // Combined summary when multiple bills are shown
-  let summaryHTML = '';
-  if (bills.length > 1) {
-    const totalCost  = bills.reduce((s,b) => s + (+b.total||0), 0);
-    const totalDays  = bills.reduce((s,b) => s + (+b.days||0), 0);
-    const totalUsage = bills.reduce((s,b) => s + b.ratePeriods.reduce((u,r)=>u+(+r.usage||0),0), 0);
-    const annualised = totalDays ? totalCost * 365 / totalDays : null;
-    summaryHTML = `<div class="card" style="margin-bottom:14px;padding:16px 18px;background:var(--primary);color:white;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div>
-          <div style="font-size:12px;font-weight:600;opacity:0.8;margin-bottom:2px;">${bills.length} BILLS · ${totalDays} DAYS${totalUsage?` · ${totalUsage.toFixed(0)}kWh`:''}</div>
-          <div style="font-size:22px;font-weight:800;">$${totalCost.toFixed(2)} combined</div>
-          ${annualised?`<div style="font-size:12px;opacity:0.8;margin-top:2px;">≈ $${annualised.toFixed(2)}/year · $${(annualised/12).toFixed(2)}/month</div>`:''}
-        </div>
-      </div>
-    </div>`;
-  }
-
   if (!bills.length) {
-    el.innerHTML = `<div style="padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">No bills in the selected period</div>`;
+    el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">No bills in the selected period</div>`;
     return;
   }
 
-  el.innerHTML = summaryHTML + bills.map(b => {
+  const rows = bills.map((b, i) => {
     const isComp = utilCompBill?.id === b.id;
     const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
-    const totalUsage = b.ratePeriods.reduce((s,r) => s + (+r.usage||0), 0);
-    const annualised = b.days ? (+b.total) * 365 / b.days : null;
-    return `<div class="card" style="margin-bottom:10px;padding:16px 18px;${isComp?'border:2px solid var(--primary);':''}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:4px;">${esc(b.provider||'Unknown Provider')}</div>
-          <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px;">${periodLabel}${b.days?' · '+b.days+' days':''}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            ${b.supply?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Supply $${(+b.supply).toFixed(4)}/day</span>`:''}
-            ${b.ratePeriods.map(r=>`<span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;">${esc(r.name)}: ${r.rate}c · ${r.usage}kWh</span>`).join('')}
-            ${totalUsage?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Total ${totalUsage.toFixed(0)}kWh</span>`:''}
-          </div>
-          ${annualised?`<div style="margin-top:6px;font-size:12px;color:var(--gray-500);">≈ $${annualised.toFixed(2)}/year · $${(annualised/12).toFixed(2)}/month</div>`:''}
-          ${b.notes?`<div style="margin-top:4px;font-size:12px;color:var(--gray-400);font-style:italic;">${esc(b.notes)}</div>`:''}
+    const perDay = b.days ? `$${((+b.total)/b.days).toFixed(2)}/day` : '';
+    const isLast = i === bills.length - 1;
+    return `<div onclick="selectCompBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;background:${isComp?'var(--primary-light)':'transparent'};" onmouseover="if(!${isComp})this.style.background='#f8fafc'" onmouseout="this.style.background='${isComp?'var(--primary-light)':'transparent'}'">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <div style="font-size:13.5px;font-weight:600;color:#0f172a;">${esc(b.provider||'Unknown Provider')}</div>
+          ${isComp?`<span style="font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 6px;border-radius:4px;border:1px solid var(--primary);">CURRENT</span>`:''}
         </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:20px;font-weight:800;color:var(--gray-900);">$${(+b.total).toFixed(2)}</div>
-          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">total bill</div>
-          <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
-            <button onclick="selectCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
-            <button onclick="editBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
-            <button onclick="openShareModal('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Share</button>
-            <button onclick="deleteBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
-          </div>
-        </div>
+        <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-right:4px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
+        ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
+      </div>
+      <div style="display:flex;gap:2px;flex-shrink:0;" onclick="event.stopPropagation()">
+        <button onclick="editBill('${b.id}')" title="Edit" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✎</button>
+        <button onclick="openShareModal('${b.id}')" title="Share" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:13px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">↗</button>
+        <button onclick="deleteBill('${b.id}')" title="Delete" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='#fee2e2';this.style.color='var(--red-mid)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✕</button>
       </div>
     </div>`;
   }).join('');
+  el.innerHTML = `<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">${rows}</div>`;
 }
 
 function selectCompBill(id) {
@@ -3251,58 +3215,36 @@ function renderGasBillsList() {
   if (!el) return;
   const allBills = utilBills.filter(b => b.type === 'gas');
   if (!allBills.length) {
-    el.innerHTML = `<div class="empty" style="padding:32px 0;"><div class="empty-icon">🔥</div><div class="empty-title">No gas bills saved</div><div class="empty-sub">Add your current gas bill to start comparing</div></div>`;
+    el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:32px;text-align:center;"><div style="font-size:28px;margin-bottom:8px;">🔥</div><div style="font-size:14px;font-weight:600;color:var(--gray-700);">No gas bills saved</div><div style="font-size:13px;color:var(--gray-400);margin-top:4px;">Add your current gas bill to start comparing</div></div>`;
     return;
   }
   const bills = allBills.filter(gasInFilter);
-  let summaryHTML = '';
-  if (bills.length > 1) {
-    const totalCost  = bills.reduce((s,b) => s + (+b.total||0), 0);
-    const totalDays  = bills.reduce((s,b) => s + (+b.days||0), 0);
-    const totalUsage = bills.reduce((s,b) => s + b.ratePeriods.reduce((u,r)=>u+(+r.usage||0),0), 0);
-    const annualised = totalDays ? totalCost * 365 / totalDays : null;
-    summaryHTML = `<div class="card" style="margin-bottom:14px;padding:16px 18px;background:var(--primary);color:white;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div>
-          <div style="font-size:12px;font-weight:600;opacity:0.8;margin-bottom:2px;">${bills.length} BILLS · ${totalDays} DAYS${totalUsage?` · ${totalUsage.toFixed(0)}MJ`:''}</div>
-          <div style="font-size:22px;font-weight:800;">$${totalCost.toFixed(2)} combined</div>
-          ${annualised?`<div style="font-size:12px;opacity:0.8;margin-top:2px;">≈ $${annualised.toFixed(2)}/year · $${(annualised/12).toFixed(2)}/month</div>`:''}
-        </div>
-      </div>
-    </div>`;
-  }
-  if (!bills.length) { el.innerHTML = `<div style="padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">No bills in the selected period</div>`; return; }
-  el.innerHTML = summaryHTML + bills.map(b => {
+  if (!bills.length) { el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">No bills in the selected period</div>`; return; }
+  const rows = bills.map((b, i) => {
     const isComp = gasCompBill?.id === b.id;
     const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
-    const totalUsage = b.ratePeriods.reduce((s,r) => s + (+r.usage||0), 0);
-    const annualised = b.days ? (+b.total) * 365 / b.days : null;
-    return `<div class="card" style="margin-bottom:10px;padding:16px 18px;${isComp?'border:2px solid var(--primary);':''}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:4px;">${esc(b.provider||'Unknown Provider')}</div>
-          <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px;">${periodLabel}${b.days?' · '+b.days+' days':''}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            ${b.supply?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Supply $${(+b.supply).toFixed(4)}/day</span>`:''}
-            ${b.ratePeriods.map(r=>`<span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;">${esc(r.name)}: ${r.rate}c · ${r.usage}MJ</span>`).join('')}
-            ${totalUsage?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Total ${totalUsage.toFixed(0)}MJ</span>`:''}
-          </div>
-          ${annualised?`<div style="margin-top:6px;font-size:12px;color:var(--gray-500);">≈ $${annualised.toFixed(2)}/year · $${(annualised/12).toFixed(2)}/month</div>`:''}
-          ${b.notes?`<div style="margin-top:4px;font-size:12px;color:var(--gray-400);font-style:italic;">${esc(b.notes)}</div>`:''}
+    const perDay = b.days ? `$${((+b.total)/b.days).toFixed(2)}/day` : '';
+    const isLast = i === bills.length - 1;
+    return `<div onclick="selectGasCompBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;background:${isComp?'var(--primary-light)':'transparent'};" onmouseover="if(!${isComp})this.style.background='#f8fafc'" onmouseout="this.style.background='${isComp?'var(--primary-light)':'transparent'}'">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <div style="font-size:13.5px;font-weight:600;color:#0f172a;">${esc(b.provider||'Unknown Provider')}</div>
+          ${isComp?`<span style="font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 6px;border-radius:4px;border:1px solid var(--primary);">CURRENT</span>`:''}
         </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:20px;font-weight:800;color:var(--gray-900);">$${(+b.total).toFixed(2)}</div>
-          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">total bill</div>
-          <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
-            <button onclick="selectGasCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
-            <button onclick="editBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
-            <button onclick="openShareModal('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Share</button>
-            <button onclick="deleteBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
-          </div>
-        </div>
+        <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-right:4px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
+        ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
+      </div>
+      <div style="display:flex;gap:2px;flex-shrink:0;" onclick="event.stopPropagation()">
+        <button onclick="editBill('${b.id}')" title="Edit" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✎</button>
+        <button onclick="openShareModal('${b.id}')" title="Share" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:13px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">↗</button>
+        <button onclick="deleteBill('${b.id}')" title="Delete" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='#fee2e2';this.style.color='var(--red-mid)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✕</button>
       </div>
     </div>`;
   }).join('');
+  el.innerHTML = `<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">${rows}</div>`;
 }
 
 function selectGasCompBill(id) {
@@ -3330,40 +3272,33 @@ function renderInternetBillsList() {
   if (!el) return;
   const bills = utilBills.filter(b => b.type === 'internet');
   if (!bills.length) {
-    el.innerHTML = `<div class="empty" style="padding:32px 0;"><div class="empty-icon">🌐</div><div class="empty-title">No plans saved</div><div class="empty-sub">Add your current internet plan to start comparing</div></div>`;
+    el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:32px;text-align:center;"><div style="font-size:28px;margin-bottom:8px;">🌐</div><div style="font-size:14px;font-weight:600;color:var(--gray-700);">No plans saved</div><div style="font-size:13px;color:var(--gray-400);margin-top:4px;">Add your current internet plan to start comparing</div></div>`;
     return;
   }
-  el.innerHTML = bills.map(b => {
+  const rows = bills.map((b, i) => {
     const isComp = internetCompBill?.id === b.id;
-    const speedLabel = (b.downloadSpeed || b.uploadSpeed) ? `${b.downloadSpeed||'?'}/${b.uploadSpeed||'?'} Mbps` : '';
-    const annualised = (+b.monthlyRate||0) * 12;
-    return `<div class="card" style="margin-bottom:10px;padding:16px 18px;${isComp?'border:2px solid var(--primary);':''}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
-          ${b.planName?`<div style="font-size:13px;color:var(--gray-500);margin-bottom:8px;">${esc(b.planName)}</div>`:''}
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
-            ${speedLabel?`<span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;">${speedLabel}</span>`:''}
-            ${b.data?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">${esc(b.data)}</span>`:''}
-            ${b.contractMonths?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">${b.contractMonths}m contract</span>`:'<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">No lock-in</span>'}
-            ${b.setupFee?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Setup $${(+b.setupFee).toFixed(2)}</span>`:''}
-          </div>
-          ${annualised?`<div style="font-size:12px;color:var(--gray-500);">≈ $${annualised.toFixed(2)}/year</div>`:''}
-          ${b.notes?`<div style="margin-top:4px;font-size:12px;color:var(--gray-400);font-style:italic;">${esc(b.notes)}</div>`:''}
+    const subtitle = b.planName ? esc(b.planName) : (b.data || '');
+    const isLast = i === bills.length - 1;
+    return `<div onclick="selectInternetCompBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;background:${isComp?'var(--primary-light)':'transparent'};" onmouseover="if(!${isComp})this.style.background='#f8fafc'" onmouseout="this.style.background='${isComp?'var(--primary-light)':'transparent'}'">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <div style="font-size:13.5px;font-weight:600;color:#0f172a;">${esc(b.provider||'Unknown Provider')}</div>
+          ${isComp?`<span style="font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-light);padding:2px 6px;border-radius:4px;border:1px solid var(--primary);">CURRENT</span>`:''}
         </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:20px;font-weight:800;color:var(--gray-900);">$${(+b.monthlyRate).toFixed(2)}</div>
-          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">/month</div>
-          <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
-            <button onclick="selectInternetCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
-            <button onclick="openInternetBillForm('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
-            <button onclick="openShareModal('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Share</button>
-            <button onclick="deleteInternetBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
-          </div>
-        </div>
+        ${subtitle?`<div style="font-size:12px;color:#64748b;">${subtitle}</div>`:''}
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-right:4px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.monthlyRate).toFixed(2)}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">/month</div>
+      </div>
+      <div style="display:flex;gap:2px;flex-shrink:0;" onclick="event.stopPropagation()">
+        <button onclick="openInternetBillForm('${b.id}')" title="Edit" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✎</button>
+        <button onclick="openShareModal('${b.id}')" title="Share" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:13px;line-height:1;" onmouseover="this.style.background='var(--gray-100)';this.style.color='var(--gray-700)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">↗</button>
+        <button onclick="deleteInternetBill('${b.id}')" title="Delete" style="width:30px;height:30px;border:none;background:none;color:var(--gray-400);cursor:pointer;border-radius:6px;font-size:14px;line-height:1;" onmouseover="this.style.background='#fee2e2';this.style.color='var(--red-mid)'" onmouseout="this.style.background='none';this.style.color='var(--gray-400)'">✕</button>
       </div>
     </div>`;
   }).join('');
+  el.innerHTML = `<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">${rows}</div>`;
 }
 
 function selectInternetCompBill(id) {
