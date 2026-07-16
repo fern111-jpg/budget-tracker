@@ -899,10 +899,24 @@ select.form-control {
       <!-- Utility type tabs -->
       <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="util-type-tabs">
         <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">⚡ Electricity</button>
+        <button class="pill" id="utab-gas" onclick="setUtilTab('gas')">🔥 Gas</button>
+        <button class="pill" id="utab-internet" onclick="setUtilTab('internet')">🌐 Internet</button>
       </div>
 
       <!-- Electricity panel -->
       <div id="util-panel-electricity">
+        <!-- Period filter bar -->
+        <div style="margin-bottom:14px;">
+          <div id="util-month-pills" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:12px;color:var(--gray-500);font-weight:600;">Range:</span>
+            <input type="month" id="util-filter-from" class="form-control" style="width:150px;font-size:13px;" onchange="applyUtilRange()">
+            <span style="font-size:12px;color:var(--gray-400);">to</span>
+            <input type="month" id="util-filter-to" class="form-control" style="width:150px;font-size:13px;" onchange="applyUtilRange()">
+            <button onclick="clearUtilFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
+          </div>
+        </div>
+
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
           <div class="sec-title" style="margin:0;">Saved Bills</div>
           <button onclick="openBillForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
@@ -920,6 +934,24 @@ select.form-control {
             </button>
           </div>
           <div id="util-compare-table"></div>
+        </div>
+      </div>
+
+      <!-- Gas panel -->
+      <div id="util-panel-gas" style="display:none;">
+        <div class="empty" style="padding:48px 0;">
+          <div class="empty-icon">🔥</div>
+          <div class="empty-title">Gas coming soon</div>
+          <div class="empty-sub">Bill tracking and comparison for gas will be available here</div>
+        </div>
+      </div>
+
+      <!-- Internet panel -->
+      <div id="util-panel-internet" style="display:none;">
+        <div class="empty" style="padding:48px 0;">
+          <div class="empty-icon">🌐</div>
+          <div class="empty-title">Internet coming soon</div>
+          <div class="empty-sub">Bill tracking and comparison for internet will be available here</div>
         </div>
       </div>
     </div>
@@ -1201,10 +1233,12 @@ let txs     = [];
 let budgets = {};
 let budgetPeriod = 'month';
 let utilBills = [];
-let utilCompBill = null;   // bill selected for comparison
-let utilQuotes  = [];      // session-only quotes
+let utilCompBill = null;
+let utilQuotes  = [];
 let utilTab = 'electricity';
-let bfRateRows = [];       // bill form rate period rows
+let utilFilterFrom = '';   // 'YYYY-MM'
+let utilFilterTo   = '';   // 'YYYY-MM'
+let bfRateRows = [];
 let editingBillId = null;
 let curPage = 'dashboard';
 let editId = null;
@@ -2262,21 +2296,117 @@ function renderUtilities() {
 
 // ── Electricity ─────────────────────────────────────────────────
 function renderElectricity() {
+  renderUtilMonthPills();
   renderBillsList();
   renderCompareSection();
 }
 
+// Returns 'YYYY-MM' for a bill (from date, or to date, or savedAt)
+function billMonth(b) { return (b.from || b.to || b.savedAt || '').slice(0,7); }
+
+// A bill is in range if any part of its period overlaps [filterFrom, filterTo]
+function billInFilter(b) {
+  if (!utilFilterFrom && !utilFilterTo) return true;
+  const bFrom = (b.from || b.to || b.savedAt || '').slice(0,7);
+  const bTo   = (b.to   || b.from || b.savedAt || '').slice(0,7);
+  const fFrom = utilFilterFrom || '0000-00';
+  const fTo   = utilFilterTo   || '9999-99';
+  return bFrom <= fTo && bTo >= fFrom;
+}
+
+function renderUtilMonthPills() {
+  const el = $$('util-month-pills');
+  if (!el) return;
+  const bills = utilBills.filter(b => b.type === 'electricity');
+
+  // Collect unique months and years
+  const months = [...new Set(bills.map(billMonth).filter(Boolean))].sort().reverse();
+  const years  = [...new Set(months.map(m => m.slice(0,4)))];
+
+  const isAll  = !utilFilterFrom && !utilFilterTo;
+
+  const pillStyle = (active) => `padding:5px 12px;border:1.5px solid ${active?'var(--primary)':'var(--gray-200)'};border-radius:20px;background:${active?'var(--primary)':'var(--white)'};font-size:12px;font-weight:600;color:${active?'white':'var(--gray-500)'};cursor:pointer;white-space:nowrap;font-family:inherit;`;
+
+  const yearBtns = years.map(y => {
+    const active = utilFilterFrom === `${y}-01` && utilFilterTo === `${y}-12`;
+    return `<button style="${pillStyle(active)}" onclick="setUtilYearFilter('${y}')">${y}</button>`;
+  }).join('');
+
+  const monthBtns = months.map(m => {
+    const [y, mo] = m.split('-');
+    const label = MONTHS[+mo-1].slice(0,3) + ' ' + y;
+    const active = utilFilterFrom === m && utilFilterTo === m;
+    return `<button style="${pillStyle(active)}" onclick="setUtilMonthFilter('${m}')">${label}</button>`;
+  }).join('');
+
+  el.innerHTML = `<button style="${pillStyle(isAll)}" onclick="clearUtilFilter()">All</button>${yearBtns}${monthBtns}`;
+
+  // Sync range inputs
+  if ($$('util-filter-from')) $$('util-filter-from').value = utilFilterFrom;
+  if ($$('util-filter-to'))   $$('util-filter-to').value   = utilFilterTo;
+}
+
+function setUtilMonthFilter(m) {
+  utilFilterFrom = m; utilFilterTo = m;
+  renderElectricity();
+}
+
+function setUtilYearFilter(y) {
+  utilFilterFrom = `${y}-01`; utilFilterTo = `${y}-12`;
+  renderElectricity();
+}
+
+function applyUtilRange() {
+  utilFilterFrom = $$('util-filter-from')?.value || '';
+  utilFilterTo   = $$('util-filter-to')?.value   || '';
+  renderElectricity();
+}
+
+function clearUtilFilter() {
+  utilFilterFrom = ''; utilFilterTo = '';
+  if ($$('util-filter-from')) $$('util-filter-from').value = '';
+  if ($$('util-filter-to'))   $$('util-filter-to').value   = '';
+  renderElectricity();
+}
+
 function renderBillsList() {
   const el = $$('util-bills-list');
-  const bills = utilBills.filter(b => b.type === 'electricity');
-  if (!bills.length) {
+  const allBills = utilBills.filter(b => b.type === 'electricity');
+  if (!allBills.length) {
     el.innerHTML = `<div class="empty" style="padding:32px 0;"><div class="empty-icon">⚡</div><div class="empty-title">No bills saved</div><div class="empty-sub">Add your current bill to start comparing</div></div>`;
     return;
   }
-  el.innerHTML = bills.map(b => {
+
+  const bills = allBills.filter(billInFilter);
+
+  // Combined summary when multiple bills are shown
+  let summaryHTML = '';
+  if (bills.length > 1) {
+    const totalCost  = bills.reduce((s,b) => s + (+b.total||0), 0);
+    const totalDays  = bills.reduce((s,b) => s + (+b.days||0), 0);
+    const totalUsage = bills.reduce((s,b) => s + b.ratePeriods.reduce((u,r)=>u+(+r.usage||0),0), 0);
+    const annualised = totalDays ? totalCost * 365 / totalDays : null;
+    summaryHTML = `<div class="card" style="margin-bottom:14px;padding:16px 18px;background:var(--primary);color:white;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:12px;font-weight:600;opacity:0.8;margin-bottom:2px;">${bills.length} BILLS · ${totalDays} DAYS${totalUsage?` · ${totalUsage.toFixed(0)}kWh`:''}</div>
+          <div style="font-size:22px;font-weight:800;">$${totalCost.toFixed(2)} combined</div>
+          ${annualised?`<div style="font-size:12px;opacity:0.8;margin-top:2px;">≈ $${annualised.toFixed(2)}/year · $${(annualised/12).toFixed(2)}/month</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (!bills.length) {
+    el.innerHTML = `<div style="padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">No bills in the selected period</div>`;
+    return;
+  }
+
+  el.innerHTML = summaryHTML + bills.map(b => {
     const isComp = utilCompBill?.id === b.id;
     const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
-    const totalUsage = b.ratePeriods.reduce((s,r) => s + (r.usage||0), 0);
+    const totalUsage = b.ratePeriods.reduce((s,r) => s + (+r.usage||0), 0);
+    const annualised = b.days ? (+b.total) * 365 / b.days : null;
     return `<div class="card" style="margin-bottom:10px;padding:16px 18px;${isComp?'border:2px solid var(--primary);':''}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div style="flex:1;min-width:0;">
@@ -2287,7 +2417,8 @@ function renderBillsList() {
             ${b.ratePeriods.map(r=>`<span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;">${esc(r.name)}: ${r.rate}c · ${r.usage}kWh</span>`).join('')}
             ${totalUsage?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Total ${totalUsage.toFixed(0)}kWh</span>`:''}
           </div>
-          ${b.notes?`<div style="margin-top:6px;font-size:12px;color:var(--gray-400);font-style:italic;">${esc(b.notes)}</div>`:''}
+          ${annualised?`<div style="margin-top:6px;font-size:12px;color:var(--gray-500);">≈ $${annualised.toFixed(2)}/year · $${(annualised/12).toFixed(2)}/month</div>`:''}
+          ${b.notes?`<div style="margin-top:4px;font-size:12px;color:var(--gray-400);font-style:italic;">${esc(b.notes)}</div>`:''}
         </div>
         <div style="text-align:right;flex-shrink:0;">
           <div style="font-size:20px;font-weight:800;color:var(--gray-900);">$${(+b.total).toFixed(2)}</div>
