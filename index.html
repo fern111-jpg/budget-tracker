@@ -1184,8 +1184,8 @@ select.form-control {
       <button class="btn-primary" onclick="submitInternetBillForm()" style="flex:1;" id="ibi-form-submit">Save Plan</button>
       <button onclick="closeInternetBillForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
       <div id="ibi-form-edit-actions" style="display:none;gap:6px;">
-        <button onclick="ibiFormShare()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);background:var(--white);font-size:13px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Share</button>
-        <button onclick="ibiFormDelete()" style="padding:10px 14px;border:none;background:none;font-size:13px;font-weight:600;color:var(--red-mid);cursor:pointer;font-family:inherit;">Delete</button>
+        <button id="ibi-share-btn" onclick="ibiFormShare()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);background:var(--white);font-size:13px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Share</button>
+        <button onclick="ibiFormDeleteAction()" style="padding:10px 14px;border:none;background:none;font-size:13px;font-weight:600;color:var(--red-mid);cursor:pointer;font-family:inherit;">Delete</button>
       </div>
     </div>
   </div>
@@ -1265,9 +1265,10 @@ select.form-control {
       </label>
     </div>
 
-    <div style="display:flex;gap:10px;margin-top:16px;">
+    <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
       <button class="btn-primary" onclick="submitQuoteForm()" style="flex:1;" id="quote-form-submit">Add to Comparison</button>
       <button onclick="closeQuoteForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
+      <button id="quote-form-delete-btn" onclick="quoteFormDelete()" style="display:none;padding:10px 14px;border:none;background:none;font-size:13px;font-weight:600;color:var(--red-mid);cursor:pointer;font-family:inherit;">Delete</button>
     </div>
   </div>
 </div>
@@ -2748,73 +2749,84 @@ function renderCompareTable(type) {
   const colBg = (ci) => multiCol && ci === cheapestIdx ? '#f0fdf4' : '';
   const colBorder = (ci) => multiCol && ci === cheapestIdx ? '2px solid #10b981' : '';
 
-  el.innerHTML = `
+  const TH_METRIC = `padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;background:#f8fafc;border-bottom:1px solid #e2e8f0;min-width:160px;`;
+  const thCol = (ci) => {
+    const cheap = multiCol && ci === cheapestIdx;
+    const cur   = cols[ci].isCurrent;
+    return `padding:12px 16px;text-align:left;min-width:150px;vertical-align:top;border-bottom:1px solid #e2e8f0;border-left:1px solid #f1f5f9;${cheap?'background:#eff6ff;border-top:2px solid var(--primary);':cur?'':'cursor:pointer;'}`;
+  };
+  const TD_LABEL = `padding:11px 16px;font-size:12.5px;font-weight:600;color:#475569;background:#f8fafc;border-top:1px solid #f1f5f9;`;
+  const tdVal = (ci, extra='') => `padding:11px 16px;text-align:right;font-size:13px;color:#334155;border-top:1px solid #f1f5f9;border-left:1px solid #f1f5f9;${multiCol&&ci===cheapestIdx?'background:#eff6ff;':''}${extra}`;
+  const hoverRow = `onmouseover="Array.from(this.cells).forEach(c=>c.style.background=(c.dataset.base||c.style.background)==='#f8fafc'?'#eef2f7':c.dataset.base==='#eff6ff'?'#dbeafe':'#f0f4ff')" onmouseout="Array.from(this.cells).forEach(c=>c.style.background=c.dataset.base||'')"`;
+
+  const setBase = (ci, base) => `data-base="${base||''}"`;
+
+  el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
   <div style="overflow-x:auto;">
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead>
-        <tr style="border-bottom:2px solid var(--gray-200);">
-          <th style="text-align:left;padding:10px 8px;color:var(--gray-500);font-weight:600;font-size:12px;white-space:nowrap;">Metric</th>
-          ${cols.map((col,ci) => `<th style="text-align:right;padding:10px 8px;min-width:130px;${multiCol && ci===cheapestIdx ? 'background:#f0fdf4;border-bottom:2px solid #10b981;' : ''}">
-            <div style="font-size:13px;font-weight:700;color:var(--gray-900);">${esc(col.label||col.provider||'Quote')}</div>
-            ${multiCol && ci===cheapestIdx ? '<div style="font-size:10px;color:#10b981;font-weight:700;">★ CHEAPEST</div>' : ''}
-            ${col.isCurrent ? '<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT BILL</div>' : `<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;"><button onclick="openQuoteForm('${col.id}','${type}')" style="font-size:10px;border:none;background:none;color:var(--primary);cursor:pointer;font-family:inherit;padding:0;">✎ Edit</button><button onclick="deleteQuote('${col.id}','${type}')" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button></div>`}
-          </th>`).join('')}
+        <tr>
+          <th style="${TH_METRIC}">Metric</th>
+          ${cols.map((col,ci) => {
+            const cheap = multiCol && ci === cheapestIdx;
+            const clickAttr = col.isCurrent ? '' : `onclick="openQuoteForm('${col.id}','${type}')"`;
+            return `<th style="${thCol(ci)}" ${clickAttr}>
+              <div style="font-size:13.5px;font-weight:700;color:#0f172a;">${esc(col.label||col.provider||'Quote')}</div>
+              ${col.isCurrent ? `<div style="font-size:10.5px;font-weight:700;color:var(--primary);letter-spacing:0.03em;margin-top:2px;">CURRENT BILL</div>` : ''}
+              ${cheap ? `<div style="font-size:10.5px;font-weight:700;color:#15803d;letter-spacing:0.03em;margin-top:2px;">★ CHEAPEST</div>` : ''}
+            </th>`;
+          }).join('')}
         </tr>
       </thead>
       <tbody>
-        <tr style="background:var(--gray-50);">
-          <td style="padding:8px;color:var(--gray-600);font-weight:600;">Daily Supply</td>
-          ${cols.map((col,ci) => `<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${col.supply ? `${(+col.supply).toFixed(4)}/day` : fmtC(null)}</td>`).join('')}
+        <tr ${hoverRow}>
+          <td style="${TD_LABEL}" data-base="#f8fafc">Daily Supply</td>
+          ${cols.map((col,ci) => `<td style="${tdVal(ci)}" data-base="${multiCol&&ci===cheapestIdx?'#eff6ff':''}">${col.supply ? `${(+col.supply).toFixed(4)}/day` : fmtC(null)}</td>`).join('')}
         </tr>
         ${b.ratePeriods.map(bp => `
-        <tr>
-          <td style="padding:8px;color:var(--gray-600);">${esc(bp.name)} <span style="color:var(--gray-400);font-size:11px;">(${bp.usage}${unitLabel})</span></td>
+        <tr ${hoverRow}>
+          <td style="${TD_LABEL}" data-base="#f8fafc">${esc(bp.name)} <span style="color:#94a3b8;font-size:11px;">(${bp.usage}${unitLabel})</span></td>
           ${calcs.map((calc,ci) => {
-            const bg = colBg(ci) ? `background:${colBg(ci)};` : '';
-            if (cols[ci].isCurrent) return `<td style="text-align:right;padding:8px;${bg}">${bp.rate}c/kWh</td>`;
+            const base = multiCol&&ci===cheapestIdx?'#eff6ff':'';
+            if (cols[ci].isCurrent) return `<td style="${tdVal(ci)}" data-base="${base}">${bp.rate}c/${unitLabel}</td>`;
             const p = calc.periodCosts?.find(x=>x.name===bp.name);
-            return `<td style="text-align:right;padding:8px;${bg}">${p?.rate!=null ? p.rate+'c/kWh' : '<span style="color:var(--gray-300);">no rate</span>'}</td>`;
+            return `<td style="${tdVal(ci)}" data-base="${base}">${p?.rate!=null ? p.rate+'c/'+unitLabel : '<span style="color:#cbd5e1;">—</span>'}</td>`;
           }).join('')}
         </tr>`).join('')}
-        <tr style="border-top:1px solid var(--gray-200);">
-          <td style="padding:8px;color:var(--gray-600);">Supply Cost (${days}d)</td>
-          ${calcs.map((c,ci) => `<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${c.supplyCost!=null ? fmtC(c.supplyCost) : fmtC(null)}</td>`).join('')}
+        <tr ${hoverRow}>
+          <td style="${TD_LABEL}" data-base="#f8fafc">Supply Cost (${days}d)</td>
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${c.supplyCost!=null ? fmtC(c.supplyCost) : fmtC(null)}</td>`; }).join('')}
         </tr>
-        <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
-          <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Bill Period Total</td>
-          ${calcs.map((c,ci) => {
-            const cheap = multiCol && ci === cheapestIdx;
-            return `<td style="text-align:right;padding:10px 8px;font-weight:700;font-size:15px;${cheap ? 'background:#dcfce7;color:#16a34a;' : 'background:var(--primary-light);color:var(--primary);'}">${fmtC(c.gross)}</td>`;
-          }).join('')}
+        <tr ${hoverRow}>
+          <td style="padding:11px 16px;font-size:12.5px;font-weight:700;color:var(--primary);background:#f8fafc;border-top:2px solid #e2e8f0;" data-base="#f8fafc">Bill Period Total</td>
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci,'font-weight:700;color:var(--primary);border-top:2px solid #e2e8f0;')}" data-base="${base}">${fmtC(c.gross)}</td>`; }).join('')}
         </tr>
-        <tr>
-          <td style="padding:8px;color:var(--gray-600);">Annualised Cost</td>
-          ${calcs.map((c,ci) => `<td style="text-align:right;padding:8px;color:var(--gray-700);${colBg(ci)?'background:'+colBg(ci)+';':''}">${fmtC(c.netAnnual + (c.bonusAnnual||0))}</td>`).join('')}
+        <tr ${hoverRow}>
+          <td style="${TD_LABEL}" data-base="#f8fafc">Annualised Cost</td>
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${fmtC(c.netAnnual + (c.bonusAnnual||0))}</td>`; }).join('')}
         </tr>
-        <tr>
-          <td style="padding:8px;color:var(--gray-600);">Bonuses / Cashback (p.a.)</td>
-          ${calcs.map((c,ci) => `<td style="text-align:right;padding:8px;color:#10b981;font-weight:600;${colBg(ci)?'background:'+colBg(ci)+';':''}">${c.bonusAnnual ? '−$'+(c.bonusAnnual).toFixed(2) : fmtC(null)}</td>`).join('')}
+        <tr ${hoverRow}>
+          <td style="${TD_LABEL}" data-base="#f8fafc">Bonuses / Cashback (p.a.)</td>
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci,'color:#16a34a;font-weight:600;')}" data-base="${base}">${c.bonusAnnual ? '−$'+(c.bonusAnnual).toFixed(2) : fmtC(null)}</td>`; }).join('')}
         </tr>
-        <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
-          <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Effective Annual</td>
-          ${calcs.map((c,ci) => {
-            const cheap = multiCol && ci === cheapestIdx;
-            return `<td style="text-align:right;padding:10px 8px;font-weight:800;font-size:15px;${cheap ? 'background:#dcfce7;color:#16a34a;' : 'color:var(--primary);'}">${fmtC(c.netAnnual)}</td>`;
-          }).join('')}
+        <tr ${hoverRow}>
+          <td style="padding:11px 16px;font-size:12.5px;font-weight:700;color:var(--primary);background:#f8fafc;border-top:2px solid #e2e8f0;" data-base="#f8fafc">Effective Annual</td>
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci,'font-weight:700;color:var(--primary);border-top:2px solid #e2e8f0;')}" data-base="${base}">${fmtC(c.netAnnual)}</td>`; }).join('')}
         </tr>
-        <tr style="border-top:1px solid var(--gray-200);">
-          <td style="padding:8px;color:var(--gray-600);">Effective Monthly</td>
-          ${calcs.map((c,ci) => `<td style="text-align:right;padding:8px;font-weight:600;color:var(--gray-700);${colBg(ci)?'background:'+colBg(ci)+';':''}">${fmtC(c.netMonthly)}</td>`).join('')}
+        <tr ${hoverRow}>
+          <td style="${TD_LABEL}border-top:1px solid #e2e8f0;" data-base="#f8fafc">Effective Monthly</td>
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci,'border-top:1px solid #e2e8f0;')}" data-base="${base}">${fmtC(c.netMonthly)}</td>`; }).join('')}
         </tr>
         ${cols.some((c,ci)=>!c.isCurrent&&calcs[ci].bonusAnnual) ? `
-        <tr style="border-top:1px solid var(--gray-200);background:var(--gray-50);">
-          <td style="padding:8px;color:var(--gray-500);font-size:12px;" colspan="${1+cols.length}">
-            Bonuses: ${quotes.map(q=>(q.bonuses||[]).map(bon=>`<strong>${esc(q.provider)}</strong>: ${esc(bon.desc||'Bonus')} $${bon.amount} ${bon.type==='one-off'?`(one-off, spread over ${bon.amortizeMonths}m)`:'(annual)'}`).join(', ')).filter(Boolean).join(' · ')}
+        <tr>
+          <td style="padding:10px 16px;color:#64748b;font-size:11.5px;border-top:1px solid #f1f5f9;" colspan="${1+cols.length}">
+            ${quotes.map(q=>(q.bonuses||[]).map(bon=>`<strong>${esc(q.provider)}</strong>: ${esc(bon.desc||'Bonus')} $${bon.amount} ${bon.type==='one-off'?`(one-off, spread over ${bon.amortizeMonths}m)`:'(annual)'}`).join(', ')).filter(Boolean).join(' · ')}
           </td>
         </tr>` : ''}
       </tbody>
     </table>
-  </div>`;
+  </div>
+</div>`;
 }
 
 function deleteQuote(id, type) {
@@ -3115,12 +3127,18 @@ function openQuoteForm(quoteId, type) {
     delete preview.dataset.dataUrl;
     $$('qf-attachment-img').src = '';
   }
+  const delBtn = $$('quote-form-delete-btn');
+  if (delBtn) delBtn.style.display = existing ? '' : 'none';
   $$('quote-form-modal').style.display = 'flex';
 }
 
 function closeQuoteForm() {
   editingQuoteId = null;
   $$('quote-form-modal').style.display = 'none';
+}
+
+function quoteFormDelete() {
+  if (editingQuoteId) { const t = currentFormType; closeQuoteForm(); deleteQuote(editingQuoteId, t); }
 }
 
 function handleQuoteAttachment(input) {
@@ -3400,56 +3418,71 @@ function renderInternetCompareTable() {
   const calcs = cols.map(calcEffective);
   const cheapestIdx = calcs.reduce((bi,c,i) => c.effectiveAnnual < calcs[bi].effectiveAnnual ? i : bi, 0);
   const multiCol = cols.length > 1;
-  const fmtC = n => n == null ? '<span style="color:var(--gray-300);">—</span>' : `$${(+n).toFixed(2)}`;
-  const colBg = (ci) => multiCol && ci === cheapestIdx ? '#f0fdf4' : '';
+  const fmtC = n => n == null ? '<span style="color:#cbd5e1;">—</span>' : `$${(+n).toFixed(2)}`;
+  const isCheap = (ci) => multiCol && ci === cheapestIdx;
 
-  el.innerHTML = `<div style="overflow-x:auto;">
+  const TH_M = `padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;background:#f8fafc;border-bottom:1px solid #e2e8f0;min-width:160px;`;
+  const thC = (ci) => `padding:12px 16px;text-align:left;min-width:150px;vertical-align:top;border-bottom:1px solid #e2e8f0;border-left:1px solid #f1f5f9;${isCheap(ci)?'background:#eff6ff;border-top:2px solid var(--primary);':cols[ci].isCurrent?'':'cursor:pointer;'}`;
+  const TDL = `padding:11px 16px;font-size:12.5px;font-weight:600;color:#475569;background:#f8fafc;border-top:1px solid #f1f5f9;`;
+  const tdV = (ci,x='') => `padding:11px 16px;text-align:right;font-size:13px;color:#334155;border-top:1px solid #f1f5f9;border-left:1px solid #f1f5f9;${isCheap(ci)?'background:#eff6ff;':''}${x}`;
+  const hr = `onmouseover="Array.from(this.cells).forEach(c=>c.style.background=(c.dataset.b||'')==='#f8fafc'?'#eef2f7':(c.dataset.b||'')==='#eff6ff'?'#dbeafe':'#f0f4ff')" onmouseout="Array.from(this.cells).forEach(c=>c.style.background=c.dataset.b||'')"`;
+
+  el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+  <div style="overflow-x:auto;">
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead>
-        <tr style="border-bottom:2px solid var(--gray-200);">
-          <th style="text-align:left;padding:10px 8px;color:var(--gray-500);font-weight:600;font-size:12px;white-space:nowrap;">Metric</th>
-          ${cols.map((col,ci) => `<th style="text-align:right;padding:10px 8px;min-width:130px;${multiCol&&ci===cheapestIdx?'background:#f0fdf4;border-bottom:2px solid #10b981;':''}">
-            <div style="font-size:13px;font-weight:700;color:var(--gray-900);">${esc(col.label||col.provider||'Quote')}</div>
-            ${col.planName?`<div style="font-size:11px;color:var(--gray-500);">${esc(col.planName)}</div>`:''}
-            ${multiCol&&ci===cheapestIdx?'<div style="font-size:10px;color:#10b981;font-weight:700;">★ CHEAPEST</div>':''}
-            ${col.isCurrent?'<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT PLAN</div>':`<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;"><button onclick="openInternetQuoteForm('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--primary);cursor:pointer;font-family:inherit;padding:0;">✎ Edit</button><button onclick="deleteInternetQuote('${col.id}')" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button></div>`}
-          </th>`).join('')}
-        </tr>
-      </thead>
+      <thead><tr>
+        <th style="${TH_M}">Metric</th>
+        ${cols.map((col,ci) => {
+          const clickAttr = col.isCurrent ? '' : `onclick="openInternetQuoteForm('${col.id}')"`;
+          return `<th style="${thC(ci)}" ${clickAttr}>
+            <div style="font-size:13.5px;font-weight:700;color:#0f172a;">${esc(col.label||col.provider||'Quote')}</div>
+            ${col.planName?`<div style="font-size:11px;color:#64748b;margin-top:1px;">${esc(col.planName)}</div>`:''}
+            ${col.isCurrent?`<div style="font-size:10.5px;font-weight:700;color:var(--primary);letter-spacing:0.03em;margin-top:2px;">CURRENT PLAN</div>`:''}
+            ${isCheap(ci)?`<div style="font-size:10.5px;font-weight:700;color:#15803d;letter-spacing:0.03em;margin-top:2px;">★ CHEAPEST</div>`:''}
+          </th>`;
+        }).join('')}
+      </tr></thead>
       <tbody>
-        <tr><td style="padding:8px;color:var(--gray-600);">Speed (Down/Up)</td>
-          ${cols.map((col,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${(col.downloadSpeed||col.uploadSpeed)?`${col.downloadSpeed||'?'}/${col.uploadSpeed||'?'} Mbps`:'<span style="color:var(--gray-300);">—</span>'}</td>`).join('')}
+        <tr ${hr}>
+          <td style="${TDL}" data-b="#f8fafc">Speed (Down/Up)</td>
+          ${cols.map((col,ci)=>`<td style="${tdV(ci)}" data-b="${isCheap(ci)?'#eff6ff':''}">${(col.downloadSpeed||col.uploadSpeed)?`${col.downloadSpeed||'?'}/${col.uploadSpeed||'?'} Mbps`:'<span style="color:#cbd5e1;">—</span>'}</td>`).join('')}
         </tr>
-        <tr style="background:var(--gray-50);"><td style="padding:8px;color:var(--gray-600);">Data</td>
-          ${cols.map((col,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${col.data?esc(col.data):'<span style="color:var(--gray-300);">—</span>'}</td>`).join('')}
+        <tr ${hr}>
+          <td style="${TDL}" data-b="#f8fafc">Data</td>
+          ${cols.map((col,ci)=>`<td style="${tdV(ci)}" data-b="${isCheap(ci)?'#eff6ff':''}">${col.data?esc(col.data):'<span style="color:#cbd5e1;">—</span>'}</td>`).join('')}
         </tr>
-        <tr><td style="padding:8px;color:var(--gray-600);">Contract</td>
-          ${cols.map((col,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${col.contractMonths?col.contractMonths+'m':'No lock-in'}</td>`).join('')}
+        <tr ${hr}>
+          <td style="${TDL}" data-b="#f8fafc">Contract</td>
+          ${cols.map((col,ci)=>`<td style="${tdV(ci)}" data-b="${isCheap(ci)?'#eff6ff':''}">${col.contractMonths?col.contractMonths+'m':'No lock-in'}</td>`).join('')}
         </tr>
-        <tr style="background:var(--gray-50);"><td style="padding:8px;color:var(--gray-600);">Setup Fee</td>
-          ${calcs.map((c,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${c.setup?fmtC(c.setup):fmtC(null)}</td>`).join('')}
+        <tr ${hr}>
+          <td style="${TDL}" data-b="#f8fafc">Setup Fee</td>
+          ${calcs.map((c,ci)=>`<td style="${tdV(ci)}" data-b="${isCheap(ci)?'#eff6ff':''}">${c.setup?fmtC(c.setup):fmtC(null)}</td>`).join('')}
         </tr>
-        <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
-          <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Monthly Rate</td>
-          ${calcs.map((c,ci)=>{const cheap=multiCol&&ci===cheapestIdx;return`<td style="text-align:right;padding:10px 8px;font-weight:700;font-size:15px;${cheap?'background:#dcfce7;color:#16a34a;':'background:var(--primary-light);color:var(--primary);'}">${fmtC(c.monthly)}</td>`;}).join('')}
+        <tr ${hr}>
+          <td style="padding:11px 16px;font-size:12.5px;font-weight:700;color:var(--primary);background:#f8fafc;border-top:2px solid #e2e8f0;" data-b="#f8fafc">Monthly Rate</td>
+          ${calcs.map((c,ci)=>`<td style="${tdV(ci,'font-weight:700;color:var(--primary);border-top:2px solid #e2e8f0;')}" data-b="${isCheap(ci)?'#eff6ff':''}">${fmtC(c.monthly)}</td>`).join('')}
         </tr>
-        <tr><td style="padding:8px;color:var(--gray-600);">Annual Cost (incl. setup)</td>
-          ${calcs.map((c,ci)=>`<td style="text-align:right;padding:8px;${colBg(ci)?'background:'+colBg(ci)+';':''}">${fmtC(c.annualGross)}</td>`).join('')}
+        <tr ${hr}>
+          <td style="${TDL}" data-b="#f8fafc">Annual Cost (incl. setup)</td>
+          ${calcs.map((c,ci)=>`<td style="${tdV(ci)}" data-b="${isCheap(ci)?'#eff6ff':''}">${fmtC(c.annualGross)}</td>`).join('')}
         </tr>
-        <tr><td style="padding:8px;color:var(--gray-600);">Bonuses / Cashback (p.a.)</td>
-          ${calcs.map((c,ci)=>`<td style="text-align:right;padding:8px;color:#10b981;font-weight:600;${colBg(ci)?'background:'+colBg(ci)+';':''}">${c.bonusAnnual?'−$'+c.bonusAnnual.toFixed(2):fmtC(null)}</td>`).join('')}
+        <tr ${hr}>
+          <td style="${TDL}" data-b="#f8fafc">Bonuses / Cashback (p.a.)</td>
+          ${calcs.map((c,ci)=>`<td style="${tdV(ci,'color:#16a34a;font-weight:600;')}" data-b="${isCheap(ci)?'#eff6ff':''}">${c.bonusAnnual?'−$'+c.bonusAnnual.toFixed(2):fmtC(null)}</td>`).join('')}
         </tr>
-        <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
-          <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Effective Annual</td>
-          ${calcs.map((c,ci)=>{const cheap=multiCol&&ci===cheapestIdx;return`<td style="text-align:right;padding:10px 8px;font-weight:800;font-size:15px;${cheap?'background:#dcfce7;color:#16a34a;':'color:var(--primary);'}">${fmtC(c.effectiveAnnual)}</td>`;}).join('')}
+        <tr ${hr}>
+          <td style="padding:11px 16px;font-size:12.5px;font-weight:700;color:var(--primary);background:#f8fafc;border-top:2px solid #e2e8f0;" data-b="#f8fafc">Effective Annual</td>
+          ${calcs.map((c,ci)=>`<td style="${tdV(ci,'font-weight:700;color:var(--primary);border-top:2px solid #e2e8f0;')}" data-b="${isCheap(ci)?'#eff6ff':''}">${fmtC(c.effectiveAnnual)}</td>`).join('')}
         </tr>
-        <tr style="border-top:1px solid var(--gray-200);">
-          <td style="padding:8px;color:var(--gray-600);">Effective Monthly</td>
-          ${calcs.map((c,ci)=>`<td style="text-align:right;padding:8px;font-weight:600;color:var(--gray-700);${colBg(ci)?'background:'+colBg(ci)+';':''}">${fmtC(c.effectiveMonthly)}</td>`).join('')}
+        <tr ${hr}>
+          <td style="${TDL}border-top:1px solid #e2e8f0;" data-b="#f8fafc">Effective Monthly</td>
+          ${calcs.map((c,ci)=>`<td style="${tdV(ci,'border-top:1px solid #e2e8f0;')}" data-b="${isCheap(ci)?'#eff6ff':''}">${fmtC(c.effectiveMonthly)}</td>`).join('')}
         </tr>
       </tbody>
     </table>
-  </div>`;
+  </div>
+</div>`;
 }
 
 function deleteInternetQuote(id) {
@@ -3485,6 +3518,8 @@ function openInternetBillForm(idOrContext) {
   });
   const editActions = $$('ibi-form-edit-actions');
   if (editActions) editActions.style.display = editingInternetBillId ? 'flex' : 'none';
+  const shareBtn = $$('ibi-share-btn');
+  if (shareBtn) shareBtn.style.display = '';
   $$('internet-bill-form-modal').style.display = 'flex';
 }
 
@@ -3492,8 +3527,9 @@ function ibiFormShare() {
   if (editingInternetBillId) { closeInternetBillForm(); openShareModal(editingInternetBillId); }
 }
 
-function ibiFormDelete() {
-  if (editingInternetBillId) { closeInternetBillForm(); deleteInternetBill(editingInternetBillId); }
+function ibiFormDeleteAction() {
+  if (editingInternetQuoteId) { internetQuoteFormDelete(); }
+  else if (editingInternetBillId) { closeInternetBillForm(); deleteInternetBill(editingInternetBillId); }
 }
 
 function openInternetQuoteForm(quoteId) {
@@ -3522,7 +3558,15 @@ function openInternetQuoteForm(quoteId) {
     inputs[0].value = b.desc || ''; inputs[1].value = b.amount || '';
     inputs[2].value = b.type || 'one-off'; inputs[3].value = b.amortizeMonths || 12;
   });
+  const editActions = $$('ibi-form-edit-actions');
+  if (editActions) editActions.style.display = existing ? 'flex' : 'none';
+  const shareBtn = $$('ibi-share-btn');
+  if (shareBtn) shareBtn.style.display = 'none';
   $$('internet-bill-form-modal').style.display = 'flex';
+}
+
+function internetQuoteFormDelete() {
+  if (editingInternetQuoteId) { const id = editingInternetQuoteId; closeInternetBillForm(); deleteInternetQuote(id); }
 }
 
 function closeInternetBillForm() {
