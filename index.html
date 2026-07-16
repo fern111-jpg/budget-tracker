@@ -583,6 +583,10 @@ select.form-control {
         <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><line x1="6" y1="10" x2="6" y2="13"></line><line x1="10" y1="8" x2="10" y2="13"></line><line x1="14" y1="11" x2="14" y2="13"></line><line x1="18" y1="9" x2="18" y2="13"></line></svg>
         Budgeting
       </button>
+      <button class="sb-item" id="sb-utilities" onclick="goTo('utilities')">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Utilities
+      </button>
       <button class="sb-item" id="sb-manage" onclick="goTo('manage')">
         <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Manage
@@ -883,6 +887,36 @@ select.form-control {
       </div>
     </div>
 
+    <!-- UTILITIES -->
+    <div class="page" id="pg-utilities">
+      <!-- Utility type tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="util-type-tabs">
+        <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">⚡ Electricity</button>
+      </div>
+
+      <!-- Electricity panel -->
+      <div id="util-panel-electricity">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div class="sec-title" style="margin:0;">Saved Bills</div>
+          <button onclick="openBillForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Bill
+          </button>
+        </div>
+        <div id="util-bills-list"></div>
+
+        <!-- Comparison section (shown when a bill is selected) -->
+        <div id="util-compare-section" style="display:none;margin-top:28px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div class="sec-title" style="margin:0;">Quote Comparison</div>
+            <button onclick="openQuoteForm()" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Quote
+            </button>
+          </div>
+          <div id="util-compare-table"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- MANAGE -->
     <div class="page" id="pg-manage">
       <div class="settings-sec">Categories</div>
@@ -922,6 +956,109 @@ select.form-control {
   </div><!-- /.main -->
 
 </div><!-- /#app -->
+
+<!-- ── Bill Form Modal ───────────────────── -->
+<div id="bill-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;">
+  <div class="card" style="width:100%;max-width:580px;margin:auto;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:16px;font-weight:700;color:var(--gray-900);" id="bill-form-title">Add Electricity Bill</span>
+      <button onclick="closeBillForm()" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:22px;line-height:1;padding:2px 6px;">&times;</button>
+    </div>
+
+    <!-- Upload strip -->
+    <div style="border:2px dashed var(--gray-200);border-radius:var(--radius-sm);padding:14px;text-align:center;margin-bottom:18px;cursor:pointer;background:var(--gray-50);" onclick="$$('bill-file-input').click()">
+      <input type="file" id="bill-file-input" accept=".pdf,image/*" style="display:none" onchange="handleBillUpload(this)">
+      <div id="bill-upload-status" style="font-size:13px;color:var(--gray-500);">
+        📄 Upload PDF or photo to auto-fill — <strong>click to browse</strong>
+      </div>
+      <div id="bill-upload-preview" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="form-row" style="grid-template-columns:1fr 1fr;">
+      <div class="form-group">
+        <label class="form-label">Energy Company</label>
+        <input type="text" class="form-control" id="bf-provider" placeholder="e.g. AGL, Origin">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Total Cost ($)</label>
+        <input type="number" class="form-control" id="bf-total" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+      <div class="form-group">
+        <label class="form-label">Period From</label>
+        <input type="date" class="form-control" id="bf-from" onchange="updateBillDays()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Period To</label>
+        <input type="date" class="form-control" id="bf-to" onchange="updateBillDays()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Days</label>
+        <input type="number" class="form-control" id="bf-days" placeholder="90" min="1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Daily Supply Charge ($/day)</label>
+      <input type="number" class="form-control" id="bf-supply" placeholder="1.20" step="0.0001" min="0">
+    </div>
+
+    <!-- Rate periods -->
+    <div style="margin-bottom:6px;">
+      <label class="form-label">Usage Rate Periods</label>
+      <div id="bf-rate-rows"></div>
+      <button type="button" onclick="addBillRateRow()" style="margin-top:8px;padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Rate Period</button>
+    </div>
+
+    <div class="form-group" style="margin-top:12px;">
+      <label class="form-label">Notes (optional)</label>
+      <input type="text" class="form-control" id="bf-notes" placeholder="e.g. includes solar feed-in">
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="btn-primary" onclick="submitBillForm()" style="flex:1;">Save Bill</button>
+      <button onclick="closeBillForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Quote Form Modal ──────────────────── -->
+<div id="quote-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;">
+  <div class="card" style="width:100%;max-width:520px;margin:auto;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:16px;font-weight:700;color:var(--gray-900);">Add Quote</span>
+      <button onclick="closeQuoteForm()" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:22px;line-height:1;padding:2px 6px;">&times;</button>
+    </div>
+    <div class="form-row" style="grid-template-columns:1fr 1fr;">
+      <div class="form-group">
+        <label class="form-label">Provider</label>
+        <input type="text" class="form-control" id="qf-provider" placeholder="e.g. Origin">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Daily Supply Charge ($/day)</label>
+        <input type="number" class="form-control" id="qf-supply" placeholder="1.10" step="0.0001" min="0">
+      </div>
+    </div>
+
+    <!-- Rate periods matched to comparison bill -->
+    <div style="margin-bottom:6px;">
+      <label class="form-label">Rates (c/kWh) — matched to your bill's usage periods</label>
+      <div id="qf-rate-rows"></div>
+    </div>
+
+    <!-- Bonuses -->
+    <div style="margin-top:14px;margin-bottom:6px;">
+      <label class="form-label">Bonuses / Cashback</label>
+      <div id="qf-bonus-rows"></div>
+      <button type="button" onclick="addBonusRow()" style="margin-top:8px;padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Bonus</button>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn-primary" onclick="submitQuoteForm()" style="flex:1;">Add to Comparison</button>
+      <button onclick="closeQuoteForm()" style="padding:12px 20px;background:var(--gray-100);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-700);">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── Edit Modal ────────────────────────── -->
 <div class="overlay" id="edit-overlay" onclick="closeModal(event)">
@@ -1016,6 +1153,10 @@ select.form-control {
     <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><line x1="6" y1="10" x2="6" y2="13"></line><line x1="10" y1="8" x2="10" y2="13"></line><line x1="14" y1="11" x2="14" y2="13"></line><line x1="18" y1="9" x2="18" y2="13"></line></svg>
     Budget
   </button>
+  <button class="nav-item" id="nav-utilities" onclick="goTo('utilities')">
+    <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    Utilities
+  </button>
   <button class="nav-item" id="nav-manage" onclick="goTo('manage')">
     <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
     Manage
@@ -1061,6 +1202,12 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 let txs     = [];
 let budgets = {};
 let budgetPeriod = 'month';
+let utilBills = [];
+let utilCompBill = null;   // bill selected for comparison
+let utilQuotes  = [];      // session-only quotes
+let utilTab = 'electricity';
+let bfRateRows = [];       // bill form rate period rows
+let editingBillId = null;
 let curPage = 'dashboard';
 let editId = null;
 let splitOn = { f: false, e: false };
@@ -1078,6 +1225,7 @@ let sortState = { col: 'date', dir: -1 };
 function save() { localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs)); updateCount(); syncSave(); }
 function saveCats() { localStorage.setItem('bt_cats_' + currentUser, JSON.stringify(CATS)); }
 function saveAccounts() { localStorage.setItem('bt_accounts_' + currentUser, JSON.stringify(userAccounts)); }
+function saveUtilBills() { localStorage.setItem('bt_util_bills_' + currentUser, JSON.stringify(utilBills)); }
 function saveBudgets() { localStorage.setItem('bt_budgets_' + currentUser, JSON.stringify(budgets)); }
 function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function $$(id) { return document.getElementById(id); }
@@ -1111,13 +1259,14 @@ function goTo(page) {
   $$('sb-' + page)?.classList.add('active');
   curPage = page;
   sessionStorage.setItem('bt_page', page);
-  const titles = { dashboard:'Overview', transactions:'Transactions', budgeting:'Budgeting', settings:'Settings', manage:'Manage' };
+  const titles = { dashboard:'Overview', transactions:'Transactions', budgeting:'Budgeting', settings:'Settings', manage:'Manage', utilities:'Utilities' };
   $$('hdr-title').textContent = titles[page] || page;
   $$('hdr-badge').textContent = page === 'transactions' ? txs.length + ' entries' : '';
   if (page === 'dashboard')    renderDash();
   if (page === 'transactions') renderTx();
   if (page === 'budgeting')    renderBudget();
   if (page === 'manage')       renderManage();
+  if (page === 'utilities')    renderUtilities();
 }
 
 function openAddModal() {
@@ -2086,6 +2235,7 @@ function bootApp() {
   syncCfg      = JSON.parse(localStorage.getItem('bt_sync_'         + currentUser) || 'null');
   CATS         = JSON.parse(localStorage.getItem('bt_cats_'         + currentUser) || 'null') || JSON.parse(JSON.stringify(DEFAULT_CATS));
   userAccounts = JSON.parse(localStorage.getItem('bt_accounts_'     + currentUser) || 'null') || [...DEFAULT_ACCOUNTS];
+  utilBills    = JSON.parse(localStorage.getItem('bt_util_bills_'   + currentUser) || '[]');
   $$('auth-overlay').classList.remove('show');
   const lbl = $$('current-user-label');
   if (lbl) lbl.textContent = currentUser;
@@ -2096,6 +2246,432 @@ function bootApp() {
   updateSyncUI();
   setBudgetPeriod(budgetPeriod);
   if (syncCfg?.key && syncCfg?.binId) setTimeout(syncPull, 800);
+}
+
+// ── Utilities page ─────────────────────────────────────────────
+function setUtilTab(tab) {
+  utilTab = tab;
+  document.querySelectorAll('#util-type-tabs .pill').forEach(b => b.classList.remove('active'));
+  $$('utab-' + tab)?.classList.add('active');
+  document.querySelectorAll('[id^="util-panel-"]').forEach(p => p.style.display = 'none');
+  $$('util-panel-' + tab).style.display = '';
+  renderUtilities();
+}
+
+function renderUtilities() {
+  if (utilTab === 'electricity') renderElectricity();
+}
+
+// ── Electricity ─────────────────────────────────────────────────
+function renderElectricity() {
+  renderBillsList();
+  renderCompareSection();
+}
+
+function renderBillsList() {
+  const el = $$('util-bills-list');
+  const bills = utilBills.filter(b => b.type === 'electricity');
+  if (!bills.length) {
+    el.innerHTML = `<div class="empty" style="padding:32px 0;"><div class="empty-icon">⚡</div><div class="empty-title">No bills saved</div><div class="empty-sub">Add your current bill to start comparing</div></div>`;
+    return;
+  }
+  el.innerHTML = bills.map(b => {
+    const isComp = utilCompBill?.id === b.id;
+    const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
+    const totalUsage = b.ratePeriods.reduce((s,r) => s + (r.usage||0), 0);
+    return `<div class="card" style="margin-bottom:10px;padding:16px 18px;${isComp?'border:2px solid var(--primary);':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:4px;">${esc(b.provider||'Unknown Provider')}</div>
+          <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px;">${periodLabel}${b.days?' · '+b.days+' days':''}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            ${b.supply?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Supply $${(+b.supply).toFixed(4)}/day</span>`:''}
+            ${b.ratePeriods.map(r=>`<span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;">${esc(r.name)}: ${r.rate}c · ${r.usage}kWh</span>`).join('')}
+            ${totalUsage?`<span style="font-size:12px;background:var(--gray-100);padding:3px 8px;border-radius:6px;">Total ${totalUsage.toFixed(0)}kWh</span>`:''}
+          </div>
+          ${b.notes?`<div style="margin-top:6px;font-size:12px;color:var(--gray-400);font-style:italic;">${esc(b.notes)}</div>`:''}
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:20px;font-weight:800;color:var(--gray-900);">$${(+b.total).toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">total bill</div>
+          <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
+            <button onclick="selectCompBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid ${isComp?'var(--primary)':'var(--gray-200)'};background:${isComp?'var(--primary)':'var(--white)'};color:${isComp?'white':'var(--gray-600)'};">${isComp?'✓ Comparing':'Compare'}</button>
+            <button onclick="editBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);">Edit</button>
+            <button onclick="deleteBill('${b.id}')" style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;border:none;background:none;color:var(--red-mid);">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectCompBill(id) {
+  utilCompBill = utilCompBill?.id === id ? null : utilBills.find(b => b.id === id);
+  if (!utilCompBill) utilQuotes = [];
+  renderElectricity();
+}
+
+function deleteBill(id) {
+  if (!confirm('Delete this bill?')) return;
+  utilBills = utilBills.filter(b => b.id !== id);
+  if (utilCompBill?.id === id) { utilCompBill = null; utilQuotes = []; }
+  saveUtilBills(); renderElectricity();
+}
+
+function editBill(id) {
+  const b = utilBills.find(x => x.id === id);
+  if (!b) return;
+  editingBillId = id;
+  openBillForm(b);
+}
+
+function renderCompareSection() {
+  const sec = $$('util-compare-section');
+  if (!utilCompBill) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  renderCompareTable();
+}
+
+function renderCompareTable() {
+  const b = utilCompBill;
+  if (!b) return;
+  const el = $$('util-compare-table');
+  const days = b.days || 90;
+
+  // Build columns: current bill + each quote
+  const cols = [
+    { label: b.provider || 'Current Bill', isCurrent: true, supply: b.supply, ratePeriods: b.ratePeriods.map(r=>({name:r.name,rate:r.rate})), bonuses: [], total: b.total }
+  ].concat(utilQuotes.map((q,qi) => ({ ...q, qi })));
+
+  // Calculations
+  const calcs = cols.map(col => {
+    if (col.isCurrent) return { periodCost: null, supplyCost: null, gross: +col.total, bonusAnnual: 0, netAnnual: +col.total * 365/days, netMonthly: +col.total * 365/days/12 };
+    const supplyCost = (+col.supply||0) * days;
+    let periodCosts = [];
+    b.ratePeriods.forEach(bp => {
+      const match = col.ratePeriods.find(r => r.name.toLowerCase() === bp.name.toLowerCase());
+      periodCosts.push({ name: bp.name, usage: bp.usage, rate: match ? match.rate : null, cost: match ? bp.usage * match.rate / 100 : null });
+    });
+    const usageCost = periodCosts.reduce((s,p) => s + (p.cost||0), 0);
+    const gross = supplyCost + usageCost;
+    const bonusAnnual = (col.bonuses||[]).reduce((s,bon) => {
+      const amt = +bon.amount||0;
+      return s + (bon.type==='annual' ? amt : amt / ((+bon.amortizeMonths||12)/12));
+    }, 0);
+    const netAnnual = gross * 365/days - bonusAnnual;
+    return { supplyCost, periodCosts, gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
+  });
+
+  const fmtC = n => n == null ? '<span style="color:var(--gray-300);">—</span>' : `$${(+n).toFixed(2)}`;
+
+  el.innerHTML = `
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--gray-200);">
+          <th style="text-align:left;padding:10px 8px;color:var(--gray-500);font-weight:600;font-size:12px;white-space:nowrap;">Metric</th>
+          ${cols.map((col,ci) => `<th style="text-align:right;padding:10px 8px;min-width:130px;">
+            <div style="font-size:13px;font-weight:700;color:var(--gray-900);">${esc(col.label||col.provider||'Quote')}</div>
+            ${col.isCurrent ? '<div style="font-size:10px;color:var(--primary);font-weight:600;">CURRENT BILL</div>' : `<button onclick="deleteQuote(${col.qi})" style="font-size:10px;border:none;background:none;color:var(--red-mid);cursor:pointer;font-family:inherit;padding:0;">✕ Remove</button>`}
+          </th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:var(--gray-50);">
+          <td style="padding:8px;color:var(--gray-600);font-weight:600;">Daily Supply</td>
+          ${cols.map(col => `<td style="text-align:right;padding:8px;">${col.supply ? `${(+col.supply).toFixed(4)}/day` : fmtC(null)}</td>`).join('')}
+        </tr>
+        ${b.ratePeriods.map(bp => `
+        <tr>
+          <td style="padding:8px;color:var(--gray-600);">${esc(bp.name)} <span style="color:var(--gray-400);font-size:11px;">(${bp.usage}kWh)</span></td>
+          ${calcs.map((calc,ci) => {
+            if (cols[ci].isCurrent) return `<td style="text-align:right;padding:8px;">${bp.rate}c/kWh</td>`;
+            const p = calc.periodCosts?.find(x=>x.name===bp.name);
+            return `<td style="text-align:right;padding:8px;">${p?.rate!=null ? p.rate+'c/kWh' : '<span style="color:var(--gray-300);">no rate</span>'}</td>`;
+          }).join('')}
+        </tr>`).join('')}
+        <tr style="border-top:1px solid var(--gray-200);">
+          <td style="padding:8px;color:var(--gray-600);">Supply Cost (${days}d)</td>
+          ${calcs.map(c => `<td style="text-align:right;padding:8px;">${c.supplyCost!=null ? fmtC(c.supplyCost) : fmtC(null)}</td>`).join('')}
+        </tr>
+        <tr style="border-top:2px solid var(--gray-200);background:var(--gray-50);">
+          <td style="padding:10px 8px;font-weight:700;color:var(--gray-900);">Bill Period Total</td>
+          ${calcs.map(c => `<td style="text-align:right;padding:10px 8px;font-weight:700;font-size:15px;color:var(--gray-900);">${fmtC(c.gross)}</td>`).join('')}
+        </tr>
+        <tr>
+          <td style="padding:8px;color:var(--gray-600);">Annualised Cost</td>
+          ${calcs.map(c => `<td style="text-align:right;padding:8px;color:var(--gray-700);">${fmtC(c.netAnnual + (c.bonusAnnual||0))}</td>`).join('')}
+        </tr>
+        <tr>
+          <td style="padding:8px;color:var(--gray-600);">Bonuses / Cashback (p.a.)</td>
+          ${calcs.map(c => `<td style="text-align:right;padding:8px;color:#10b981;font-weight:600;">${c.bonusAnnual ? '−$'+(c.bonusAnnual).toFixed(2) : fmtC(null)}</td>`).join('')}
+        </tr>
+        <tr style="border-top:2px solid var(--primary);background:var(--primary-light);">
+          <td style="padding:10px 8px;font-weight:700;color:var(--primary);">Effective Annual</td>
+          ${calcs.map(c => `<td style="text-align:right;padding:10px 8px;font-weight:800;font-size:15px;color:var(--primary);">${fmtC(c.netAnnual)}</td>`).join('')}
+        </tr>
+        <tr style="border-top:1px solid var(--gray-200);">
+          <td style="padding:8px;color:var(--gray-600);">Effective Monthly</td>
+          ${calcs.map(c => `<td style="text-align:right;padding:8px;font-weight:600;color:var(--gray-700);">${fmtC(c.netMonthly)}</td>`).join('')}
+        </tr>
+        ${cols.some((c,ci)=>!c.isCurrent&&calcs[ci].bonusAnnual) ? `
+        <tr style="border-top:1px solid var(--gray-200);background:var(--gray-50);">
+          <td style="padding:8px;color:var(--gray-500);font-size:12px;" colspan="${1+cols.length}">
+            Bonuses: ${utilQuotes.map(q=>(q.bonuses||[]).map(bon=>`<strong>${esc(q.provider)}</strong>: ${esc(bon.desc||'Bonus')} $${bon.amount} ${bon.type==='one-off'?`(one-off, spread over ${bon.amortizeMonths}m)`:'(annual)'}`).join(', ')).filter(Boolean).join(' · ')}
+          </td>
+        </tr>` : ''}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function deleteQuote(qi) {
+  utilQuotes.splice(qi, 1);
+  renderCompareTable();
+}
+
+// ── Bill form ───────────────────────────────────────────────────
+function openBillForm(prefill) {
+  editingBillId = prefill?.id || null;
+  $$('bill-form-title').textContent = editingBillId ? 'Edit Bill' : 'Add Electricity Bill';
+  $$('bf-provider').value = prefill?.provider || '';
+  $$('bf-total').value    = prefill?.total    || '';
+  $$('bf-from').value     = prefill?.from     || '';
+  $$('bf-to').value       = prefill?.to       || '';
+  $$('bf-days').value     = prefill?.days     || '';
+  $$('bf-supply').value   = prefill?.supply   || '';
+  $$('bf-notes').value    = prefill?.notes    || '';
+  $$('bill-upload-status').innerHTML = '📄 Upload PDF or photo to auto-fill — <strong>click to browse</strong>';
+  $$('bill-upload-preview').innerHTML = '';
+  $$('bill-file-input').value = '';
+  bfRateRows = prefill?.ratePeriods ? prefill.ratePeriods.map(r=>({...r})) : [{ name:'General Usage', rate:'', usage:'' }];
+  renderBillRateRows();
+  $$('bill-form-modal').style.display = 'flex';
+}
+
+function closeBillForm() {
+  $$('bill-form-modal').style.display = 'none';
+  editingBillId = null;
+}
+
+function renderBillRateRows() {
+  $$('bf-rate-rows').innerHTML = bfRateRows.map((r,i) => `
+    <div style="display:grid;grid-template-columns:1fr 90px 90px 32px;gap:6px;margin-bottom:6px;align-items:center;">
+      <input type="text" class="form-control" placeholder="Period name (e.g. Peak)" value="${esc(r.name||'')}" oninput="bfRateRows[${i}].name=this.value" style="font-size:13px;">
+      <input type="number" class="form-control" placeholder="c/kWh" value="${r.rate||''}" oninput="bfRateRows[${i}].rate=+this.value" min="0" step="0.01" style="font-size:13px;" title="Rate (cents per kWh)">
+      <input type="number" class="form-control" placeholder="kWh" value="${r.usage||''}" oninput="bfRateRows[${i}].usage=+this.value" min="0" style="font-size:13px;" title="Usage (kWh)">
+      <button onclick="removeBillRateRow(${i})" style="background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;padding:0;" ${bfRateRows.length<2?'disabled style="opacity:0.3;cursor:default;"':''}>&times;</button>
+    </div>
+  `).join('') + '<div style="display:grid;grid-template-columns:1fr 90px 90px 32px;gap:6px;"><span style="font-size:11px;color:var(--gray-400);">Name</span><span style="font-size:11px;color:var(--gray-400);">Rate (c/kWh)</span><span style="font-size:11px;color:var(--gray-400);">Usage (kWh)</span></div>';
+}
+
+function addBillRateRow() {
+  bfRateRows.push({ name:'', rate:'', usage:'' });
+  renderBillRateRows();
+}
+
+function removeBillRateRow(i) {
+  if (bfRateRows.length < 2) return;
+  bfRateRows.splice(i, 1);
+  renderBillRateRows();
+}
+
+function updateBillDays() {
+  const from = $$('bf-from').value, to = $$('bf-to').value;
+  if (from && to) {
+    const d = Math.round((new Date(to) - new Date(from)) / 86400000);
+    if (d > 0) $$('bf-days').value = d;
+  }
+}
+
+function submitBillForm() {
+  const provider = $$('bf-provider').value.trim();
+  const total    = parseFloat($$('bf-total').value);
+  if (!provider) { toast('Enter the energy company name'); return; }
+  if (isNaN(total) || total <= 0) { toast('Enter a valid total cost'); return; }
+  const bill = {
+    id: editingBillId || uid(),
+    type: 'electricity',
+    provider,
+    total,
+    from: $$('bf-from').value,
+    to:   $$('bf-to').value,
+    days: parseInt($$('bf-days').value) || null,
+    supply: parseFloat($$('bf-supply').value) || null,
+    ratePeriods: bfRateRows.filter(r => r.name).map(r => ({ name: r.name, rate: +r.rate||0, usage: +r.usage||0 })),
+    notes: $$('bf-notes').value.trim(),
+    savedAt: new Date().toISOString()
+  };
+  if (editingBillId) {
+    const idx = utilBills.findIndex(b => b.id === editingBillId);
+    if (idx >= 0) utilBills[idx] = bill;
+    if (utilCompBill?.id === editingBillId) utilCompBill = bill;
+  } else {
+    utilBills.push(bill);
+  }
+  saveUtilBills(); closeBillForm(); renderElectricity();
+  toast(editingBillId ? 'Bill updated' : 'Bill saved');
+}
+
+// ── Bill upload / PDF parse ─────────────────────────────────────
+async function handleBillUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = $$('bill-upload-status');
+  const preview = $$('bill-upload-preview');
+  status.textContent = '⏳ Processing…';
+  preview.innerHTML = '';
+  try {
+    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      status.textContent = '⏳ Loading PDF parser…';
+      await loadPdfJs();
+      status.textContent = '⏳ Extracting text from PDF…';
+      const text = await extractPdfText(file);
+      const parsed = parseElecBillText(text);
+      prefillBillForm(parsed);
+      status.innerHTML = `✅ <strong>Text extracted.</strong> Review the pre-filled fields below and correct anything that looks wrong before saving.`;
+    } else if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      preview.innerHTML = `<img src="${url}" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;margin-top:4px;">`;
+      status.innerHTML = `📷 <strong>Image loaded.</strong> Fill in the fields below using the image as reference.`;
+    } else {
+      status.textContent = '⚠️ Unsupported file type. Please upload a PDF or image.';
+    }
+  } catch(e) {
+    status.innerHTML = `⚠️ Could not auto-extract. Please fill in the fields manually. <small style="color:var(--gray-400);">(${e.message})</small>`;
+  }
+}
+
+async function loadPdfJs() {
+  if (window.pdfjsLib) return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+async function extractPdfText(file) {
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it => it.str).join(' ') + '\n';
+  }
+  return text;
+}
+
+function parseElecBillText(text) {
+  const t = text.replace(/\s+/g,' ');
+  const result = {};
+  // Provider
+  const knownProviders = ['AGL','Origin Energy','Origin','EnergyAustralia','Energy Australia','Red Energy','Alinta Energy','Alinta','Ergon Energy','Ergon','Energex','Powercor','CitiPower','Jemena','ActewAGL','Simply Energy','Tango Energy','Dodo Power','OVO Energy','Momentum Energy'];
+  for (const p of knownProviders) { if (t.includes(p)) { result.provider = p; break; } }
+  // Total
+  const totalM = t.match(/(?:total\s+amount\s+(?:due|payable)|amount\s+due|amount\s+payable|total\s+due)[^\d]{0,20}(\d+\.\d{2})/i);
+  if (totalM) result.total = totalM[1];
+  // Billing period
+  const dateM = t.match(/(\d{1,2}[\s\/\-]\w+[\s\/\-]\d{2,4})\s*(?:to|–|-)\s*(\d{1,2}[\s\/\-]\w+[\s\/\-]\d{2,4})/i);
+  if (dateM) { result.fromRaw = dateM[1]; result.toRaw = dateM[2]; }
+  // Days
+  const daysM = t.match(/(\d+)\s*days?\s*(?:in|of)?\s*(?:this\s+)?(?:billing\s+)?period/i);
+  if (daysM) result.days = daysM[1];
+  // Supply charge
+  const supM = t.match(/supply\s+(?:charge|fee)[^\d]{0,30}(\d+\.?\d*)\s*(?:cents?\s*per\s*day|c\/day|\$\/day|per\s+day)?[^\d]{0,10}(\d+\.?\d*)?/i);
+  if (supM) result.supply = supM[1].length > 2 ? (+supM[1]/100).toFixed(4) : supM[1];
+  // Rate periods
+  const rates = [];
+  const ratePatterns = [
+    /(?:peak|anytime)\s+usage[^\d]{0,20}(\d+\.?\d+)\s*(?:cents?|c)\s*(?:per\s*kWh|\/kWh)/gi,
+    /off.peak\s+usage[^\d]{0,20}(\d+\.?\d+)\s*(?:cents?|c)\s*(?:per\s*kWh|\/kWh)/gi,
+    /shoulder\s+usage[^\d]{0,20}(\d+\.?\d+)\s*(?:cents?|c)\s*(?:per\s*kWh|\/kWh)/gi,
+    /controlled\s+load[^\d]{0,20}(\d+\.?\d+)\s*(?:cents?|c)\s*(?:per\s*kWh|\/kWh)/gi,
+    /general\s+usage[^\d]{0,20}(\d+\.?\d+)\s*(?:cents?|c)\s*(?:per\s*kWh|\/kWh)/gi,
+    /flat\s+(?:rate|tariff)[^\d]{0,20}(\d+\.?\d+)\s*(?:cents?|c)\s*(?:per\s*kWh|\/kWh)/gi,
+  ];
+  const rateNames = ['Peak','Off-Peak','Shoulder','Controlled Load','General Usage','Flat Rate'];
+  ratePatterns.forEach((pat,pi) => {
+    const m = pat.exec(t);
+    if (m) rates.push({ name: rateNames[pi], rate: m[1], usage: '' });
+  });
+  // Usage per period
+  const usagePatterns = [
+    /peak[^\d]{0,20}(\d+\.?\d*)\s*kWh/gi,
+    /off.peak[^\d]{0,20}(\d+\.?\d*)\s*kWh/gi,
+  ];
+  ['Peak','Off-Peak'].forEach((name,pi) => {
+    const m = usagePatterns[pi].exec(t);
+    const r = rates.find(x=>x.name===name);
+    if (m && r) r.usage = m[1];
+  });
+  const totalUsageM = t.match(/total\s+usage[^\d]{0,10}(\d+\.?\d*)\s*kWh/i);
+  if (rates.length === 1 && totalUsageM) rates[0].usage = totalUsageM[1];
+  if (rates.length === 0 && totalUsageM) rates.push({ name:'General Usage', rate:'', usage: totalUsageM[1] });
+  if (rates.length) result.ratePeriods = rates;
+  return result;
+}
+
+function prefillBillForm(parsed) {
+  if (parsed.provider) $$('bf-provider').value = parsed.provider;
+  if (parsed.total)    $$('bf-total').value = parsed.total;
+  if (parsed.supply)   $$('bf-supply').value = parsed.supply;
+  if (parsed.days)     $$('bf-days').value = parsed.days;
+  if (parsed.ratePeriods?.length) {
+    bfRateRows = parsed.ratePeriods.map(r => ({ name: r.name, rate: r.rate, usage: r.usage }));
+    renderBillRateRows();
+  }
+}
+
+// ── Quote form ──────────────────────────────────────────────────
+function openQuoteForm() {
+  if (!utilCompBill) { toast('Select a bill to compare against first'); return; }
+  $$('qf-provider').value = '';
+  $$('qf-supply').value = '';
+  // Pre-populate rate rows from the comparison bill's periods
+  $$('qf-rate-rows').innerHTML = utilCompBill.ratePeriods.map((r,i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="flex:1;font-size:13px;color:var(--gray-700);">${esc(r.name)} <span style="color:var(--gray-400);font-size:11px;">(${r.usage}kWh actual)</span></span>
+      <input type="number" class="form-control" id="qr-rate-${i}" placeholder="c/kWh" min="0" step="0.01" style="width:100px;font-size:13px;">
+    </div>`).join('');
+  $$('qf-bonus-rows').innerHTML = '';
+  $$('quote-form-modal').style.display = 'flex';
+}
+
+function closeQuoteForm() { $$('quote-form-modal').style.display = 'none'; }
+
+function addBonusRow() {
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 80px 90px 80px 28px;gap:6px;margin-bottom:6px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" class="form-control" placeholder="Description (e.g. Sign-up credit)" style="font-size:12px;">
+    <input type="number" class="form-control" placeholder="$" min="0" step="0.01" style="font-size:12px;">
+    <select class="form-control" style="font-size:12px;">
+      <option value="one-off">One-off</option>
+      <option value="annual">Annual</option>
+    </select>
+    <input type="number" class="form-control" placeholder="Spread (m)" min="1" value="12" title="Spread one-off over N months" style="font-size:12px;">
+    <button onclick="this.closest('div').remove()" style="background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;">&times;</button>`;
+  $$('qf-bonus-rows').appendChild(row);
+}
+
+function submitQuoteForm() {
+  const provider = $$('qf-provider').value.trim();
+  if (!provider) { toast('Enter a provider name'); return; }
+  const ratePeriods = utilCompBill.ratePeriods.map((r,i) => ({
+    name: r.name,
+    rate: parseFloat(document.getElementById('qr-rate-'+i)?.value) || 0
+  }));
+  const bonuses = [...$$('qf-bonus-rows').children].map(row => {
+    const inputs = row.querySelectorAll('input,select');
+    return { desc: inputs[0].value, amount: parseFloat(inputs[1].value)||0, type: inputs[2].value, amortizeMonths: parseInt(inputs[3].value)||12 };
+  }).filter(b => b.amount > 0);
+  utilQuotes.push({ provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses });
+  closeQuoteForm(); renderCompareSection();
+  toast('Quote added');
 }
 
 // ── Manage page ────────────────────────────────────────────────
