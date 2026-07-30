@@ -740,9 +740,7 @@ select.form-control {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           Filter
         </button>
-      </div>
-      <div style="margin-bottom:10px;">
-        <button onclick="openAddModal()" style="padding:9px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+        <button onclick="openAddModal()" style="margin-left:auto;padding:9px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add transaction
         </button>
@@ -788,13 +786,16 @@ select.form-control {
 
       <!-- Tasks + Income vs expenses row -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-        <div class="card" style="padding:18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card" style="padding:0;display:flex;flex-direction:column;height:320px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;flex-shrink:0;">
             <div style="font-size:14px;font-weight:700;color:#0f172a;">Tasks</div>
-            <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
+              <div id="tasks-page-nav" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-400);"></div>
+            </div>
           </div>
-          <div id="tasks-list" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
-          <div style="display:flex;gap:8px;">
+          <div id="tasks-list" style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:0;padding:0 18px;"></div>
+          <div style="display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--gray-100);flex-shrink:0;">
             <input type="text" id="task-input" placeholder="Add a task…"
               style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;"
               onkeydown="if(event.key==='Enter')addTask()">
@@ -803,7 +804,7 @@ select.form-control {
         </div>
 
         <!-- Income vs expenses chart -->
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;">
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;height:320px;box-sizing:border-box;overflow:hidden;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
           <div style="font-size:14px;font-weight:700;color:#0f172a;">Income vs. expenses</div>
           <button onclick="goTo('budgeting')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">Manage budgets</button>
