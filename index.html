@@ -208,7 +208,7 @@ body {
 .month-label { font-weight: 700; font-size: 15px; color: var(--gray-800); }
 
 /* ── Summary Grid ────────────────────────── */
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .sum-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 14px 16px; }
 .sum-label { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 4px; }
 .sum-amount { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: 'Inter', sans-serif; }
@@ -263,10 +263,10 @@ body {
   background: var(--gray-50); padding: 10px 12px;
   text-align: left; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--gray-400); border-bottom: 2px solid var(--gray-200);
+  color: var(--sb-bg); border-bottom: 2px solid var(--gray-200);
   white-space: nowrap; user-select: none; cursor: pointer;
 }
-.tx-table thead th:hover { color: var(--gray-600); }
+.tx-table thead th:hover { color: var(--sb-bg); opacity: 0.75; }
 .tx-table thead th.sort-asc::after  { content: ' ▲'; font-size: 9px; }
 .tx-table thead th.sort-desc::after { content: ' ▼'; font-size: 9px; }
 .tx-table thead th.r { text-align: right; }
@@ -299,7 +299,7 @@ body {
   padding: 16px 18px; margin-bottom: 14px;
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
 }
-.bsum-label { font-size: 11px; font-weight: 600; color: var(--sb-bg); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.bsum-label { font-size: 11px; font-weight: 600; color: var(--sb-bg); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-family: 'Inter', sans-serif; }
 .bsum-val   { font-size: 20px; font-weight: 700; color: var(--gray-900); font-family: 'Inter', sans-serif; }
 .bsum-val.ok  { color: var(--green-mid); }
 .bsum-val.over { color: var(--red-mid); }
@@ -476,7 +476,7 @@ select.form-control {
 .auth-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--gray-200); padding: 36px 32px; width: 100%; max-width: 380px; margin: 20px; }
 .auth-logo { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
 .auth-logo-inner { width: 34px; height: 34px; border-radius: 9px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 700; color: #fff; font-size: 16px; }
-.auth-title { font-size: 20px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; font-family: 'Inter', sans-serif; }
+.auth-title { font-size: 20px; font-weight: 700; color: var(--gray-900); margin-bottom: 32px; font-family: 'Inter', sans-serif; }
 .auth-subtitle { font-size: 13.5px; color: var(--gray-500); margin-bottom: 24px; }
 .auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: var(--gray-500); }
 .auth-switch a { color: var(--primary); font-weight: 600; cursor: pointer; }
@@ -511,7 +511,7 @@ select.form-control {
   .toast { bottom: 20px; }
 
   /* Dashboard desktop layout */
-  .summary-grid { grid-template-columns: repeat(3, 1fr); }
+  .summary-grid { grid-template-columns: repeat(4, 1fr); }
   .sum-card.full { grid-column: auto; }
   .sum-amount { font-size: 24px; }
 
@@ -549,7 +549,7 @@ select.form-control {
 <!-- ── Auth overlay ──────────────────────── -->
 <div id="auth-overlay">
   <div class="auth-card">
-    <div style="margin-bottom:28px;">
+    <div style="margin-bottom:28px;display:flex;justify-content:center;">
       <svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:260px;display:block;">
         <defs>
           <linearGradient id="authBadgeGrad" x1="0" y1="0" x2="1" y2="1">
@@ -570,7 +570,7 @@ select.form-control {
       </svg>
     </div>
     <div class="auth-title" id="auth-title-text">Sign in</div>
-    <div class="auth-subtitle" id="auth-subtitle">Sign in to continue</div>
+    <div class="auth-subtitle" id="auth-subtitle" style="display:none;"></div>
     <div class="auth-error" id="auth-error"></div>
 
     <!-- Login form -->
@@ -584,7 +584,7 @@ select.form-control {
         <input type="password" class="form-control" id="auth-password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter') authLogin()">
       </div>
       <button class="btn-primary" onclick="authLogin()">Sign In</button>
-      <div class="auth-switch">No account? <a onclick="showAuthRegister()">Create one</a></div>
+      <div class="auth-switch" style="margin-top:32px;">No account? <a onclick="showAuthRegister()">Create one</a></div>
       <div class="auth-switch" style="margin-top:6px;"><a onclick="showAuthReset()">Forgot password?</a></div>
     </div>
 
@@ -740,23 +740,27 @@ select.form-control {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           Filter
         </button>
+        <button onclick="openAddModal()" style="margin-left:auto;padding:9px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add transaction
+        </button>
       </div>
 
-      <div class="summary-grid">
-        <div class="sum-card">
-          <div class="sum-label" id="dash-income-label">Income</div>
-          <div class="sum-amount income" id="dash-income">$0</div>
-          <div class="sum-sub positive" id="dash-income-sub"></div>
+      <div class="budget-summary-bar" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px;">
+        <div>
+          <div class="bsum-label" id="dash-income-label">Income</div>
+          <div class="bsum-val" id="dash-income">$0</div>
+          <div style="font-size:11.5px;color:var(--gray-400);margin-top:3px;" id="dash-income-sub"></div>
         </div>
-        <div class="sum-card">
-          <div class="sum-label" id="dash-expense-label">Expenses</div>
-          <div class="sum-amount expense" id="dash-expense">$0</div>
-          <div class="sum-sub" id="dash-expense-sub"></div>
+        <div>
+          <div class="bsum-label" id="dash-expense-label">Expenses</div>
+          <div class="bsum-val" id="dash-expense">$0</div>
+          <div style="font-size:11.5px;color:var(--gray-400);margin-top:3px;" id="dash-expense-sub"></div>
         </div>
-        <div class="sum-card">
-          <div class="sum-label">Net</div>
-          <div class="sum-amount neutral" id="dash-net">$0</div>
-          <div class="sum-sub" id="dash-net-sub"></div>
+        <div>
+          <div class="bsum-label">Net</div>
+          <div class="bsum-val" id="dash-net">$0</div>
+          <div style="font-size:11.5px;color:var(--gray-400);margin-top:3px;" id="dash-net-sub"></div>
         </div>
       </div>
 
@@ -765,7 +769,7 @@ select.form-control {
         <div>
           <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;">
-              <div style="font-size:14px;font-weight:700;color:#0f172a;">Recent transactions</div>
+              <div class="bsum-label" style="margin-bottom:0;">Recent transactions</div>
               <button onclick="goTo('transactions')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">View all</button>
             </div>
             <div id="dash-recent"></div>
@@ -773,17 +777,36 @@ select.form-control {
         </div>
         <div>
           <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;padding:16px 18px;">
-            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:14px;">Spending by category</div>
+            <div class="bsum-label">Spending by category</div>
             <div id="cat-donut" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
             <div id="cat-legend"></div>
           </div>
         </div>
       </div>
 
-      <!-- Income vs expenses chart -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-top:16px;">
+      <!-- Tasks + Income vs expenses row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+        <div class="card" style="padding:0;display:flex;flex-direction:column;height:320px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;flex-shrink:0;">
+            <div class="bsum-label" style="margin-bottom:0;">Tasks</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
+              <div id="tasks-page-nav" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-400);"></div>
+            </div>
+          </div>
+          <div id="tasks-list" style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:0;padding:0 18px;"></div>
+          <div style="display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--gray-100);flex-shrink:0;">
+            <input type="text" id="task-input" placeholder="Add a task…"
+              style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;"
+              onkeydown="if(event.key==='Enter')addTask()">
+            <button onclick="addTask()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Add</button>
+          </div>
+        </div>
+
+        <!-- Income vs expenses chart -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;height:320px;box-sizing:border-box;overflow:hidden;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-          <div style="font-size:14px;font-weight:700;color:#0f172a;">Income vs. expenses</div>
+          <div class="bsum-label" style="margin-bottom:0;">Income vs. expenses</div>
           <button onclick="goTo('budgeting')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">Manage budgets</button>
         </div>
         <div id="income-expense-chart"></div>
@@ -791,7 +814,8 @@ select.form-control {
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;"><div style="width:10px;height:10px;border-radius:2px;background:var(--primary);"></div>Income</div>
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;"><div style="width:10px;height:10px;border-radius:2px;background:#cbd5e1;"></div>Expenses</div>
         </div>
-      </div>
+        </div><!-- end income vs expenses card -->
+      </div><!-- end tasks+chart row -->
     </div>
 
     <!-- ADD TRANSACTION MODAL -->
@@ -902,13 +926,26 @@ select.form-control {
           </div>
         </div>
       </div>
-      <div class="pills" id="month-pills"></div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px;margin-bottom:10px;">
+        <div class="pills" id="month-pills" style="flex-wrap:wrap;display:contents;"></div>
+        <button id="tx-date-filter-btn" onclick="toggleTxDateFilter()"
+          style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
+          Date range
+        </button>
+      </div>
+      <div id="tx-date-filter-panel" style="display:none;margin-top:8px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);display:none;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--gray-500);">From</label>
+        <input type="date" id="tx-date-from" class="form-control" style="width:150px;font-size:13px;" onchange="applyTxDateFilter()">
+        <label style="font-size:12px;font-weight:600;color:var(--gray-500);">To</label>
+        <input type="date" id="tx-date-to" class="form-control" style="width:150px;font-size:13px;" onchange="applyTxDateFilter()">
+        <button onclick="clearTxDateFilter()" style="padding:5px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
+      </div>
 
       <!-- Mobile cards -->
       <div id="tx-cards" class="card" style="padding:0;overflow:hidden;"></div>
 
       <!-- Desktop table -->
-      <div class="desktop-table-wrap">
+      <div class="desktop-table-wrap" style="margin-top:0;">
         <table class="tx-table" id="tx-table">
             <thead>
               <tr>
@@ -930,10 +967,10 @@ select.form-control {
       <!-- Bulk action bar -->
       <div id="bulk-bar" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:white;border-radius:var(--radius);padding:12px 16px;display:none;align-items:center;gap:10px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.3);min-width:300px;max-width:90vw;">
         <span id="bulk-count" style="font-size:13px;font-weight:600;flex:1;">0 selected</span>
-        <button onclick="bulkMarkPaid()" style="padding:8px 14px;background:#10b981;color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✓ Mark Paid</button>
-        <button onclick="bulkMarkUnpaid()" style="padding:8px 14px;background:#6b7280;color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Mark Unpaid</button>
-        <button onclick="openBulkSplit()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">÷ Split</button>
-        <button onclick="clearBulkSelection()" style="padding:8px 10px;background:transparent;color:var(--gray-400);border:none;font-size:18px;cursor:pointer;line-height:1;">✕</button>
+        <button onclick="bulkMarkPaid()" style="padding:7px 13px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">✓ Mark Paid</button>
+        <button onclick="bulkMarkUnpaid()" style="padding:7px 13px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">✕ Mark Unpaid</button>
+        <button onclick="openBulkSplit()" style="padding:7px 13px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">+ Split</button>
+        <button onclick="clearBulkSelection()" style="padding:6px 10px;background:transparent;color:rgba(255,255,255,0.5);border:none;font-size:18px;cursor:pointer;line-height:1;">✕</button>
       </div>
     </div>
 
@@ -983,17 +1020,18 @@ select.form-control {
         <div><div class="bsum-label">Spent</div><div class="bsum-val" id="b-total-spent">—</div></div>
         <div><div class="bsum-label">Remaining</div><div class="bsum-val" id="b-total-rem">—</div></div>
       </div>
+      <div id="budget-donut-wrap" style="display:none;margin-bottom:20px;"></div>
       <div class="budget-list" id="budget-list"></div>
     </div>
 
     <!-- BUDGET MODAL -->
     <div id="budget-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;">
-      <div class="card" style="width:100%;max-width:520px;position:relative;margin:auto;">
+      <div class="card" style="width:100%;max-width:560px;position:relative;margin:auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <span style="font-size:16px;font-weight:700;color:var(--gray-900);">Set Budget</span>
           <button onclick="closeBudgetModal()" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:22px;line-height:1;padding:2px 6px;">&times;</button>
         </div>
-        <div style="font-size:13px;color:var(--gray-500);margin-bottom:20px;">Set a total budget and allocate across categories.</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-bottom:20px;">Allocate budgets across categories and sub-categories.</div>
 
         <!-- Overall budget -->
         <div style="background:var(--primary-light);border:1.5px solid #bfdbfe;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;">
@@ -1014,11 +1052,17 @@ select.form-control {
           </div>
         </div>
 
-        <!-- Per-category inputs -->
-        <div id="bm-cats" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
+        <!-- Per-category rows -->
+        <div id="bm-cats" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
+
+        <!-- Add category -->
+        <button onclick="bmAddCategory()" style="width:100%;padding:9px;border:1.5px dashed var(--gray-200);border-radius:var(--radius-sm);background:none;color:var(--primary);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:20px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Category
+        </button>
 
         <div style="display:flex;gap:10px;">
-          <button class="btn-primary" onclick="submitBudgetModal()" style="flex:1;">Save budgets</button>
+          <button class="btn-primary" onclick="submitBudgetModal()" style="flex:1;">Save</button>
           <button onclick="closeBudgetModal()" style="padding:10px 16px;border:1.5px solid var(--gray-200);background:var(--white);border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Cancel</button>
         </div>
       </div>
@@ -1104,11 +1148,14 @@ select.form-control {
 
     <!-- UTILITIES -->
     <div class="page" id="pg-utilities">
-      <!-- Utility type tabs -->
-      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="util-type-tabs">
-        <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">Electricity</button>
-        <button class="pill" id="utab-gas" onclick="setUtilTab('gas')">Gas</button>
-        <button class="pill" id="utab-internet" onclick="setUtilTab('internet')">Internet</button>
+      <!-- Utility type tabs + CTA inline -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="util-type-tabs">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">Electricity</button>
+          <button class="pill" id="utab-gas" onclick="setUtilTab('gas')">Gas</button>
+          <button class="pill" id="utab-internet" onclick="setUtilTab('internet')">Internet</button>
+        </div>
+        <div id="util-inline-cta"></div>
       </div>
 
       <!-- Electricity panel -->
@@ -1603,6 +1650,7 @@ let dashWeekStart = (function() {
 })();
 let activePill = '';
 let sortState = { col: 'date', dir: -1 };
+let txDateFrom = '', txDateTo = '';
 
 function save() { localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs)); updateCount(); syncSave(); }
 function saveCats() { localStorage.setItem('bt_cats_' + currentUser, JSON.stringify(CATS)); }
@@ -1717,6 +1765,76 @@ function changePeriod(d) {
   renderDash();
 }
 
+// ── Tasks ──────────────────────────────────────────────────────
+let userTasks = [];
+let tasksPage = 0;
+const TASKS_PER_PAGE = 5;
+
+function loadTasks() {
+  try { userTasks = JSON.parse(localStorage.getItem('bt_tasks_' + currentUser) || '[]'); } catch { userTasks = []; }
+}
+function saveTasks() { localStorage.setItem('bt_tasks_' + currentUser, JSON.stringify(userTasks)); }
+
+function renderTasks() {
+  const list = $$('tasks-list');
+  if (!list) return;
+
+  const done = userTasks.filter(t => t.done).length;
+  const countEl = $$('tasks-count');
+  if (countEl) countEl.textContent = userTasks.length ? `${done}/${userTasks.length} done` : '';
+
+  const totalPages = Math.max(1, Math.ceil(userTasks.length / TASKS_PER_PAGE));
+  if (tasksPage >= totalPages) tasksPage = totalPages - 1;
+  const start = tasksPage * TASKS_PER_PAGE;
+  const page = userTasks.slice(start, start + TASKS_PER_PAGE);
+
+  // Pagination nav
+  const nav = $$('tasks-page-nav');
+  if (nav) {
+    nav.innerHTML = totalPages > 1 ? `
+      <button onclick="tasksPage=Math.max(0,tasksPage-1);renderTasks()" ${tasksPage===0?'disabled':''} style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:14px;padding:0 2px;line-height:1;">‹</button>
+      <span style="min-width:32px;text-align:center;">${tasksPage+1}/${totalPages}</span>
+      <button onclick="tasksPage=Math.min(${totalPages-1},tasksPage+1);renderTasks()" ${tasksPage===totalPages-1?'disabled':''} style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:14px;padding:0 2px;line-height:1;">›</button>` : '';
+  }
+
+  if (!userTasks.length) {
+    list.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-300);font-size:13px;">No tasks yet</div>`;
+    return;
+  }
+  list.innerHTML = page.map((t, pi) => {
+    const i = start + pi;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gray-100);">
+      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})"
+        style="width:15px;height:15px;cursor:pointer;accent-color:var(--primary);flex-shrink:0;">
+      <span style="flex:1;font-size:13px;color:${t.done ? 'var(--gray-300)' : 'var(--gray-700)'};text-decoration:${t.done ? 'line-through' : 'none'};">${esc(t.text)}</span>
+      <button onclick="deleteTask(${i})" style="background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:15px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
+    </div>`;
+  }).join('');
+}
+
+function addTask() {
+  const inp = $$('task-input');
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) return;
+  userTasks.push({ text, done: false });
+  saveTasks();
+  inp.value = '';
+  // Jump to last page so new task is visible
+  tasksPage = Math.floor((userTasks.length - 1) / TASKS_PER_PAGE);
+  renderTasks();
+}
+function toggleTask(i) {
+  userTasks[i].done = !userTasks[i].done;
+  saveTasks();
+  renderTasks();
+}
+function deleteTask(i) {
+  userTasks.splice(i, 1);
+  saveTasks();
+  renderTasks();
+}
+
 function renderDash() {
   let period, periodLabel;
   if (dashView === 'week') {
@@ -1753,8 +1871,8 @@ function renderDash() {
   $$('dash-income').textContent  = (income > 0 ? '+' : '') + fmt(income);
   $$('dash-expense').textContent = (expenses > 0 ? '-' : '') + fmt(expenses);
   const ne = $$('dash-net');
-  ne.textContent = (net >= 0 ? '+' : '') + fmt(Math.abs(net));
-  ne.className   = 'sum-amount ' + (net > 0 ? 'pos' : net < 0 ? 'neg' : 'neutral');
+  ne.textContent = (net >= 0 ? '+' : '-') + fmt(Math.abs(net));
+  ne.className   = 'bsum-val ' + (net > 0 ? 'ok' : net < 0 ? 'over' : '');
 
   // Subtexts
   const incomeSub = $$('dash-income-sub');
@@ -1838,7 +1956,9 @@ function renderDash() {
           <div style="font-size:14px;font-weight:700;color:#0f172a;flex-shrink:0;">${isIncome?'+':'-'}${fmt(amt)}</div>
         </div>`;
       }).join('')
-    : `<div style="text-align:center;color:var(--gray-400);font-size:13px;padding:16px 0;">${emptyMsg.replace('expenses','transactions')}</div>`;
+    : `<div style="display:flex;align-items:center;justify-content:center;padding:40px 20px;min-height:220px;">
+        <div style="font-size:13px;color:var(--gray-400);">No transactions added</div>
+      </div>`;
 
   // Income vs expenses bar chart (last 6 months)
   const now = new Date();
@@ -1868,10 +1988,46 @@ function renderDash() {
       </div>`;
     }).join('')}
   </div>`;
+
+  loadTasks();
+  renderTasks();
 }
 
 function openDashFilter() {
   // placeholder — period and view controls already on the page
+}
+
+function toggleTxDateFilter() {
+  const panel = $$('tx-date-filter-panel');
+  if (!panel) return;
+  const open = panel.style.display === 'flex';
+  panel.style.display = open ? 'none' : 'flex';
+  const btn = $$('tx-date-filter-btn');
+  if (btn) {
+    const hasFilter = txDateFrom || txDateTo;
+    btn.style.borderColor = (!open || hasFilter) ? (hasFilter ? 'var(--primary)' : 'var(--gray-200)') : 'var(--gray-200)';
+    btn.style.color = hasFilter ? 'var(--primary)' : 'var(--gray-400)';
+  }
+}
+function applyTxDateFilter() {
+  txDateFrom = $$('tx-date-from')?.value || '';
+  txDateTo   = $$('tx-date-to')?.value   || '';
+  const btn = $$('tx-date-filter-btn');
+  if (btn) {
+    const has = txDateFrom || txDateTo;
+    btn.style.borderColor = has ? 'var(--primary)' : 'var(--gray-200)';
+    btn.style.color = has ? 'var(--primary)' : 'var(--gray-400)';
+    btn.textContent = has ? 'Date range ✓' : 'Date range';
+  }
+  renderTx();
+}
+function clearTxDateFilter() {
+  txDateFrom = ''; txDateTo = '';
+  if ($$('tx-date-from')) $$('tx-date-from').value = '';
+  if ($$('tx-date-to'))   $$('tx-date-to').value   = '';
+  const btn = $$('tx-date-filter-btn');
+  if (btn) { btn.style.borderColor = 'var(--gray-200)'; btn.style.color = 'var(--gray-400)'; btn.textContent = 'Date range'; }
+  renderTx();
 }
 
 // ── Mobile card HTML ───────────────────────────────────────────
@@ -1913,12 +2069,13 @@ function renderTx() {
 
   let list = txs.filter(t => {
     const mOk = !activePill || t.date?.startsWith(activePill);
+    const dOk = (!txDateFrom || t.date >= txDateFrom) && (!txDateTo || t.date <= txDateTo);
     const qOk = !q ||
       (t.desc||'').toLowerCase().includes(q) ||
       (t.cat||'').toLowerCase().includes(q) ||
       (t.subcat||'').toLowerCase().includes(q) ||
       (t.account||'').toLowerCase().includes(q);
-    return mOk && qOk;
+    return mOk && dOk && qOk;
   });
 
   // Sort
@@ -2222,38 +2379,104 @@ function setBudget(cat, val) {
   renderBudgetSummary();
 }
 
+// bmState holds the working copy while the modal is open
+let bmState = []; // [{origName, name, budget, subs:[{origName,name,budget}]}]
+
 function openBudgetModal() {
   const cats = Object.keys(CATS).filter(c => c !== 'Income');
   const totalSet = cats.reduce((s, c) => s + (budgets[c] || 0), 0);
-  const overall = parseFloat($$('bm-overall')?.value) || totalSet || 0;
-  $$('bm-overall').value = overall || '';
-
-  const col = CAT_COLOR;
-  $$('bm-cats').innerHTML = cats.map(c => {
-    const color = col[c] || '#6B7280';
-    const cur = budgets[c] || '';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius-sm);border:1px solid var(--gray-100);">
-      <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-      <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--gray-800);">${esc(c)}</div>
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:13px;color:var(--gray-500);">$</span>
-        <input type="number" min="0" step="1" placeholder="—" value="${cur}"
-          data-cat="${esc(c)}"
-          style="width:90px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;text-align:right;outline:none;"
-          oninput="updateBudgetRemaining()">
-      </div>
-    </div>`;
-  }).join('');
-
+  $$('bm-overall').value = totalSet || '';
+  bmState = cats.map(c => ({
+    origName: c,
+    name: c,
+    budget: budgets[c] || 0,
+    subs: (CATS[c] || []).map(s => ({ origName: s, name: s, budget: budgets[c + '/' + s] || 0 })),
+    expanded: false
+  }));
+  bmRender();
   updateBudgetRemaining();
   $$('budget-modal').style.display = 'flex';
-  $$('bm-overall').focus();
+}
+
+function bmRender() {
+  $$('bm-cats').innerHTML = bmState.map((cat, ci) => {
+    const color = CAT_COLOR[cat.origName] || CAT_COLOR[cat.name] || '#6B7280';
+    const subHtml = cat.subs.map((sub, si) => `
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0 7px 28px;border-top:1px solid var(--gray-100);">
+        <input type="text" value="${esc(sub.name)}" placeholder="Sub-category name"
+          style="flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:12.5px;font-family:inherit;outline:none;min-width:0;"
+          oninput="bmState[${ci}].subs[${si}].name=this.value">
+        <input type="number" min="0" step="1" placeholder="$" value="${sub.budget || ''}"
+          style="width:80px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:12.5px;font-family:inherit;text-align:right;outline:none;"
+          oninput="bmState[${ci}].subs[${si}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
+        <button onclick="bmDeleteSub(${ci},${si})" title="Remove"
+          style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
+      </div>`).join('');
+    const chevron = cat.expanded
+      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>`
+      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>`;
+    return `<div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--gray-50);">
+        <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+        <input type="text" value="${esc(cat.name)}" placeholder="Category name"
+          style="flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-weight:600;font-family:inherit;outline:none;min-width:0;background:var(--white);"
+          oninput="bmState[${ci}].name=this.value">
+        <input type="number" min="0" step="1" placeholder="$" value="${cat.budget || ''}"
+          style="width:90px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;text-align:right;outline:none;background:var(--white);"
+          oninput="bmState[${ci}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
+        <button onclick="bmToggleExpand(${ci})" title="Sub-categories"
+          style="background:none;border:1px solid var(--gray-200);border-radius:6px;cursor:pointer;color:var(--gray-500);padding:4px 6px;line-height:0;display:flex;align-items:center;">
+          ${chevron}
+        </button>
+        <button onclick="bmDeleteCat(${ci})" title="Delete category"
+          style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
+      </div>
+      ${cat.expanded ? `<div style="background:var(--white);">
+        ${subHtml}
+        <div style="padding:8px 12px 8px 28px;border-top:1px solid var(--gray-100);">
+          <button onclick="bmAddSub(${ci})"
+            style="background:none;border:1px dashed var(--gray-300);border-radius:6px;color:var(--primary);font-size:12px;font-weight:700;padding:4px 10px;cursor:pointer;font-family:inherit;">
+            + Add Sub-category
+          </button>
+        </div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function bmToggleExpand(ci) {
+  bmState[ci].expanded = !bmState[ci].expanded;
+  bmRender();
+}
+
+function bmAddSub(ci) {
+  bmState[ci].subs.push({ origName: null, name: '', budget: 0 });
+  bmState[ci].expanded = true;
+  bmRender();
+}
+
+function bmDeleteSub(ci, si) {
+  bmState[ci].subs.splice(si, 1);
+  bmRender();
+}
+
+function bmDeleteCat(ci) {
+  bmState.splice(ci, 1);
+  bmRender();
+  updateBudgetRemaining();
+}
+
+function bmAddCategory() {
+  bmState.push({ origName: null, name: '', budget: 0, subs: [], expanded: false });
+  bmRender();
+  // focus the new name input
+  const inputs = $$('bm-cats').querySelectorAll('input[type="text"]');
+  if (inputs.length) inputs[inputs.length - 1].focus();
 }
 
 function updateBudgetRemaining() {
   const overall = parseFloat($$('bm-overall')?.value) || 0;
-  const catInputs = $$('bm-cats')?.querySelectorAll('input[data-cat]') || [];
-  const allocated = Array.from(catInputs).reduce((s, el) => s + (parseFloat(el.value) || 0), 0);
+  const allocated = bmState.reduce((s, c) => s + c.budget, 0);
   const rem = overall - allocated;
   const el = $$('bm-remaining');
   if (el) {
@@ -2265,8 +2488,78 @@ function updateBudgetRemaining() {
 function closeBudgetModal() { $$('budget-modal').style.display = 'none'; }
 
 function submitBudgetModal() {
-  const catInputs = $$('bm-cats')?.querySelectorAll('input[data-cat]') || [];
-  catInputs.forEach(el => setBudget(el.dataset.cat, el.value));
+  // Validate: no empty category names
+  for (const cat of bmState) {
+    if (!cat.name.trim()) { toast('Category name cannot be empty', 'error'); return; }
+    for (const sub of cat.subs) {
+      if (!sub.name.trim()) { toast('Sub-category name cannot be empty', 'error'); return; }
+    }
+  }
+
+  // Collect old cat names before mutating
+  const oldCats = Object.keys(CATS).filter(c => c !== 'Income');
+  const newCatNames = bmState.map(c => c.name.trim());
+
+  // Remove deleted categories from CATS and budgets
+  oldCats.forEach(old => {
+    if (!bmState.find(c => c.origName === old)) {
+      delete CATS[old];
+      delete budgets[old];
+      (CATS[old] || []).forEach(s => delete budgets[old + '/' + s]);
+    }
+  });
+
+  // Apply renames and new cats
+  bmState.forEach(cat => {
+    const newName = cat.name.trim();
+    const oldName = cat.origName;
+    const oldSubs = oldName ? (CATS[oldName] || []) : [];
+
+    if (oldName && oldName !== newName) {
+      // rename: move CATS entry and budgets
+      CATS[newName] = CATS[oldName];
+      delete CATS[oldName];
+      if (budgets[oldName] !== undefined) { budgets[newName] = budgets[oldName]; delete budgets[oldName]; }
+      oldSubs.forEach(s => {
+        const ok = oldName + '/' + s, nk = newName + '/' + s;
+        if (budgets[ok] !== undefined) { budgets[nk] = budgets[ok]; delete budgets[ok]; }
+      });
+      if (CAT_COLOR[oldName]) { CAT_COLOR[newName] = CAT_COLOR[oldName]; delete CAT_COLOR[oldName]; }
+    } else if (!oldName) {
+      // new category
+      CATS[newName] = [];
+      if (!CAT_COLOR[newName]) CAT_COLOR[newName] = '#6B7280';
+    }
+
+    // Save category budget
+    setBudget(newName, cat.budget);
+
+    // Sync sub-cats
+    const newSubs = cat.subs.map(s => s.name.trim());
+    const currentSubs = CATS[newName] || [];
+
+    // Remove deleted sub-cats
+    currentSubs.forEach(s => {
+      if (!cat.subs.find(sub => sub.origName === s)) {
+        delete budgets[newName + '/' + s];
+      }
+    });
+
+    // Apply sub renames + new subs
+    cat.subs.forEach(sub => {
+      const sNew = sub.name.trim();
+      const sOld = sub.origName;
+      if (sOld && sOld !== sNew) {
+        const ok = newName + '/' + sOld, nk = newName + '/' + sNew;
+        if (budgets[ok] !== undefined) { budgets[nk] = budgets[ok]; delete budgets[ok]; }
+      }
+      setBudget(newName + '/' + sNew, sub.budget);
+    });
+
+    CATS[newName] = newSubs;
+  });
+
+  saveCats();
   renderBudget();
   closeBudgetModal();
   toast('Budgets saved');
@@ -2292,6 +2585,82 @@ function renderBudgetSummary() {
   }
 }
 
+function renderBudgetDonut(spent) {
+  const wrap = $$('budget-donut-wrap');
+  if (!wrap) return;
+  const cats = Object.keys(CATS).filter(c => c !== 'Income');
+  const hasBudget = cats.some(c => budgets[c] > 0);
+  if (!hasBudget) { wrap.style.display = 'none'; return; }
+
+  // Build slices: use budgeted amounts for allocation, spent for context
+  const slices = cats.map(c => ({
+    name: c,
+    color: CAT_COLOR[c] || '#6B7280',
+    budget: budgets[c] || 0,
+    spent: spent[c] || 0
+  })).filter(s => s.budget > 0);
+
+  const total = slices.reduce((s, x) => s + x.budget, 0);
+  const totalSpent = slices.reduce((s, x) => s + x.spent, 0);
+  const pctUsed = total > 0 ? Math.min(totalSpent / total * 100, 100) : 0;
+  const rem = total - totalSpent;
+  const over = totalSpent > total;
+
+  // SVG donut
+  const R = 70, cx = 90, cy = 90, stroke = 22;
+  const circ = 2 * Math.PI * R;
+  let offset = 0;
+  const gap = 1.5; // degrees gap between slices
+  const gapRad = (gap / 360) * circ;
+
+  const svgSlices = slices.map(s => {
+    const frac = s.budget / total;
+    const len = frac * circ - gapRad;
+    const dash = `${Math.max(0, len)} ${circ - Math.max(0, len)}`;
+    const el = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${s.color}" stroke-width="${stroke}"
+      stroke-dasharray="${dash}" stroke-dashoffset="${-offset}" stroke-linecap="butt"
+      style="transition:stroke-dasharray 0.4s ease;"/>`;
+    offset += frac * circ;
+    return el;
+  }).join('');
+
+  // Inner text: remaining or over
+  const centerLabel = over
+    ? `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--red-mid)" font-family="Inter,sans-serif">−${fmt(Math.abs(rem))}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="var(--gray-500)" font-family="Inter,sans-serif">over budget</text>`
+    : `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--gray-800)" font-family="Inter,sans-serif">${fmt(rem)}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="var(--gray-500)" font-family="Inter,sans-serif">remaining</text>`;
+
+  const svg = `<svg viewBox="0 0 180 180" width="180" height="180" style="flex-shrink:0;transform:rotate(-90deg);">
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--gray-100)" stroke-width="${stroke}"/>
+    ${svgSlices}
+    <g transform="rotate(90,${cx},${cy})">${centerLabel}</g>
+  </svg>`;
+
+  // Legend rows
+  const legend = slices.map(s => {
+    const pct = Math.round(s.budget / total * 100);
+    const sOver = s.spent > s.budget;
+    const spentPct = s.budget > 0 ? Math.min(s.spent / s.budget * 100, 100) : 0;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+      <div style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0;"></div>
+      <div style="flex:1;font-size:12.5px;font-weight:600;color:var(--gray-700);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.name)}</div>
+      <div style="font-size:11.5px;color:var(--gray-500);white-space:nowrap;">${pct}%</div>
+      <div style="font-size:12px;font-weight:700;color:${sOver?'var(--red-mid)':s.color};white-space:nowrap;">${fmt(s.budget)}</div>
+    </div>`;
+  }).join('');
+
+  wrap.style.display = 'flex';
+  wrap.innerHTML = `<div class="card" style="display:flex;gap:20px;align-items:center;padding:20px;flex-wrap:wrap;">
+    <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;">
+      ${svg}
+      <div style="font-size:11px;color:var(--gray-400);font-weight:600;">${Math.round(pctUsed)}% of budget used</div>
+    </div>
+    <div style="flex:1;min-width:160px;display:flex;flex-direction:column;border-left:1px solid var(--gray-100);padding-left:20px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--sb-bg);margin-bottom:8px;">Allocation</div>
+      ${legend}
+    </div>
+  </div>`;
+}
+
 function renderBudget() {
   // sync period pills
   ['week','fortnight','month'].forEach(k => {
@@ -2300,6 +2669,7 @@ function renderBudget() {
 
   const spent = budgetSpentByPeriod();
   renderBudgetSummary();
+  renderBudgetDonut(spent);
 
   $$('budget-list').innerHTML = Object.keys(CATS).filter(c => c !== 'Income').map(cat => {
     const color    = CAT_COLOR[cat] || '#6B7280';
@@ -2320,52 +2690,31 @@ function renderBudget() {
       const sPct      = sHas ? Math.min(sSpent / sBudget * 100, 100) : 0;
       const sOver     = sHas && sSpent > sBudget;
       const sBarColor = sOver ? 'var(--red-mid)' : (sPct > 80 ? '#F97316' : color);
+      if (!sHas && sSpent === 0) return '';
       return `<div style="padding:8px 0 8px 32px;border-top:1px solid var(--gray-100);">
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
           <div style="flex:1;font-size:12.5px;color:var(--gray-600);">${esc(sub)}</div>
-          <div class="budget-input-wrap" style="min-width:90px;">
-            <span>$</span>
-            <input class="budget-input" type="number" min="0" step="1"
-              value="${sHas ? sBudget : ''}"
-              placeholder="—"
-              onchange="setBudget('${esc(key)}', this.value)"
-              onclick="event.stopPropagation()">
-          </div>
+          <div style="font-size:12.5px;font-weight:600;color:${sOver?'var(--red-mid)':color};">${sHas ? (sOver?'−'+fmt(Math.abs(sBudget-sSpent))+' over':fmt(sSpent)+' / '+fmt(sBudget)) : fmt(sSpent)+' spent'}</div>
         </div>
-        ${sHas || sSpent > 0 ? `<div style="margin-top:5px;">
-          <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${sPct}%;background:${sBarColor};"></div></div>
-          <div class="budget-meta ${sOver?'over':''}" style="font-size:10.5px;">
-            ${sHas ? (sOver ? '−'+fmt(Math.abs(sBudget-sSpent))+' over' : fmt(sSpent)+' of '+fmt(sBudget)) : (sSpent > 0 ? fmt(sSpent)+' spent' : '')}
-          </div>
-        </div>` : ''}
+        <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${sPct}%;background:${sBarColor};"></div></div>
       </div>`;
-    }).join('');
+    }).filter(Boolean).join('');
 
     return `<div class="budget-row" style="padding-bottom:0;">
       <div class="budget-row-top">
         <div class="budget-cat-icon" style="background:${color}22;"><div style="width:12px;height:12px;border-radius:50%;background:${color};"></div></div>
         <div class="budget-cat-name">${esc(cat)}</div>
-        <div class="budget-input-wrap">
-          <span>$</span>
-          <input class="budget-input" type="number" min="0" step="1"
-            value="${hasBudget ? budget : ''}"
-            placeholder="—"
-            onchange="setBudget('${esc(cat)}', this.value)"
-            onclick="event.stopPropagation()">
+        <div style="font-size:14px;font-weight:700;color:${over?'var(--red-mid)':color};">
+          ${hasBudget ? (over ? '−'+fmt(Math.abs(remAmt))+' over' : fmt(spentAmt)+' / '+fmt(budget)) : (spentAmt > 0 ? fmt(spentAmt)+' spent' : '<span style="color:var(--gray-300);">No budget</span>')}
         </div>
       </div>
       <div class="budget-progress-row">
         <div class="budget-bar-track">
           <div class="budget-bar-fill" style="width:${pct}%;background:${barColor};"></div>
         </div>
-        ${hasBudget
-          ? `<div class="budget-meta ${over?'over':''}">
-              ${over ? '−'+fmt(Math.abs(remAmt))+' over' : fmt(spentAmt)+' of '+fmt(budget)}
-            </div>`
-          : `<div class="budget-meta">${spentAmt > 0 ? fmt(spentAmt)+' spent' : ''}</div>`
-        }
+        ${hasBudget ? `<div class="budget-meta ${over?'over':''}">${Math.round(pct)}% used</div>` : ''}
       </div>
-      ${subs.length ? subRows : ''}
+      ${subRows}
     </div>`;
   }).join('');
 }
@@ -2758,7 +3107,7 @@ function showAuthLogin() {
   $$('auth-register-form').style.display = 'none';
   $$('auth-reset-form').style.display = 'none';
   $$('auth-title-text').textContent = 'Sign in';
-  $$('auth-subtitle').textContent = 'Sign in to continue';
+  $$('auth-subtitle').textContent = '';
   hideAuthError();
 }
 
@@ -2883,6 +3232,7 @@ function bootApp() {
   CATS         = JSON.parse(localStorage.getItem('bt_cats_'         + currentUser) || 'null') || JSON.parse(JSON.stringify(DEFAULT_CATS));
   userAccounts = JSON.parse(localStorage.getItem('bt_accounts_'     + currentUser) || 'null') || [...DEFAULT_ACCOUNTS];
   utilBills    = JSON.parse(localStorage.getItem('bt_util_bills_'   + currentUser) || '[]');
+  loadTasks();
   $$('auth-overlay').classList.remove('show');
   const lbl = $$('current-user-label');
   if (lbl) lbl.textContent = currentUser;
@@ -2903,15 +3253,24 @@ function updateHdrActions(page) {
   const btnStyle = `padding:9px 18px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
   const svgPlus = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
   if (page === 'dashboard') {
-    el.innerHTML = `<button onclick="openAddModal()" style="${btnStyle}">${svgPlus}Add transaction</button>`;
-  } else if (page === 'utilities') {
-    if (utilTab === 'internet') {
-      el.innerHTML = `<button onclick="openInternetBillForm()" style="${btnStyle}">${svgPlus}Add plan</button>`;
-    } else if (utilTab === 'gas') {
-      el.innerHTML = `<button onclick="openBillForm(null,'gas')" style="${btnStyle}">${svgPlus}Add bill</button>`;
-    } else {
-      el.innerHTML = `<button onclick="openBillForm()" style="${btnStyle}">${svgPlus}Add bill</button>`;
-    }
+    el.innerHTML = '';
+  } else {
+    el.innerHTML = '';
+  }
+  renderUtilInlineCta();
+}
+
+function renderUtilInlineCta() {
+  const el = $$('util-inline-cta');
+  if (!el) return;
+  const btnStyle = `padding:8px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
+  const svgPlus = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+  if (utilTab === 'internet') {
+    el.innerHTML = `<button onclick="openInternetBillForm()" style="${btnStyle}">${svgPlus}Add plan</button>`;
+  } else if (utilTab === 'gas') {
+    el.innerHTML = `<button onclick="openBillForm(null,'gas')" style="${btnStyle}">${svgPlus}Add bill</button>`;
+  } else if (utilTab === 'electricity') {
+    el.innerHTML = `<button onclick="openBillForm()" style="${btnStyle}">${svgPlus}Add bill</button>`;
   } else {
     el.innerHTML = '';
   }
@@ -2924,6 +3283,7 @@ function setUtilTab(tab) {
   document.querySelectorAll('[id^="util-panel-"]').forEach(p => p.style.display = 'none');
   $$('util-panel-' + tab).style.display = '';
   updateHdrActions('utilities');
+  renderUtilInlineCta();
   renderUtilities();
 }
 
