@@ -286,7 +286,7 @@ body {
 .split-badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; background: #DBEAFE; color: #1D4ED8; }
 
 /* ── Budget page ─────────────────────────── */
-.budget-header { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.budget-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
 .budget-period-pills { display: flex; gap: 6px; }
 .budget-period-pill {
   padding: 6px 14px; border: 1.5px solid var(--gray-200); border-radius: 20px;
@@ -1003,7 +1003,6 @@ select.form-control {
     <!-- BUDGETING -->
     <div class="page" id="pg-budgeting">
       <div class="budget-header">
-        <div style="display:flex;align-items:center;gap:10px;">
         <div class="budget-period-pills">
           <button class="budget-period-pill" id="bpill-week"      onclick="setBudgetPeriod('week')">Week</button>
           <button class="budget-period-pill" id="bpill-fortnight" onclick="setBudgetPeriod('fortnight')">Fortnight</button>
@@ -1013,7 +1012,6 @@ select.form-control {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Set budget
         </button>
-        </div>
       </div>
       <div class="budget-summary-bar">
         <div><div class="bsum-label">Budgeted</div><div class="bsum-val" id="b-total-budget">—</div></div>
