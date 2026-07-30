@@ -741,7 +741,7 @@ select.form-control {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           Filter
         </button>
-        <button onclick="openAddModal()" style="margin-left:auto;padding:9px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
+        <button onclick="openAddModal()" style="margin-left:auto;padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add transaction
         </button>
@@ -1009,7 +1009,7 @@ select.form-control {
           <button class="budget-period-pill" id="bpill-fortnight" onclick="setBudgetPeriod('fortnight')">Fortnight</button>
           <button class="budget-period-pill active" id="bpill-month" onclick="setBudgetPeriod('month')">Month</button>
         </div>
-        <button onclick="openBudgetModal()" style="padding:8px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+        <button onclick="openBudgetModal()" style="padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Set budget
         </button>
@@ -1236,7 +1236,7 @@ select.form-control {
     <div class="page" id="pg-manage">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div class="settings-sec" style="margin:0;">Categories &amp; Sub-Categories</div>
-        <button onclick="saveManage()" id="manage-save-btn" style="display:none;padding:8px 18px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>
+        <button onclick="saveManage()" id="manage-save-btn" style="display:none;padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>
       </div>
       <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">
         <div id="manage-cats-list"></div>
@@ -3282,7 +3282,7 @@ function bootApp() {
 function updateHdrActions(page) {
   const el = $$('hdr-actions');
   if (!el) return;
-  const btnStyle = `padding:9px 18px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
+  const btnStyle = `padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
   const svgPlus = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
   if (page === 'dashboard') {
     el.innerHTML = '';
@@ -3295,7 +3295,7 @@ function updateHdrActions(page) {
 function renderUtilInlineCta() {
   const el = $$('util-inline-cta');
   if (!el) return;
-  const btnStyle = `padding:8px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
+  const btnStyle = `padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
   const svgPlus = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
   if (utilTab === 'internet') {
     el.innerHTML = `<button onclick="openInternetBillForm()" style="${btnStyle}">${svgPlus}Add plan</button>`;
