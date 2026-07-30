@@ -208,7 +208,7 @@ body {
 .month-label { font-weight: 700; font-size: 15px; color: var(--gray-800); }
 
 /* ── Summary Grid ────────────────────────── */
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .sum-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 14px 16px; }
 .sum-label { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 4px; }
 .sum-amount { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: 'Inter', sans-serif; }
@@ -263,10 +263,10 @@ body {
   background: var(--gray-50); padding: 10px 12px;
   text-align: left; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--gray-400); border-bottom: 2px solid var(--gray-200);
+  color: var(--sb-bg); border-bottom: 2px solid var(--gray-200);
   white-space: nowrap; user-select: none; cursor: pointer;
 }
-.tx-table thead th:hover { color: var(--gray-600); }
+.tx-table thead th:hover { color: var(--sb-bg); opacity: 0.75; }
 .tx-table thead th.sort-asc::after  { content: ' ▲'; font-size: 9px; }
 .tx-table thead th.sort-desc::after { content: ' ▼'; font-size: 9px; }
 .tx-table thead th.r { text-align: right; }
@@ -476,7 +476,7 @@ select.form-control {
 .auth-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--gray-200); padding: 36px 32px; width: 100%; max-width: 380px; margin: 20px; }
 .auth-logo { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
 .auth-logo-inner { width: 34px; height: 34px; border-radius: 9px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 700; color: #fff; font-size: 16px; }
-.auth-title { font-size: 20px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; font-family: 'Inter', sans-serif; }
+.auth-title { font-size: 20px; font-weight: 700; color: var(--gray-900); margin-bottom: 32px; font-family: 'Inter', sans-serif; }
 .auth-subtitle { font-size: 13.5px; color: var(--gray-500); margin-bottom: 24px; }
 .auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: var(--gray-500); }
 .auth-switch a { color: var(--primary); font-weight: 600; cursor: pointer; }
@@ -511,7 +511,7 @@ select.form-control {
   .toast { bottom: 20px; }
 
   /* Dashboard desktop layout */
-  .summary-grid { grid-template-columns: repeat(3, 1fr); }
+  .summary-grid { grid-template-columns: repeat(4, 1fr); }
   .sum-card.full { grid-column: auto; }
   .sum-amount { font-size: 24px; }
 
@@ -549,7 +549,7 @@ select.form-control {
 <!-- ── Auth overlay ──────────────────────── -->
 <div id="auth-overlay">
   <div class="auth-card">
-    <div style="margin-bottom:28px;">
+    <div style="margin-bottom:28px;display:flex;justify-content:center;">
       <svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:260px;display:block;">
         <defs>
           <linearGradient id="authBadgeGrad" x1="0" y1="0" x2="1" y2="1">
@@ -584,7 +584,7 @@ select.form-control {
         <input type="password" class="form-control" id="auth-password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter') authLogin()">
       </div>
       <button class="btn-primary" onclick="authLogin()">Sign In</button>
-      <div class="auth-switch">No account? <a onclick="showAuthRegister()">Create one</a></div>
+      <div class="auth-switch" style="margin-top:32px;">No account? <a onclick="showAuthRegister()">Create one</a></div>
       <div class="auth-switch" style="margin-top:6px;"><a onclick="showAuthReset()">Forgot password?</a></div>
     </div>
 
@@ -758,6 +758,19 @@ select.form-control {
           <div class="sum-amount neutral" id="dash-net">$0</div>
           <div class="sum-sub" id="dash-net-sub"></div>
         </div>
+        <div class="sum-card" style="display:flex;flex-direction:column;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div class="sum-label" style="margin-bottom:0;">Tasks</div>
+            <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
+          </div>
+          <div id="tasks-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin-bottom:8px;max-height:120px;"></div>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="task-input" placeholder="Add a task…"
+              style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:5px 8px;font-size:12px;font-family:inherit;outline:none;min-width:0;"
+              onkeydown="if(event.key==='Enter')addTask()">
+            <button onclick="addTask()" style="padding:5px 10px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">Add</button>
+          </div>
+        </div>
       </div>
 
       <!-- Dashboard bottom: 2-col on desktop -->
@@ -777,21 +790,6 @@ select.form-control {
             <div id="cat-donut" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
             <div id="cat-legend"></div>
           </div>
-        </div>
-      </div>
-
-      <!-- Tasks card -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-top:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div style="font-size:14px;font-weight:700;color:#0f172a;">Tasks</div>
-          <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
-        </div>
-        <div id="tasks-list" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="task-input" placeholder="Add a task…"
-            style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;"
-            onkeydown="if(event.key==='Enter')addTask()">
-          <button onclick="addTask()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Add</button>
         </div>
       </div>
 
@@ -917,7 +915,20 @@ select.form-control {
           </div>
         </div>
       </div>
-      <div class="pills" id="month-pills"></div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <div class="pills" id="month-pills" style="flex-wrap:wrap;display:contents;"></div>
+        <button id="tx-date-filter-btn" onclick="toggleTxDateFilter()"
+          style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
+          Date range
+        </button>
+      </div>
+      <div id="tx-date-filter-panel" style="display:none;margin-top:8px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);display:none;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--gray-500);">From</label>
+        <input type="date" id="tx-date-from" class="form-control" style="width:150px;font-size:13px;" onchange="applyTxDateFilter()">
+        <label style="font-size:12px;font-weight:600;color:var(--gray-500);">To</label>
+        <input type="date" id="tx-date-to" class="form-control" style="width:150px;font-size:13px;" onchange="applyTxDateFilter()">
+        <button onclick="clearTxDateFilter()" style="padding:5px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
+      </div>
 
       <!-- Mobile cards -->
       <div id="tx-cards" class="card" style="padding:0;overflow:hidden;"></div>
@@ -1126,11 +1137,14 @@ select.form-control {
 
     <!-- UTILITIES -->
     <div class="page" id="pg-utilities">
-      <!-- Utility type tabs -->
-      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="util-type-tabs">
-        <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">Electricity</button>
-        <button class="pill" id="utab-gas" onclick="setUtilTab('gas')">Gas</button>
-        <button class="pill" id="utab-internet" onclick="setUtilTab('internet')">Internet</button>
+      <!-- Utility type tabs + CTA inline -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="util-type-tabs">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">Electricity</button>
+          <button class="pill" id="utab-gas" onclick="setUtilTab('gas')">Gas</button>
+          <button class="pill" id="utab-internet" onclick="setUtilTab('internet')">Internet</button>
+        </div>
+        <div id="util-inline-cta"></div>
       </div>
 
       <!-- Electricity panel -->
@@ -1625,6 +1639,7 @@ let dashWeekStart = (function() {
 })();
 let activePill = '';
 let sortState = { col: 'date', dir: -1 };
+let txDateFrom = '', txDateTo = '';
 
 function save() { localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs)); updateCount(); syncSave(); }
 function saveCats() { localStorage.setItem('bt_cats_' + currentUser, JSON.stringify(CATS)); }
@@ -1905,10 +1920,8 @@ function renderDash() {
           <div style="font-size:14px;font-weight:700;color:#0f172a;flex-shrink:0;">${isIncome?'+':'-'}${fmt(amt)}</div>
         </div>`;
       }).join('')
-    : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;min-height:220px;">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--gray-200)" stroke-width="1.5" style="margin-bottom:12px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        <div style="font-size:13.5px;font-weight:600;color:var(--gray-400);margin-bottom:4px;">No transactions</div>
-        <div style="font-size:12px;color:var(--gray-300);">Transactions you add will appear here</div>
+    : `<div style="display:flex;align-items:center;justify-content:center;padding:40px 20px;min-height:220px;">
+        <div style="font-size:13px;color:var(--gray-400);">No transactions added</div>
       </div>`;
 
   // Income vs expenses bar chart (last 6 months)
@@ -1946,6 +1959,39 @@ function renderDash() {
 
 function openDashFilter() {
   // placeholder — period and view controls already on the page
+}
+
+function toggleTxDateFilter() {
+  const panel = $$('tx-date-filter-panel');
+  if (!panel) return;
+  const open = panel.style.display === 'flex';
+  panel.style.display = open ? 'none' : 'flex';
+  const btn = $$('tx-date-filter-btn');
+  if (btn) {
+    const hasFilter = txDateFrom || txDateTo;
+    btn.style.borderColor = (!open || hasFilter) ? (hasFilter ? 'var(--primary)' : 'var(--gray-200)') : 'var(--gray-200)';
+    btn.style.color = hasFilter ? 'var(--primary)' : 'var(--gray-400)';
+  }
+}
+function applyTxDateFilter() {
+  txDateFrom = $$('tx-date-from')?.value || '';
+  txDateTo   = $$('tx-date-to')?.value   || '';
+  const btn = $$('tx-date-filter-btn');
+  if (btn) {
+    const has = txDateFrom || txDateTo;
+    btn.style.borderColor = has ? 'var(--primary)' : 'var(--gray-200)';
+    btn.style.color = has ? 'var(--primary)' : 'var(--gray-400)';
+    btn.textContent = has ? 'Date range ✓' : 'Date range';
+  }
+  renderTx();
+}
+function clearTxDateFilter() {
+  txDateFrom = ''; txDateTo = '';
+  if ($$('tx-date-from')) $$('tx-date-from').value = '';
+  if ($$('tx-date-to'))   $$('tx-date-to').value   = '';
+  const btn = $$('tx-date-filter-btn');
+  if (btn) { btn.style.borderColor = 'var(--gray-200)'; btn.style.color = 'var(--gray-400)'; btn.textContent = 'Date range'; }
+  renderTx();
 }
 
 // ── Mobile card HTML ───────────────────────────────────────────
@@ -1987,12 +2033,13 @@ function renderTx() {
 
   let list = txs.filter(t => {
     const mOk = !activePill || t.date?.startsWith(activePill);
+    const dOk = (!txDateFrom || t.date >= txDateFrom) && (!txDateTo || t.date <= txDateTo);
     const qOk = !q ||
       (t.desc||'').toLowerCase().includes(q) ||
       (t.cat||'').toLowerCase().includes(q) ||
       (t.subcat||'').toLowerCase().includes(q) ||
       (t.account||'').toLowerCase().includes(q);
-    return mOk && qOk;
+    return mOk && dOk && qOk;
   });
 
   // Sort
@@ -3171,14 +3218,23 @@ function updateHdrActions(page) {
   const svgPlus = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
   if (page === 'dashboard') {
     el.innerHTML = `<button onclick="openAddModal()" style="${btnStyle}">${svgPlus}Add transaction</button>`;
-  } else if (page === 'utilities') {
-    if (utilTab === 'internet') {
-      el.innerHTML = `<button onclick="openInternetBillForm()" style="${btnStyle}">${svgPlus}Add plan</button>`;
-    } else if (utilTab === 'gas') {
-      el.innerHTML = `<button onclick="openBillForm(null,'gas')" style="${btnStyle}">${svgPlus}Add bill</button>`;
-    } else {
-      el.innerHTML = `<button onclick="openBillForm()" style="${btnStyle}">${svgPlus}Add bill</button>`;
-    }
+  } else {
+    el.innerHTML = '';
+  }
+  renderUtilInlineCta();
+}
+
+function renderUtilInlineCta() {
+  const el = $$('util-inline-cta');
+  if (!el) return;
+  const btnStyle = `padding:8px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
+  const svgPlus = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+  if (utilTab === 'internet') {
+    el.innerHTML = `<button onclick="openInternetBillForm()" style="${btnStyle}">${svgPlus}Add plan</button>`;
+  } else if (utilTab === 'gas') {
+    el.innerHTML = `<button onclick="openBillForm(null,'gas')" style="${btnStyle}">${svgPlus}Add bill</button>`;
+  } else if (utilTab === 'electricity') {
+    el.innerHTML = `<button onclick="openBillForm()" style="${btnStyle}">${svgPlus}Add bill</button>`;
   } else {
     el.innerHTML = '';
   }
@@ -3191,6 +3247,7 @@ function setUtilTab(tab) {
   document.querySelectorAll('[id^="util-panel-"]').forEach(p => p.style.display = 'none');
   $$('util-panel-' + tab).style.display = '';
   updateHdrActions('utilities');
+  renderUtilInlineCta();
   renderUtilities();
 }
 
