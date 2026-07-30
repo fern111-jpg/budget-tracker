@@ -720,6 +720,10 @@ select.form-control {
     <!-- DASHBOARD -->
     <div class="page active" id="pg-dashboard">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <button onclick="openAddModal()" style="padding:9px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add transaction
+        </button>
         <div class="month-picker" style="flex:1;margin-bottom:0;">
           <button class="month-btn" onclick="changePeriod(-1)">
             <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -742,7 +746,7 @@ select.form-control {
         </button>
       </div>
 
-      <div class="budget-summary-bar" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:10px;">
+      <div class="budget-summary-bar" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px;">
         <div>
           <div class="bsum-label" id="dash-income-label">Income</div>
           <div class="bsum-val" id="dash-income">$0</div>
@@ -757,19 +761,6 @@ select.form-control {
           <div class="bsum-label">Net</div>
           <div class="bsum-val" id="dash-net">$0</div>
           <div style="font-size:11.5px;color:var(--gray-400);margin-top:3px;" id="dash-net-sub"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;border-left:1px solid var(--gray-100);padding-left:18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <div class="bsum-label" style="margin-bottom:0;">Tasks</div>
-            <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
-          </div>
-          <div id="tasks-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin-bottom:8px;max-height:80px;"></div>
-          <div style="display:flex;gap:6px;">
-            <input type="text" id="task-input" placeholder="Add a task…"
-              style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:4px 8px;font-size:12px;font-family:inherit;outline:none;min-width:0;"
-              onkeydown="if(event.key==='Enter')addTask()">
-            <button onclick="addTask()" style="padding:4px 10px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">Add</button>
-          </div>
         </div>
       </div>
 
@@ -790,6 +781,21 @@ select.form-control {
             <div id="cat-donut" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
             <div id="cat-legend"></div>
           </div>
+        </div>
+      </div>
+
+      <!-- Tasks card -->
+      <div class="card" style="padding:18px;margin-top:0;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:14px;font-weight:700;color:#0f172a;">Tasks</div>
+          <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
+        </div>
+        <div id="tasks-list" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="task-input" placeholder="Add a task…"
+            style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;"
+            onkeydown="if(event.key==='Enter')addTask()">
+          <button onclick="addTask()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Add</button>
         </div>
       </div>
 
@@ -3217,7 +3223,7 @@ function updateHdrActions(page) {
   const btnStyle = `padding:9px 18px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;`;
   const svgPlus = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
   if (page === 'dashboard') {
-    el.innerHTML = `<button onclick="openAddModal()" style="${btnStyle}">${svgPlus}Add transaction</button>`;
+    el.innerHTML = '';
   } else {
     el.innerHTML = '';
   }
