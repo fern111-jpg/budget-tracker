@@ -1767,28 +1767,51 @@ function changePeriod(d) {
 
 // ── Tasks ──────────────────────────────────────────────────────
 let userTasks = [];
+let tasksPage = 0;
+const TASKS_PER_PAGE = 5;
+
 function loadTasks() {
   try { userTasks = JSON.parse(localStorage.getItem('bt_tasks_' + currentUser) || '[]'); } catch { userTasks = []; }
 }
 function saveTasks() { localStorage.setItem('bt_tasks_' + currentUser, JSON.stringify(userTasks)); }
+
 function renderTasks() {
   const list = $$('tasks-list');
   if (!list) return;
-  const count = $$('tasks-count');
+
   const done = userTasks.filter(t => t.done).length;
-  if (count) count.textContent = userTasks.length ? `${done}/${userTasks.length} done` : '';
+  const countEl = $$('tasks-count');
+  if (countEl) countEl.textContent = userTasks.length ? `${done}/${userTasks.length} done` : '';
+
+  const totalPages = Math.max(1, Math.ceil(userTasks.length / TASKS_PER_PAGE));
+  if (tasksPage >= totalPages) tasksPage = totalPages - 1;
+  const start = tasksPage * TASKS_PER_PAGE;
+  const page = userTasks.slice(start, start + TASKS_PER_PAGE);
+
+  // Pagination nav
+  const nav = $$('tasks-page-nav');
+  if (nav) {
+    nav.innerHTML = totalPages > 1 ? `
+      <button onclick="tasksPage=Math.max(0,tasksPage-1);renderTasks()" ${tasksPage===0?'disabled':''} style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:14px;padding:0 2px;line-height:1;">‹</button>
+      <span style="min-width:32px;text-align:center;">${tasksPage+1}/${totalPages}</span>
+      <button onclick="tasksPage=Math.min(${totalPages-1},tasksPage+1);renderTasks()" ${tasksPage===totalPages-1?'disabled':''} style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:14px;padding:0 2px;line-height:1;">›</button>` : '';
+  }
+
   if (!userTasks.length) {
-    list.innerHTML = `<div style="text-align:center;padding:20px 0;color:var(--gray-300);font-size:13px;">No tasks yet</div>`;
+    list.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-300);font-size:13px;">No tasks yet</div>`;
     return;
   }
-  list.innerHTML = userTasks.map((t, i) => `
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--gray-100);">
+  list.innerHTML = page.map((t, pi) => {
+    const i = start + pi;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gray-100);">
       <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})"
-        style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);flex-shrink:0;">
+        style="width:15px;height:15px;cursor:pointer;accent-color:var(--primary);flex-shrink:0;">
       <span style="flex:1;font-size:13px;color:${t.done ? 'var(--gray-300)' : 'var(--gray-700)'};text-decoration:${t.done ? 'line-through' : 'none'};">${esc(t.text)}</span>
       <button onclick="deleteTask(${i})" style="background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:15px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
+
 function addTask() {
   const inp = $$('task-input');
   if (!inp) return;
@@ -1797,6 +1820,8 @@ function addTask() {
   userTasks.push({ text, done: false });
   saveTasks();
   inp.value = '';
+  // Jump to last page so new task is visible
+  tasksPage = Math.floor((userTasks.length - 1) / TASKS_PER_PAGE);
   renderTasks();
 }
 function toggleTask(i) {
