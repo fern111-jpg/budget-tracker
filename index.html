@@ -1002,7 +1002,6 @@ select.form-control {
     <!-- BUDGETING -->
     <div class="page" id="pg-budgeting">
       <div class="budget-header">
-        <div style="font-size:13px;color:var(--gray-500);font-weight:600;">Set a spending limit per category</div>
         <div style="display:flex;align-items:center;gap:10px;">
         <div class="budget-period-pills">
           <button class="budget-period-pill" id="bpill-week"      onclick="setBudgetPeriod('week')">Week</button>
@@ -1702,7 +1701,7 @@ function goTo(page) {
   $$('hdr-title').textContent = titles[page] || page;
   updateHdrBadge(page);
   const sub = $$('hdr-subtitle');
-  const subMap = { utilities: 'Compare bills and provider quotes', dashboard: 'Your finances at a glance' };
+  const subMap = { utilities: 'Compare bills and provider quotes', dashboard: 'Your finances at a glance', budgeting: 'Set a spending limit per category' };
   if (sub) { sub.textContent = subMap[page] || ''; sub.style.display = subMap[page] ? '' : 'none'; }
   updateHdrActions(page);
   if (page === 'dashboard')    renderDash();
