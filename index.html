@@ -1115,36 +1115,25 @@ select.form-control {
 
     <!-- MANAGE -->
     <div class="page" id="pg-manage">
-      <div class="settings-sec">Categories</div>
-      <div class="card" style="padding:16px 20px;margin-bottom:16px;">
+      <div class="settings-sec">Categories &amp; Sub-Categories</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">
         <div id="manage-cats-list"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;">
-          <input type="text" class="form-control" id="new-cat-input" placeholder="New category name" style="flex:1;">
-          <button onclick="addCategory()" style="padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Add</button>
-        </div>
-      </div>
-
-      <div class="settings-sec">Sub-Categories</div>
-      <div class="card" style="padding:16px 20px;margin-bottom:16px;">
-        <div style="margin-bottom:12px;">
-          <label class="form-label">Category</label>
-          <select class="form-control" id="manage-subcat-pick" onchange="renderManageSubcats()">
-            <option value="">Select category</option>
-          </select>
-        </div>
-        <div id="manage-subcats-list"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;" id="manage-subcat-add-row">
-          <input type="text" class="form-control" id="new-subcat-input" placeholder="New sub-category name" style="flex:1;">
-          <button onclick="addSubcat()" style="padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Add</button>
+        <div style="padding:12px 20px;border-top:1px solid var(--gray-100);">
+          <button onclick="addCategoryInline()" style="background:none;border:none;color:var(--primary);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;padding:4px 0;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add New Category
+          </button>
         </div>
       </div>
 
       <div class="settings-sec">Accounts</div>
-      <div class="card" style="padding:16px 20px;margin-bottom:16px;">
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">
         <div id="manage-accounts-list"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;">
-          <input type="text" class="form-control" id="new-account-input" placeholder="New account name" style="flex:1;">
-          <button onclick="addAccount()" style="padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Add</button>
+        <div style="padding:12px 20px;border-top:1px solid var(--gray-100);">
+          <button onclick="addAccountInline()" style="background:none;border:none;color:var(--primary);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;padding:4px 0;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add New Account
+          </button>
         </div>
       </div>
     </div>
@@ -2110,6 +2099,10 @@ function budgetSpentByPeriod() {
     if (dt < start || dt > end) return;
     const amt = t.trueAmt ?? t.amount ?? 0;
     spent[t.cat] = (spent[t.cat] || 0) + amt;
+    if (t.subcat) {
+      const key = t.cat + '/' + t.subcat;
+      spent[key] = (spent[key] || 0) + amt;
+    }
   });
   return spent;
 }
@@ -2214,17 +2207,46 @@ function renderBudget() {
   renderBudgetSummary();
 
   $$('budget-list').innerHTML = Object.keys(CATS).filter(c => c !== 'Income').map(cat => {
-    const color   = CAT_COLOR[cat] || '#6B7280';
-    const emoji   = CAT_EMOJI[cat] || '📌';
-    const budget  = budgets[cat] || 0;
+    const color    = CAT_COLOR[cat] || '#6B7280';
+    const budget   = budgets[cat] || 0;
     const spentAmt = spent[cat]  || 0;
     const hasBudget = budget > 0;
-    const pct     = hasBudget ? Math.min(spentAmt / budget * 100, 100) : 0;
-    const over    = hasBudget && spentAmt > budget;
+    const pct      = hasBudget ? Math.min(spentAmt / budget * 100, 100) : 0;
+    const over     = hasBudget && spentAmt > budget;
     const barColor = over ? 'var(--red-mid)' : (pct > 80 ? '#F97316' : color);
-    const remAmt  = budget - spentAmt;
+    const remAmt   = budget - spentAmt;
 
-    return `<div class="budget-row">
+    const subs = (CATS[cat] || []);
+    const subRows = subs.map(sub => {
+      const key       = cat + '/' + sub;
+      const sBudget   = budgets[key] || 0;
+      const sSpent    = spent[key]   || 0;
+      const sHas      = sBudget > 0;
+      const sPct      = sHas ? Math.min(sSpent / sBudget * 100, 100) : 0;
+      const sOver     = sHas && sSpent > sBudget;
+      const sBarColor = sOver ? 'var(--red-mid)' : (sPct > 80 ? '#F97316' : color);
+      return `<div style="padding:8px 0 8px 32px;border-top:1px solid var(--gray-100);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;font-size:12.5px;color:var(--gray-600);">${esc(sub)}</div>
+          <div class="budget-input-wrap" style="min-width:90px;">
+            <span>$</span>
+            <input class="budget-input" type="number" min="0" step="1"
+              value="${sHas ? sBudget : ''}"
+              placeholder="—"
+              onchange="setBudget('${esc(key)}', this.value)"
+              onclick="event.stopPropagation()">
+          </div>
+        </div>
+        ${sHas || sSpent > 0 ? `<div style="margin-top:5px;">
+          <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${sPct}%;background:${sBarColor};"></div></div>
+          <div class="budget-meta ${sOver?'over':''}" style="font-size:10.5px;">
+            ${sHas ? (sOver ? '−'+fmt(Math.abs(sBudget-sSpent))+' over' : fmt(sSpent)+' of '+fmt(sBudget)) : (sSpent > 0 ? fmt(sSpent)+' spent' : '')}
+          </div>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+
+    return `<div class="budget-row" style="padding-bottom:0;">
       <div class="budget-row-top">
         <div class="budget-cat-icon" style="background:${color}22;"><div style="width:12px;height:12px;border-radius:50%;background:${color};"></div></div>
         <div class="budget-cat-name">${esc(cat)}</div>
@@ -2248,6 +2270,7 @@ function renderBudget() {
           : `<div class="budget-meta">${spentAmt > 0 ? fmt(spentAmt)+' spent' : ''}</div>`
         }
       </div>
+      ${subs.length ? subRows : ''}
     </div>`;
   }).join('');
 }
@@ -4046,153 +4069,173 @@ function submitShare() {
 // ── Manage page ────────────────────────────────────────────────
 function renderManage() {
   renderManageCats();
-  renderManageSubcats();
   renderManageAccounts();
-  // populate category picker for subcats
-  const pick = $$('manage-subcat-pick');
-  const cur = pick.value;
-  pick.innerHTML = '<option value="">Select category</option>' +
-    Object.keys(CATS).map(c=>`<option value="${esc(c)}" ${c===cur?'selected':''}>${esc(c)}</option>`).join('');
 }
 
+// ── shared helpers ──────────────────────────────────────────────
+function catKey(cat) { return btoa(encodeURIComponent(cat)).replace(/[^A-Za-z0-9]/g,''); }
+
+const inputStyle = `flex:1;font-size:13.5px;padding:6px 10px;border:1.5px solid var(--gray-200);border-radius:6px;font-family:inherit;color:var(--gray-900);background:var(--white);outline:none;`;
+
+// ── Categories (with inline sub-cats) ──────────────────────────
 function renderManageCats() {
   const el = $$('manage-cats-list');
-  el.innerHTML = Object.keys(CATS).map(cat => `
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100);" id="mcat-row-${btoa(cat).replace(/=/g,'')}">
-      <span style="flex:1;font-size:14px;color:var(--gray-800);" id="mcat-label-${btoa(cat).replace(/=/g,'')}">${esc(cat)}</span>
-      <input type="text" class="form-control" style="flex:1;display:none;font-size:14px;" id="mcat-input-${btoa(cat).replace(/=/g,'')}" value="${esc(cat)}">
-      <button onclick="editCatStart('${esc(cat)}')" id="mcat-edit-${btoa(cat).replace(/=/g,'')}" style="padding:4px 10px;background:var(--gray-100);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-600);">Edit</button>
-      <button onclick="editCatSave('${esc(cat)}')" id="mcat-save-${btoa(cat).replace(/=/g,'')}" style="display:none;padding:4px 10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Save</button>
-      <button onclick="deleteCategory('${esc(cat)}')" style="padding:4px 10px;background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;" title="Delete">&times;</button>
-    </div>`).join('');
+  el.innerHTML = Object.keys(CATS).map((cat, ci) => {
+    const k = catKey(cat);
+    const color = CAT_COLOR[cat] || '#6B7280';
+    const subs = CATS[cat] || [];
+    const subRows = subs.map((s, si) => {
+      const sk = k + '_s' + si;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 20px 7px 44px;border-top:1px solid var(--gray-100);" id="msub-row-${sk}">
+        <input type="text" style="${inputStyle}" id="msub-in-${sk}" value="${esc(s)}"
+          onblur="saveSubInline('${esc(cat)}',${si},this.value)"
+          onkeydown="if(event.key==='Enter')this.blur();">
+        <button onclick="deleteSubcat('${esc(cat)}',${si})" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'" title="Delete">&times;</button>
+      </div>`;
+    }).join('');
+
+    return `<div style="border-bottom:1px solid var(--gray-100);" id="mcat-block-${k}">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+        <input type="text" style="${inputStyle}font-weight:600;" id="mcat-in-${k}" value="${esc(cat)}"
+          onblur="saveCatInline('${esc(cat)}',this.value)"
+          onkeydown="if(event.key==='Enter')this.blur();">
+        <button onclick="deleteCategory('${esc(cat)}')" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'" title="Delete">&times;</button>
+      </div>
+      <div id="msub-list-${k}">${subRows}</div>
+      <div style="padding:6px 20px 8px 44px;">
+        <button onclick="addSubcatInline('${esc(cat)}')" style="background:none;border:none;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:2px 0;display:flex;align-items:center;gap:4px;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add New Sub-Category
+        </button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function catKey(cat) { return btoa(encodeURIComponent(cat)).replace(/=/g,''); }
-
-function editCatStart(cat) {
-  const k = catKey(cat);
-  $$('mcat-label-'+k).style.display = 'none';
-  $$('mcat-input-'+k).style.display = '';
-  $$('mcat-input-'+k).focus();
-  $$('mcat-edit-'+k).style.display = 'none';
-  $$('mcat-save-'+k).style.display = '';
-}
-
-function editCatSave(oldName) {
-  const k = catKey(oldName);
-  const newName = $$('mcat-input-'+k).value.trim();
+function saveCatInline(oldName, newName) {
+  newName = newName.trim();
   if (!newName || newName === oldName) { renderManageCats(); return; }
-  if (CATS[newName]) { toast('Category already exists'); return; }
-  const subs = CATS[oldName];
+  if (CATS[newName]) { toast('Category already exists'); renderManageCats(); return; }
   const newCats = {};
   Object.keys(CATS).forEach(c => { newCats[c === oldName ? newName : c] = CATS[c]; });
   CATS = newCats;
-  // update existing transactions
   txs.forEach(t => { if (t.cat === oldName) t.cat = newName; });
-  save(); saveCats(); renderManage(); toast('Category renamed');
+  save(); saveCats(); renderManageCats();
 }
 
 function deleteCategory(cat) {
-  if (!confirm(`Delete category "${cat}"? Transactions will keep their category label.`)) return;
+  if (!confirm(`Delete "${cat}"? Transactions will keep their category label.`)) return;
   delete CATS[cat];
-  saveCats(); renderManage(); toast('Category deleted');
+  saveCats(); renderManageCats(); toast('Category deleted');
 }
 
-function addCategory() {
-  const name = $$('new-cat-input').value.trim();
-  if (!name) return;
-  if (CATS[name]) { toast('Already exists'); return; }
+function addCategoryInline() {
+  const el = $$('manage-cats-list');
+  const tmp = document.createElement('div');
+  tmp.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--gray-100);';
+  tmp.innerHTML = `<div style="width:10px;height:10px;border-radius:50%;background:var(--gray-300);flex-shrink:0;"></div>
+    <input type="text" id="new-cat-tmp" style="${inputStyle}font-weight:600;" placeholder="Category name" autofocus>
+    <button onclick="confirmAddCategory()" style="padding:5px 12px;background:var(--primary);color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">Add</button>
+    <button onclick="this.closest('div[style]').remove()" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'">&times;</button>`;
+  el.appendChild(tmp);
+  tmp.querySelector('#new-cat-tmp').focus();
+}
+
+function confirmAddCategory() {
+  const inp = $$('new-cat-tmp');
+  if (!inp) return;
+  const name = inp.value.trim();
+  if (!name) { inp.focus(); return; }
+  if (CATS[name]) { toast('Already exists'); inp.focus(); return; }
   CATS[name] = [];
-  saveCats(); $$('new-cat-input').value = ''; renderManage(); toast('Category added');
+  saveCats(); renderManageCats(); toast('Category added');
 }
 
-function renderManageSubcats() {
-  const cat = $$('manage-subcat-pick').value;
-  const list = $$('manage-subcats-list');
-  if (!cat || !CATS[cat]) { list.innerHTML = '<p style="color:var(--gray-400);font-size:13px;margin:0;">Select a category above to manage its sub-categories.</p>'; return; }
-  const subs = CATS[cat];
-  list.innerHTML = subs.length ? subs.map((s,i) => `
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100);">
-      <span style="flex:1;font-size:14px;color:var(--gray-800);" id="msub-label-${i}">${esc(s)}</span>
-      <input type="text" class="form-control" style="flex:1;display:none;font-size:14px;" id="msub-input-${i}" value="${esc(s)}">
-      <button onclick="editSubStart(${i})" id="msub-edit-${i}" style="padding:4px 10px;background:var(--gray-100);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-600);">Edit</button>
-      <button onclick="editSubSave('${esc(cat)}',${i})" id="msub-save-${i}" style="display:none;padding:4px 10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Save</button>
-      <button onclick="deleteSubcat('${esc(cat)}',${i})" style="padding:4px 10px;background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;" title="Delete">&times;</button>
-    </div>`).join('') : '<p style="color:var(--gray-400);font-size:13px;margin:0 0 4px;">No sub-categories yet.</p>';
-}
-
-function editSubStart(i) {
-  $$('msub-label-'+i).style.display = 'none';
-  $$('msub-input-'+i).style.display = '';
-  $$('msub-input-'+i).focus();
-  $$('msub-edit-'+i).style.display = 'none';
-  $$('msub-save-'+i).style.display = '';
-}
-
-function editSubSave(cat, i) {
-  const newName = $$('msub-input-'+i).value.trim();
-  if (!newName) { renderManageSubcats(); return; }
+function saveSubInline(cat, i, newName) {
+  newName = newName.trim();
+  if (!newName) { renderManageCats(); return; }
   const old = CATS[cat][i];
+  if (newName === old) return;
   CATS[cat][i] = newName;
   txs.forEach(t => { if (t.cat === cat && t.subcat === old) t.subcat = newName; });
-  save(); saveCats(); renderManageSubcats(); toast('Sub-category renamed');
+  save(); saveCats();
 }
 
 function deleteSubcat(cat, i) {
   CATS[cat].splice(i, 1);
-  saveCats(); renderManageSubcats(); toast('Sub-category deleted');
+  saveCats(); renderManageCats(); toast('Sub-category deleted');
 }
 
-function addSubcat() {
-  const cat = $$('manage-subcat-pick').value;
-  if (!cat) { toast('Select a category first'); return; }
-  const name = $$('new-subcat-input').value.trim();
-  if (!name) return;
-  if (CATS[cat].includes(name)) { toast('Already exists'); return; }
+function addSubcatInline(cat) {
+  const k = catKey(cat);
+  const list = $$('msub-list-' + k);
+  if (!list) return;
+  const tmp = document.createElement('div');
+  tmp.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 20px 7px 44px;border-top:1px solid var(--gray-100);';
+  tmp.innerHTML = `<input type="text" id="new-sub-tmp-${k}" style="${inputStyle}" placeholder="Sub-category name">
+    <button onclick="confirmAddSubcat('${esc(cat)}')" style="padding:5px 12px;background:var(--primary);color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">Add</button>
+    <button onclick="this.closest('div[style]').remove()" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'">&times;</button>`;
+  list.appendChild(tmp);
+  tmp.querySelector(`#new-sub-tmp-${k}`).focus();
+}
+
+function confirmAddSubcat(cat) {
+  const k = catKey(cat);
+  const inp = $$('new-sub-tmp-' + k);
+  if (!inp) return;
+  const name = inp.value.trim();
+  if (!name) { inp.focus(); return; }
+  if (CATS[cat].includes(name)) { toast('Already exists'); inp.focus(); return; }
   CATS[cat].push(name);
-  saveCats(); $$('new-subcat-input').value = ''; renderManageSubcats(); toast('Sub-category added');
+  saveCats(); renderManageCats(); toast('Sub-category added');
 }
 
+// ── Accounts ────────────────────────────────────────────────────
 function renderManageAccounts() {
   const el = $$('manage-accounts-list');
-  el.innerHTML = userAccounts.map((a,i) => `
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-100);">
-      <span style="flex:1;font-size:14px;color:var(--gray-800);" id="macc-label-${i}">${esc(a)}</span>
-      <input type="text" class="form-control" style="flex:1;display:none;font-size:14px;" id="macc-input-${i}" value="${esc(a)}">
-      <button onclick="editAccStart(${i})" id="macc-edit-${i}" style="padding:4px 10px;background:var(--gray-100);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray-600);">Edit</button>
-      <button onclick="editAccSave(${i})" id="macc-save-${i}" style="display:none;padding:4px 10px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">Save</button>
-      <button onclick="deleteAccount(${i})" style="padding:4px 10px;background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;" title="Delete">&times;</button>
+  el.innerHTML = userAccounts.map((a, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--gray-100);">
+      <input type="text" style="${inputStyle}" id="macc-in-${i}" value="${esc(a)}"
+        onblur="saveAccInline(${i},this.value)"
+        onkeydown="if(event.key==='Enter')this.blur();">
+      <button onclick="deleteAccount(${i})" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'" title="Delete">&times;</button>
     </div>`).join('');
 }
 
-function editAccStart(i) {
-  $$('macc-label-'+i).style.display = 'none';
-  $$('macc-input-'+i).style.display = '';
-  $$('macc-input-'+i).focus();
-  $$('macc-edit-'+i).style.display = 'none';
-  $$('macc-save-'+i).style.display = '';
-}
-
-function editAccSave(i) {
-  const newName = $$('macc-input-'+i).value.trim();
-  if (!newName) { renderManageAccounts(); return; }
+function saveAccInline(i, newName) {
+  newName = newName.trim();
+  if (!newName || newName === userAccounts[i]) { renderManageAccounts(); return; }
   const old = userAccounts[i];
   userAccounts[i] = newName;
   txs.forEach(t => { if (t.account === old) t.account = newName; });
-  save(); saveAccounts(); renderManageAccounts(); toast('Account renamed');
+  save(); saveAccounts();
+}
+
+function addAccountInline() {
+  const el = $$('manage-accounts-list');
+  const tmp = document.createElement('div');
+  tmp.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--gray-100);';
+  tmp.innerHTML = `<input type="text" id="new-acc-tmp" style="${inputStyle}" placeholder="Account name">
+    <button onclick="confirmAddAccount()" style="padding:5px 12px;background:var(--primary);color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">Add</button>
+    <button onclick="this.closest('div[style]').remove()" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'">&times;</button>`;
+  el.appendChild(tmp);
+  tmp.querySelector('#new-acc-tmp').focus();
+}
+
+function confirmAddAccount() {
+  const inp = $$('new-acc-tmp');
+  if (!inp) return;
+  const name = inp.value.trim();
+  if (!name) { inp.focus(); return; }
+  if (userAccounts.includes(name)) { toast('Already exists'); inp.focus(); return; }
+  userAccounts.push(name);
+  saveAccounts(); renderManageAccounts(); toast('Account added');
 }
 
 function deleteAccount(i) {
   userAccounts.splice(i, 1);
   saveAccounts(); renderManageAccounts(); toast('Account deleted');
-}
-
-function addAccount() {
-  const name = $$('new-account-input').value.trim();
-  if (!name) return;
-  if (userAccounts.includes(name)) { toast('Already exists'); return; }
-  userAccounts.push(name);
-  saveAccounts(); $$('new-account-input').value = ''; renderManageAccounts(); toast('Account added');
 }
 
 // ── Bulk selection ─────────────────────────────────────────────
