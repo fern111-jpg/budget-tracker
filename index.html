@@ -61,32 +61,35 @@ body {
 
 /* ── App shell ───────────────────────────── */
 #app { display: flex; min-height: 100vh; max-width: 480px; margin: 0 auto; flex-direction: column; }
+@media (min-width: 768px) {
+  #app { max-width: 100%; flex-direction: row; }
+}
 
 /* ── Sidebar (desktop only) ──────────────── */
 .sidebar {
   display: none;
   width: 56px;
-  min-height: 100vh;
+  flex-shrink: 0;
   background: var(--sb-bg);
-  border-right: none;
   flex-direction: column;
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
   z-index: 100;
   box-shadow: 4px 0 24px rgba(15,23,42,0.18);
   overflow: hidden;
-  transition: width 0.2s ease;
+  transition: width 0.22s ease;
 }
 .sidebar:hover { width: var(--sb-w); }
+
+/* Brand row */
 .sb-brand {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 22px 10px 16px;
   border-bottom: 1px solid var(--sb-border);
-  white-space: nowrap;
-  overflow: hidden;
-  min-width: var(--sb-w);
+  flex-shrink: 0;
 }
 .sb-logo {
   width: 30px; height: 30px; border-radius: 8px;
@@ -94,8 +97,16 @@ body {
   font-family: 'Inter', sans-serif; font-weight: 700; color: #fff; font-size: 15px;
   flex-shrink: 0;
 }
-.sb-name { font-size: 18px; font-weight: 700; color: #ffffff; font-family: 'Inter', sans-serif; letter-spacing: -0.3px; opacity: 0; transition: opacity 0.15s ease; }
-.sidebar:hover .sb-name { opacity: 1; }
+/* Text labels — hidden when collapsed, visible when expanded */
+.sb-name {
+  font-size: 18px; font-weight: 700; color: #ffffff;
+  font-family: 'Inter', sans-serif; letter-spacing: -0.3px;
+  white-space: nowrap; overflow: hidden;
+  max-width: 0; opacity: 0;
+  transition: max-width 0.22s ease, opacity 0.15s ease;
+}
+.sidebar:hover .sb-name { max-width: 160px; opacity: 1; }
+
 .sb-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
 .sb-item {
   display: flex;
@@ -111,16 +122,37 @@ body {
   color: var(--sb-text);
   text-align: left;
   width: 100%;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   font-family: inherit;
   white-space: nowrap;
-  min-width: calc(var(--sb-w) - 20px);
+  overflow: hidden;
 }
 .sb-item:hover { background: var(--sb-hover-bg); color: #e2e8f0; }
 .sb-item.active { background: var(--sb-active-bg); color: var(--sb-text-active); font-weight: 600; }
 .sb-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .sb-item.active svg { stroke-width: 2.2; }
-.sb-footer { padding: 16px 10px; border-top: 1px solid var(--sb-border); font-size: 12px; color: var(--sb-text); overflow: hidden; white-space: nowrap; min-width: var(--sb-w); }
+
+/* Nav item label text */
+.sb-item-label {
+  white-space: nowrap; overflow: hidden;
+  max-width: 0; opacity: 0;
+  transition: max-width 0.22s ease, opacity 0.15s ease;
+}
+.sidebar:hover .sb-item-label { max-width: 160px; opacity: 1; }
+
+/* Footer */
+.sb-footer {
+  padding: 14px 10px;
+  border-top: 1px solid var(--sb-border);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sb-footer-text {
+  white-space: nowrap; overflow: hidden;
+  max-width: 0; opacity: 0;
+  transition: max-width 0.22s ease, opacity 0.15s ease;
+}
+.sidebar:hover .sb-footer-text { max-width: 160px; opacity: 1; }
 
 /* ── Main content ────────────────────────── */
 .main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
@@ -461,9 +493,9 @@ select.form-control {
   /* App shell goes full-width */
   #app { max-width: none; flex-direction: row; margin: 0; }
 
-  /* Show sidebar — collapsed to icon-only by default */
+  /* Show sidebar — collapsed to icon-only, pushes content */
   .sidebar { display: flex; }
-  .main { margin-left: 56px; flex: 1; min-height: 100vh; background: var(--bg); }
+  .main { flex: 1; min-height: 100vh; min-width: 0; background: var(--bg); }
 
   /* Header tweaks */
   .header { padding: 0 20px; }
@@ -505,7 +537,6 @@ select.form-control {
 @media (min-width: 1024px) {
   .sidebar { width: 56px; }
   .sidebar:hover { width: var(--sb-w); }
-  .main { margin-left: 56px; }
   .header { padding: 0 28px; }
   .header-title { font-size: 18px; }
   .page { padding: 24px 28px 28px; }
@@ -643,31 +674,31 @@ select.form-control {
     <nav class="sb-nav">
       <button class="sb-item active" id="sb-dashboard" onclick="goTo('dashboard')">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
-        Overview
+        <span class="sb-item-label">Overview</span>
       </button>
       <button class="sb-item" id="sb-transactions" onclick="goTo('transactions')">
         <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-        Transactions
+        <span class="sb-item-label">Transactions</span>
       </button>
       <button class="sb-item" id="sb-budgeting" onclick="goTo('budgeting')">
         <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><line x1="6" y1="10" x2="6" y2="13"></line><line x1="10" y1="8" x2="10" y2="13"></line><line x1="14" y1="11" x2="14" y2="13"></line><line x1="18" y1="9" x2="18" y2="13"></line></svg>
-        Budgeting
+        <span class="sb-item-label">Budgeting</span>
       </button>
       <button class="sb-item" id="sb-utilities" onclick="goTo('utilities')">
         <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        Utilities
+        <span class="sb-item-label">Utilities</span>
       </button>
       <button class="sb-item" id="sb-settings" onclick="goTo('settings')">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        Settings
+        <span class="sb-item-label">Settings</span>
       </button>
     </nav>
     <div class="sb-footer">
       <div style="display:flex;align-items:center;gap:10px;">
         <div id="sb-avatar" style="width:32px;height:32px;border-radius:50%;background:var(--sb-border);display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12.5px;font-weight:600;font-family:'Inter',sans-serif;flex-shrink:0;"></div>
-        <div style="min-width:0;">
-          <div id="sb-username" style="font-size:13px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-          <div style="font-size:11px;color:var(--sb-text);">Personal account</div>
+        <div class="sb-footer-text" style="min-width:0;">
+          <div id="sb-username" style="font-size:13px;font-weight:600;color:#e2e8f0;white-space:nowrap;"></div>
+          <div style="font-size:11px;color:var(--sb-text);white-space:nowrap;">Personal account</div>
         </div>
       </div>
     </div>
