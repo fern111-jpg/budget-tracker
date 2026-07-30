@@ -1797,7 +1797,7 @@ function renderTasks() {
   }
 
   if (!userTasks.length) {
-    list.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-300);font-size:13px;">No tasks yet</div>`;
+    list.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-500);font-size:13px;font-weight:500;">No tasks yet</div>`;
     return;
   }
   list.innerHTML = page.map((t, pi) => {
@@ -1967,7 +1967,7 @@ function renderDash() {
     }).join('');
   } else {
     $$('cat-donut').innerHTML = '';
-    $$('cat-legend').innerHTML = `<div style="text-align:center;color:var(--gray-400);font-size:13px;padding:16px 0;">${emptyMsg}</div>`;
+    $$('cat-legend').innerHTML = `<div style="text-align:center;color:var(--gray-500);font-size:13px;font-weight:500;padding:16px 0;">${emptyMsg}</div>`;
   }
 
   // Recent transactions (no checkboxes, avatar circle)
@@ -1989,7 +1989,7 @@ function renderDash() {
         </div>`;
       }).join('')
     : `<div style="display:flex;align-items:center;justify-content:center;padding:40px 20px;min-height:220px;">
-        <div style="font-size:13px;color:var(--gray-400);">No transactions added</div>
+        <div style="font-size:13px;color:var(--gray-500);font-weight:500;">No transactions added</div>
       </div>`;
 
   // Income vs expenses bar chart (last 6 months)
