@@ -36,7 +36,7 @@
   --radius: 12px;
   --radius-sm: 8px;
   --nav-h: 66px;
-  --header-h: 54px;
+  --header-h: 68.8px;
   --sb-w: 240px;
   --sb-bg: #0f172a;
   --sb-border: #1e293b;
@@ -142,18 +142,17 @@ body {
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 480px; height: var(--nav-h);
-  background: var(--white); border-top: 1px solid var(--gray-200);
+  background: var(--sb-bg); border-top: 1px solid var(--sb-border);
   display: flex; z-index: 200;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
   padding-bottom: env(safe-area-inset-bottom);
 }
 .nav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px; border: none; background: none; cursor: pointer;
-  color: var(--gray-400); font-size: 10px; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--sb-text); font-size: 10px; font-weight: 600; letter-spacing: 0.02em;
   transition: color 0.15s; font-family: inherit;
 }
-.nav-item.active { color: var(--primary); }
+.nav-item.active { color: var(--sb-text-active); }
 .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke-width 0.15s; }
 .nav-item.active svg { stroke-width: 2.4; }
 
@@ -172,14 +171,14 @@ body {
 .sum-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 14px 16px; }
 .sum-label { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 4px; }
 .sum-amount { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: 'Space Grotesk', sans-serif; }
-.sum-amount.income  { color: var(--green-mid); }
-.sum-amount.expense { color: var(--red-mid); }
-.sum-amount.pos     { color: var(--green-mid); }
-.sum-amount.neg     { color: var(--red-mid); }
+.sum-amount.income  { color: var(--gray-900); }
+.sum-amount.expense { color: var(--gray-900); }
+.sum-amount.pos     { color: var(--gray-900); }
+.sum-amount.neg     { color: var(--gray-900); }
 .sum-amount.neutral { color: var(--gray-800); }
 .sum-sub { font-size: 11.5px; color: var(--gray-400); margin-top: 3px; }
-.sum-sub.positive { color: var(--green-mid); }
-.sum-sub.negative { color: var(--red-mid); }
+.sum-sub.positive { color: var(--gray-600); }
+.sum-sub.negative { color: var(--gray-600); }
 
 /* ── Section title ───────────────────────── */
 .sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-400); margin: 14px 2px 7px; }
@@ -453,18 +452,16 @@ select.form-control {
   /* App shell goes full-width */
   #app { max-width: none; flex-direction: row; margin: 0; }
 
-  /* Show sidebar */
-  .sidebar { display: flex; }
-
-  /* Main gets margin for sidebar */
-  .main { margin-left: var(--sb-w); flex: 1; min-height: 100vh; background: var(--bg); }
+  /* Show sidebar — compact on tablet */
+  .sidebar { display: flex; width: 200px; }
+  .main { margin-left: 200px; flex: 1; min-height: 100vh; background: var(--bg); }
 
   /* Header tweaks */
-  .header { padding: 0 28px; }
-  .header-title { font-size: 18px; }
+  .header { padding: 0 20px; }
+  .header-title { font-size: 17px; }
 
   /* Pages fill nicely */
-  .page { padding: 24px 28px 28px; max-width: 1400px; }
+  .page { padding: 20px 20px 28px; max-width: 1400px; }
 
   /* No bottom nav */
   .bottom-nav { display: none; }
@@ -475,7 +472,7 @@ select.form-control {
   /* Dashboard desktop layout */
   .summary-grid { grid-template-columns: repeat(3, 1fr); }
   .sum-card.full { grid-column: auto; }
-  .sum-amount { font-size: 26px; }
+  .sum-amount { font-size: 24px; }
 
   .dash-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .dash-bottom .sec-title { margin-top: 0; }
@@ -492,7 +489,17 @@ select.form-control {
   .overlay { align-items: center; }
   .modal { border-radius: 18px; max-width: 560px; padding: 0 28px 32px; max-height: 88vh; }
 
-  /* Wider month picker on dashboard */
+  /* Month picker on dashboard */
+  .month-picker { max-width: 300px; }
+}
+
+@media (min-width: 1024px) {
+  .sidebar { width: var(--sb-w); }
+  .main { margin-left: var(--sb-w); }
+  .header { padding: 0 28px; }
+  .header-title { font-size: 18px; }
+  .page { padding: 24px 28px 28px; }
+  .sum-amount { font-size: 26px; }
   .month-picker { max-width: 320px; }
 }
 </style>
@@ -887,10 +894,16 @@ select.form-control {
     <div class="page" id="pg-budgeting">
       <div class="budget-header">
         <div style="font-size:13px;color:var(--gray-500);font-weight:600;">Set a spending limit per category</div>
+        <div style="display:flex;align-items:center;gap:10px;">
         <div class="budget-period-pills">
           <button class="budget-period-pill" id="bpill-week"      onclick="setBudgetPeriod('week')">Week</button>
           <button class="budget-period-pill" id="bpill-fortnight" onclick="setBudgetPeriod('fortnight')">Fortnight</button>
           <button class="budget-period-pill active" id="bpill-month" onclick="setBudgetPeriod('month')">Month</button>
+        </div>
+        <button onclick="openBudgetModal()" style="padding:8px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Set budget
+        </button>
         </div>
       </div>
       <div class="budget-summary-bar">
@@ -899,6 +912,44 @@ select.form-control {
         <div><div class="bsum-label">Remaining</div><div class="bsum-val" id="b-total-rem">—</div></div>
       </div>
       <div class="budget-list" id="budget-list"></div>
+    </div>
+
+    <!-- BUDGET MODAL -->
+    <div id="budget-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;">
+      <div class="card" style="width:100%;max-width:520px;position:relative;margin:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:16px;font-weight:700;color:var(--gray-900);">Set Budget</span>
+          <button onclick="closeBudgetModal()" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:22px;line-height:1;padding:2px 6px;">&times;</button>
+        </div>
+        <div style="font-size:13px;color:var(--gray-500);margin-bottom:20px;">Set a total budget and allocate across categories.</div>
+
+        <!-- Overall budget -->
+        <div style="background:var(--primary-light);border:1.5px solid #bfdbfe;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--primary);margin-bottom:4px;">Overall Budget</div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <span style="font-size:15px;font-weight:700;color:var(--primary);">$</span>
+                <input type="number" id="bm-overall" min="0" step="1" placeholder="0"
+                  style="width:100%;border:none;background:transparent;font-size:22px;font-weight:700;color:var(--primary);font-family:'Space Grotesk',sans-serif;outline:none;"
+                  oninput="updateBudgetRemaining()">
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-size:11px;color:var(--primary);font-weight:600;margin-bottom:2px;">Remaining</div>
+              <div id="bm-remaining" style="font-size:18px;font-weight:700;color:var(--primary);font-family:'Space Grotesk',sans-serif;">$0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-category inputs -->
+        <div id="bm-cats" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
+
+        <div style="display:flex;gap:10px;">
+          <button class="btn-primary" onclick="submitBudgetModal()" style="flex:1;">Save budgets</button>
+          <button onclick="closeBudgetModal()" style="padding:10px 16px;border:1.5px solid var(--gray-200);background:var(--white);border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <!-- SETTINGS -->
@@ -919,6 +970,30 @@ select.form-control {
         <div class="settings-row" onclick="goTo('manage')">
           <span class="settings-label">Categories, Sub-Categories &amp; Accounts</span>
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      </div>
+
+      <div class="settings-sec">Appearance</div>
+      <div class="settings-group">
+        <div class="settings-row" style="cursor:default;">
+          <span class="settings-label">Navigation background</span>
+          <input type="color" id="clr-nav-bg" value="#0f172a" oninput="applyThemeColors()" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none;">
+        </div>
+        <div class="settings-row" style="cursor:default;">
+          <span class="settings-label">Navigation text</span>
+          <input type="color" id="clr-nav-text" value="#94a3b8" oninput="applyThemeColors()" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none;">
+        </div>
+        <div class="settings-row" style="cursor:default;">
+          <span class="settings-label">CTA colour</span>
+          <input type="color" id="clr-cta" value="#1d4ed8" oninput="applyThemeColors()" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none;">
+        </div>
+        <div class="settings-row" style="cursor:default;">
+          <span class="settings-label">CTA text colour</span>
+          <input type="color" id="clr-cta-text" value="#ffffff" oninput="applyThemeColors()" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none;">
+        </div>
+        <div class="settings-row" onclick="resetThemeColors()" style="color:var(--primary);">
+          <span class="settings-label" style="color:var(--primary);">Reset to defaults</span>
+          <svg viewBox="0 0 24 24" style="stroke:var(--primary);"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.51"></path></svg>
         </div>
       </div>
 
@@ -1592,8 +1667,8 @@ function renderDash() {
   $$('dash-income-label').textContent = `Income (${periodLabel})`;
   $$('dash-expense-label').textContent = `Expenses (${periodLabel})`;
 
-  $$('dash-income').textContent  = fmt(income);
-  $$('dash-expense').textContent = fmt(expenses);
+  $$('dash-income').textContent  = (income > 0 ? '+' : '') + fmt(income);
+  $$('dash-expense').textContent = (expenses > 0 ? '-' : '') + fmt(expenses);
   const ne = $$('dash-net');
   ne.textContent = (net >= 0 ? '+' : '') + fmt(Math.abs(net));
   ne.className   = 'sum-amount ' + (net > 0 ? 'pos' : net < 0 ? 'neg' : 'neutral');
@@ -1677,10 +1752,10 @@ function renderDash() {
             <div style="font-size:13.5px;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(t.desc||'No description')}</div>
             <div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">${esc(t.cat||'')} · ${fmtShort(t.date)}</div>
           </div>
-          <div style="font-size:14px;font-weight:700;color:${isIncome?'var(--green-mid)':'#0f172a'};flex-shrink:0;">${isIncome?'+':''}${fmt(amt)}</div>
+          <div style="font-size:14px;font-weight:700;color:#0f172a;flex-shrink:0;">${isIncome?'+':'-'}${fmt(amt)}</div>
         </div>`;
       }).join('')
-    : '<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">No transactions</div><div class="empty-sub">Tap Add to log your first</div></div>';
+    : `<div style="text-align:center;color:var(--gray-400);font-size:13px;padding:16px 0;">${emptyMsg.replace('expenses','transactions')}</div>`;
 
   // Income vs expenses bar chart (last 6 months)
   const now = new Date();
@@ -1726,7 +1801,7 @@ function txCardHTML(t) {
   const checked = selectedIds.has(t.id);
   return `<label class="tx-item" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;" onclick="event.preventDefault()">
     <input type="checkbox" class="bulk-cb" data-id="${t.id}" ${checked?'checked':''} onchange="bulkToggleId('${t.id}',this.checked)" style="width:18px;height:18px;accent-color:var(--primary);flex-shrink:0;cursor:pointer;">
-    <div class="tx-icon" style="background:${col}1a;">${emoji}</div>
+    <div class="tx-icon" style="background:${col}22;color:${col};font-size:15px;font-weight:700;font-family:'Space Grotesk',sans-serif;">${(t.desc||'?')[0].toUpperCase()}</div>
     <div class="tx-body" style="flex:1;min-width:0;">
       <div class="tx-desc">${esc(t.desc||'No description')}</div>
       <div class="tx-meta">${fmtShort(t.date)}${t.account?' · '+esc(t.account):''}${t.subcat?' · '+esc(t.subcat):''}${t.split?' · Split'+(t.paid?' ✓':''):''}</div>
@@ -1776,7 +1851,7 @@ function renderTx() {
   // Mobile cards
   $$('tx-cards').innerHTML = list.length
     ? list.map(txCardHTML).join('')
-    : '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No results</div><div class="empty-sub">Try a different search or month</div></div>';
+    : '<div class="empty"><div class="empty-icon" style="font-size:0;"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="empty-title">No results</div><div class="empty-sub">Try a different search or month</div></div>';
 
   // Desktop table
   if (!list.length) {
@@ -1798,9 +1873,7 @@ function renderTx() {
       <td style="color:var(--gray-700);">${esc(t.account||'')}</td>
       <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(t.desc||'')}">${esc(t.desc||'')}</td>
       <td>
-        <span class="cat-chip" style="background:${col}18;color:${col};">
-          <span style="width:6px;height:6px;border-radius:50%;background:${col};flex-shrink:0;display:inline-block;"></span>${esc(t.cat||'')}
-        </span>
+        <span class="cat-chip" style="background:${col}18;color:${col};">${esc(t.cat||'')}</span>
         ${t.subcat?`<div style="font-size:11px;color:var(--gray-400);margin-top:3px;padding-left:2px;">${esc(t.subcat)}</div>`:''}
       </td>
       <td class="${isIncome?'income-cell':'expense-cell'}" style="white-space:nowrap;text-align:right;">
@@ -1809,8 +1882,8 @@ function renderTx() {
           : `<span style="font-weight:700;">${isIncome?'':'-'}${fmt(fullAmt)}</span>`
         }
       </td>
-      <td>${people.length ? personBadgesHTML(people) : (t.split ? `<span class="split-badge">÷${t.splitNo||''}</span>` : '<span class="muted">—</span>')}</td>
-      <td>${t.paid ? '<span class="paid-check">✓</span>' : '<span class="muted">—</span>'}</td>
+      <td>${people.length ? personBadgesHTML(people) : (t.split ? `<span class="split-badge">÷${t.splitNo||''}</span>` : '')}</td>
+      <td>${t.paid ? '<span class="paid-check">✓</span>' : ''}</td>
     </tr>`;
   }).join('');
 
@@ -2061,10 +2134,60 @@ function setBudget(cat, val) {
   renderBudgetSummary();
 }
 
+function openBudgetModal() {
+  const cats = Object.keys(CATS).filter(c => c !== 'Income');
+  const totalSet = cats.reduce((s, c) => s + (budgets[c] || 0), 0);
+  const overall = parseFloat($$('bm-overall')?.value) || totalSet || 0;
+  $$('bm-overall').value = overall || '';
+
+  const col = CAT_COLOR;
+  $$('bm-cats').innerHTML = cats.map(c => {
+    const color = col[c] || '#6B7280';
+    const cur = budgets[c] || '';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius-sm);border:1px solid var(--gray-100);">
+      <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+      <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--gray-800);">${esc(c)}</div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <span style="font-size:13px;color:var(--gray-500);">$</span>
+        <input type="number" min="0" step="1" placeholder="—" value="${cur}"
+          data-cat="${esc(c)}"
+          style="width:90px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;text-align:right;outline:none;"
+          oninput="updateBudgetRemaining()">
+      </div>
+    </div>`;
+  }).join('');
+
+  updateBudgetRemaining();
+  $$('budget-modal').style.display = 'flex';
+  $$('bm-overall').focus();
+}
+
+function updateBudgetRemaining() {
+  const overall = parseFloat($$('bm-overall')?.value) || 0;
+  const catInputs = $$('bm-cats')?.querySelectorAll('input[data-cat]') || [];
+  const allocated = Array.from(catInputs).reduce((s, el) => s + (parseFloat(el.value) || 0), 0);
+  const rem = overall - allocated;
+  const el = $$('bm-remaining');
+  if (el) {
+    el.textContent = (rem < 0 ? '-' : '') + '$' + Math.abs(rem).toFixed(0);
+    el.style.color = rem < 0 ? 'var(--red-mid)' : 'var(--primary)';
+  }
+}
+
+function closeBudgetModal() { $$('budget-modal').style.display = 'none'; }
+
+function submitBudgetModal() {
+  const catInputs = $$('bm-cats')?.querySelectorAll('input[data-cat]') || [];
+  catInputs.forEach(el => setBudget(el.dataset.cat, el.value));
+  renderBudget();
+  closeBudgetModal();
+  toast('Budgets saved');
+}
+
 function renderBudgetSummary() {
   const spent = budgetSpentByPeriod();
   let totalBudget = 0, totalSpent = 0;
-  EXPENSE_CATS.forEach(cat => {
+  Object.keys(CATS).filter(c => c !== 'Income').forEach(cat => {
     if (budgets[cat]) totalBudget += budgets[cat];
     totalSpent += spent[cat] || 0;
   });
@@ -2090,7 +2213,7 @@ function renderBudget() {
   const spent = budgetSpentByPeriod();
   renderBudgetSummary();
 
-  $$('budget-list').innerHTML = EXPENSE_CATS.map(cat => {
+  $$('budget-list').innerHTML = Object.keys(CATS).filter(c => c !== 'Income').map(cat => {
     const color   = CAT_COLOR[cat] || '#6B7280';
     const emoji   = CAT_EMOJI[cat] || '📌';
     const budget  = budgets[cat] || 0;
@@ -2103,7 +2226,7 @@ function renderBudget() {
 
     return `<div class="budget-row">
       <div class="budget-row-top">
-        <div class="budget-cat-icon" style="background:${color}22;">${emoji}</div>
+        <div class="budget-cat-icon" style="background:${color}22;"><div style="width:12px;height:12px;border-radius:50%;background:${color};"></div></div>
         <div class="budget-cat-name">${esc(cat)}</div>
         <div class="budget-input-wrap">
           <span>$</span>
@@ -2204,6 +2327,53 @@ function csvLine(s) {
 function clearAll() {
   if (!confirm('Delete ALL transactions? This cannot be undone.')) return;
   txs=[]; save(); toast('Cleared'); goTo('dashboard');
+}
+
+// ── Theme colours ──────────────────────────────────────────────
+const THEME_DEFAULTS = { 'clr-nav-bg': '#0f172a', 'clr-nav-text': '#94a3b8', 'clr-cta': '#1d4ed8', 'clr-cta-text': '#ffffff' };
+const THEME_VARS = { 'clr-nav-bg': ['--sb-bg'], 'clr-nav-text': ['--sb-text'], 'clr-cta': ['--primary'], 'clr-cta-text': [] };
+
+function applyThemeColors() {
+  const root = document.documentElement;
+  Object.entries(THEME_DEFAULTS).forEach(([id]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const val = el.value;
+    (THEME_VARS[id] || []).forEach(v => root.style.setProperty(v, val));
+    if (id === 'clr-cta') {
+      root.style.setProperty('--primary', val);
+      root.style.setProperty('--primary-dark', val);
+    }
+    if (id === 'clr-cta-text') {
+      // applied via btn-primary rule inline override
+      document.querySelectorAll('.btn-primary').forEach(b => b.style.color = val);
+    }
+  });
+  // persist
+  const saved = {};
+  Object.keys(THEME_DEFAULTS).forEach(id => { const el = document.getElementById(id); if (el) saved[id] = el.value; });
+  localStorage.setItem('bt_theme_' + currentUser, JSON.stringify(saved));
+}
+
+function loadThemeColors() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('bt_theme_' + currentUser) || '{}');
+    Object.entries(THEME_DEFAULTS).forEach(([id, def]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = saved[id] || def;
+    });
+    applyThemeColors();
+  } catch(e) {}
+}
+
+function resetThemeColors() {
+  Object.entries(THEME_DEFAULTS).forEach(([id, def]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = def;
+  });
+  applyThemeColors();
+  localStorage.removeItem('bt_theme_' + currentUser);
+  toast('Colours reset');
 }
 
 // ── Person tags ────────────────────────────────────────────────
@@ -2605,6 +2775,7 @@ function bootApp() {
   updateSyncUI();
   setBudgetPeriod(budgetPeriod);
   if (syncCfg?.key && syncCfg?.binId) setTimeout(syncPull, 800);
+  loadThemeColors();
 }
 
 // ── Utilities page ─────────────────────────────────────────────
@@ -2754,19 +2925,29 @@ function renderBillsList() {
     return;
   }
 
+  const chipStyle = `display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;`;
   const rows = bills.map((b, i) => {
     const isLast = i === bills.length - 1;
     const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
     const perDay = b.days ? `$${((+b.total)/b.days).toFixed(2)}/day` : '';
-    return `<div onclick="editBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
-        <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
+    // Build rate chips
+    const chips = [];
+    if (b.supply) chips.push(`<span style="${chipStyle}background:#fef3c7;color:#92400e;">${(+b.supply).toFixed(4)}<span style="font-weight:400;opacity:0.75;">/day</span></span>`);
+    (b.ratePeriods || []).forEach(r => {
+      if (r.name) chips.push(`<span style="${chipStyle}background:#eff6ff;color:#1e40af;">${esc(r.name)} <span style="font-weight:700;">${(+r.rate).toFixed(3)}</span><span style="font-weight:400;opacity:0.75;">c/kWh</span></span>`);
+    });
+    return `<div onclick="editBill('${b.id}')" style="padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
+          <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
+          ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
+        </div>
       </div>
-      <div style="text-align:right;flex-shrink:0;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
-        ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
-      </div>
+      ${chips.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">${chips.join('')}</div>` : ''}
     </div>`;
   }).join('');
   el.innerHTML = `<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">${rows}</div>`;
@@ -3425,19 +3606,28 @@ function renderGasBillsList() {
   }
   const bills = allBills.filter(gasInFilter);
   if (!bills.length) { el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;color:var(--gray-400);font-size:14px;">No bills in the selected period</div>`; return; }
+  const chipStyle = `display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;`;
   const rows = bills.map((b, i) => {
     const isLast = i === bills.length - 1;
     const periodLabel = b.from && b.to ? `${fmtShort(b.from)} – ${fmtShort(b.to)}` : (b.days ? `${b.days} days` : '');
     const perDay = b.days ? `$${((+b.total)/b.days).toFixed(2)}/day` : '';
-    return `<div onclick="editBill('${b.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
-        <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
+    const chips = [];
+    if (b.supply) chips.push(`<span style="${chipStyle}background:#fef3c7;color:#92400e;">${(+b.supply).toFixed(4)}<span style="font-weight:400;opacity:0.75;">/day</span></span>`);
+    (b.ratePeriods || []).forEach(r => {
+      if (r.name) chips.push(`<span style="${chipStyle}background:#f0fdf4;color:#166534;">${esc(r.name)} <span style="font-weight:700;">${(+r.rate).toFixed(3)}</span><span style="font-weight:400;opacity:0.75;">c/MJ</span></span>`);
+    });
+    return `<div onclick="editBill('${b.id}')" style="padding:14px 18px;${isLast?'':'border-bottom:1px solid #f1f5f9;'}cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:2px;">${esc(b.provider||'Unknown Provider')}</div>
+          <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
+          ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
+        </div>
       </div>
-      <div style="text-align:right;flex-shrink:0;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
-        ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
-      </div>
+      ${chips.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">${chips.join('')}</div>` : ''}
     </div>`;
   }).join('');
   el.innerHTML = `<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">${rows}</div>`;
