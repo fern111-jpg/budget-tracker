@@ -299,7 +299,7 @@ body {
   padding: 16px 18px; margin-bottom: 14px;
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
 }
-.bsum-label { font-size: 11px; font-weight: 600; color: var(--sb-bg); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.bsum-label { font-size: 11px; font-weight: 600; color: var(--sb-bg); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-family: 'Inter', sans-serif; }
 .bsum-val   { font-size: 20px; font-weight: 700; color: var(--gray-900); font-family: 'Inter', sans-serif; }
 .bsum-val.ok  { color: var(--green-mid); }
 .bsum-val.over { color: var(--red-mid); }
@@ -769,7 +769,7 @@ select.form-control {
         <div>
           <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;">
-              <div style="font-size:14px;font-weight:700;color:#0f172a;">Recent transactions</div>
+              <div class="bsum-label" style="margin-bottom:0;">Recent transactions</div>
               <button onclick="goTo('transactions')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">View all</button>
             </div>
             <div id="dash-recent"></div>
@@ -777,7 +777,7 @@ select.form-control {
         </div>
         <div>
           <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;padding:16px 18px;">
-            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:14px;">Spending by category</div>
+            <div class="bsum-label">Spending by category</div>
             <div id="cat-donut" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
             <div id="cat-legend"></div>
           </div>
@@ -788,7 +788,7 @@ select.form-control {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
         <div class="card" style="padding:0;display:flex;flex-direction:column;height:320px;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;flex-shrink:0;">
-            <div style="font-size:14px;font-weight:700;color:#0f172a;">Tasks</div>
+            <div class="bsum-label" style="margin-bottom:0;">Tasks</div>
             <div style="display:flex;align-items:center;gap:10px;">
               <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
               <div id="tasks-page-nav" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--gray-400);"></div>
@@ -806,7 +806,7 @@ select.form-control {
         <!-- Income vs expenses chart -->
         <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;height:320px;box-sizing:border-box;overflow:hidden;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-          <div style="font-size:14px;font-weight:700;color:#0f172a;">Income vs. expenses</div>
+          <div class="bsum-label" style="margin-bottom:0;">Income vs. expenses</div>
           <button onclick="goTo('budgeting')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">Manage budgets</button>
         </div>
         <div id="income-expense-chart"></div>
@@ -926,7 +926,7 @@ select.form-control {
           </div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px;margin-bottom:10px;">
         <div class="pills" id="month-pills" style="flex-wrap:wrap;display:contents;"></div>
         <button id="tx-date-filter-btn" onclick="toggleTxDateFilter()"
           style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
@@ -945,7 +945,7 @@ select.form-control {
       <div id="tx-cards" class="card" style="padding:0;overflow:hidden;"></div>
 
       <!-- Desktop table -->
-      <div class="desktop-table-wrap">
+      <div class="desktop-table-wrap" style="margin-top:0;">
         <table class="tx-table" id="tx-table">
             <thead>
               <tr>
