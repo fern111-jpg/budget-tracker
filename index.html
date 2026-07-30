@@ -742,33 +742,33 @@ select.form-control {
         </button>
       </div>
 
-      <div class="summary-grid">
-        <div class="sum-card">
-          <div class="sum-label" id="dash-income-label">Income</div>
-          <div class="sum-amount income" id="dash-income">$0</div>
-          <div class="sum-sub positive" id="dash-income-sub"></div>
+      <div class="budget-summary-bar" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:10px;">
+        <div>
+          <div class="bsum-label" id="dash-income-label">Income</div>
+          <div class="bsum-val" id="dash-income">$0</div>
+          <div style="font-size:11.5px;color:var(--gray-400);margin-top:3px;" id="dash-income-sub"></div>
         </div>
-        <div class="sum-card">
-          <div class="sum-label" id="dash-expense-label">Expenses</div>
-          <div class="sum-amount expense" id="dash-expense">$0</div>
-          <div class="sum-sub" id="dash-expense-sub"></div>
+        <div>
+          <div class="bsum-label" id="dash-expense-label">Expenses</div>
+          <div class="bsum-val" id="dash-expense">$0</div>
+          <div style="font-size:11.5px;color:var(--gray-400);margin-top:3px;" id="dash-expense-sub"></div>
         </div>
-        <div class="sum-card">
-          <div class="sum-label">Net</div>
-          <div class="sum-amount neutral" id="dash-net">$0</div>
-          <div class="sum-sub" id="dash-net-sub"></div>
+        <div>
+          <div class="bsum-label">Net</div>
+          <div class="bsum-val" id="dash-net">$0</div>
+          <div style="font-size:11.5px;color:var(--gray-400);margin-top:3px;" id="dash-net-sub"></div>
         </div>
-        <div class="sum-card" style="display:flex;flex-direction:column;overflow:hidden;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div class="sum-label" style="margin-bottom:0;">Tasks</div>
+        <div style="display:flex;flex-direction:column;border-left:1px solid var(--gray-100);padding-left:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div class="bsum-label" style="margin-bottom:0;">Tasks</div>
             <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
           </div>
-          <div id="tasks-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin-bottom:8px;max-height:120px;"></div>
+          <div id="tasks-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin-bottom:8px;max-height:80px;"></div>
           <div style="display:flex;gap:6px;">
             <input type="text" id="task-input" placeholder="Add a task…"
-              style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:5px 8px;font-size:12px;font-family:inherit;outline:none;min-width:0;"
+              style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:4px 8px;font-size:12px;font-family:inherit;outline:none;min-width:0;"
               onkeydown="if(event.key==='Enter')addTask()">
-            <button onclick="addTask()" style="padding:5px 10px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">Add</button>
+            <button onclick="addTask()" style="padding:4px 10px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">Add</button>
           </div>
         </div>
       </div>
@@ -1835,8 +1835,8 @@ function renderDash() {
   $$('dash-income').textContent  = (income > 0 ? '+' : '') + fmt(income);
   $$('dash-expense').textContent = (expenses > 0 ? '-' : '') + fmt(expenses);
   const ne = $$('dash-net');
-  ne.textContent = (net >= 0 ? '+' : '') + fmt(Math.abs(net));
-  ne.className   = 'sum-amount ' + (net > 0 ? 'pos' : net < 0 ? 'neg' : 'neutral');
+  ne.textContent = (net >= 0 ? '+' : '-') + fmt(Math.abs(net));
+  ne.className   = 'bsum-val ' + (net > 0 ? 'ok' : net < 0 ? 'over' : '');
 
   // Subtexts
   const incomeSub = $$('dash-income-sub');
