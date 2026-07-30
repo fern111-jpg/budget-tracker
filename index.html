@@ -988,12 +988,12 @@ select.form-control {
 
     <!-- BUDGET MODAL -->
     <div id="budget-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;">
-      <div class="card" style="width:100%;max-width:520px;position:relative;margin:auto;">
+      <div class="card" style="width:100%;max-width:560px;position:relative;margin:auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <span style="font-size:16px;font-weight:700;color:var(--gray-900);">Set Budget</span>
           <button onclick="closeBudgetModal()" style="background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:22px;line-height:1;padding:2px 6px;">&times;</button>
         </div>
-        <div style="font-size:13px;color:var(--gray-500);margin-bottom:20px;">Set a total budget and allocate across categories.</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-bottom:20px;">Allocate budgets across categories and sub-categories.</div>
 
         <!-- Overall budget -->
         <div style="background:var(--primary-light);border:1.5px solid #bfdbfe;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;">
@@ -1014,11 +1014,17 @@ select.form-control {
           </div>
         </div>
 
-        <!-- Per-category inputs -->
-        <div id="bm-cats" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
+        <!-- Per-category rows -->
+        <div id="bm-cats" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
+
+        <!-- Add category -->
+        <button onclick="bmAddCategory()" style="width:100%;padding:9px;border:1.5px dashed var(--gray-200);border-radius:var(--radius-sm);background:none;color:var(--primary);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:20px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Category
+        </button>
 
         <div style="display:flex;gap:10px;">
-          <button class="btn-primary" onclick="submitBudgetModal()" style="flex:1;">Save budgets</button>
+          <button class="btn-primary" onclick="submitBudgetModal()" style="flex:1;">Save</button>
           <button onclick="closeBudgetModal()" style="padding:10px 16px;border:1.5px solid var(--gray-200);background:var(--white);border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Cancel</button>
         </div>
       </div>
@@ -2222,38 +2228,104 @@ function setBudget(cat, val) {
   renderBudgetSummary();
 }
 
+// bmState holds the working copy while the modal is open
+let bmState = []; // [{origName, name, budget, subs:[{origName,name,budget}]}]
+
 function openBudgetModal() {
   const cats = Object.keys(CATS).filter(c => c !== 'Income');
   const totalSet = cats.reduce((s, c) => s + (budgets[c] || 0), 0);
-  const overall = parseFloat($$('bm-overall')?.value) || totalSet || 0;
-  $$('bm-overall').value = overall || '';
-
-  const col = CAT_COLOR;
-  $$('bm-cats').innerHTML = cats.map(c => {
-    const color = col[c] || '#6B7280';
-    const cur = budgets[c] || '';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius-sm);border:1px solid var(--gray-100);">
-      <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-      <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--gray-800);">${esc(c)}</div>
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:13px;color:var(--gray-500);">$</span>
-        <input type="number" min="0" step="1" placeholder="—" value="${cur}"
-          data-cat="${esc(c)}"
-          style="width:90px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;text-align:right;outline:none;"
-          oninput="updateBudgetRemaining()">
-      </div>
-    </div>`;
-  }).join('');
-
+  $$('bm-overall').value = totalSet || '';
+  bmState = cats.map(c => ({
+    origName: c,
+    name: c,
+    budget: budgets[c] || 0,
+    subs: (CATS[c] || []).map(s => ({ origName: s, name: s, budget: budgets[c + '/' + s] || 0 })),
+    expanded: false
+  }));
+  bmRender();
   updateBudgetRemaining();
   $$('budget-modal').style.display = 'flex';
-  $$('bm-overall').focus();
+}
+
+function bmRender() {
+  $$('bm-cats').innerHTML = bmState.map((cat, ci) => {
+    const color = CAT_COLOR[cat.origName] || CAT_COLOR[cat.name] || '#6B7280';
+    const subHtml = cat.subs.map((sub, si) => `
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0 7px 28px;border-top:1px solid var(--gray-100);">
+        <input type="text" value="${esc(sub.name)}" placeholder="Sub-category name"
+          style="flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:12.5px;font-family:inherit;outline:none;min-width:0;"
+          oninput="bmState[${ci}].subs[${si}].name=this.value">
+        <span style="font-size:12px;color:var(--gray-400);">$</span>
+        <input type="number" min="0" step="1" placeholder="0" value="${sub.budget || ''}"
+          style="width:80px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:12.5px;font-family:inherit;text-align:right;outline:none;"
+          oninput="bmState[${ci}].subs[${si}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
+        <button onclick="bmDeleteSub(${ci},${si})" title="Remove"
+          style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
+      </div>`).join('');
+    const subCount = cat.subs.length;
+    return `<div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--gray-50);">
+        <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+        <input type="text" value="${esc(cat.name)}" placeholder="Category name"
+          style="flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-weight:600;font-family:inherit;outline:none;min-width:0;background:var(--white);"
+          oninput="bmState[${ci}].name=this.value">
+        <span style="font-size:12px;color:var(--gray-400);">$</span>
+        <input type="number" min="0" step="1" placeholder="0" value="${cat.budget || ''}"
+          style="width:90px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;text-align:right;outline:none;background:var(--white);"
+          oninput="bmState[${ci}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
+        <button onclick="bmToggleExpand(${ci})" title="Sub-categories"
+          style="background:none;border:1px solid var(--gray-200);border-radius:6px;cursor:pointer;color:var(--gray-600);font-size:11px;font-weight:700;padding:4px 8px;font-family:inherit;white-space:nowrap;">
+          ${subCount} sub${cat.expanded ? ' ▲' : ' ▼'}
+        </button>
+        <button onclick="bmDeleteCat(${ci})" title="Delete category"
+          style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
+      </div>
+      ${cat.expanded ? `<div style="background:var(--white);">
+        ${subHtml}
+        <div style="padding:8px 12px 8px 28px;border-top:1px solid var(--gray-100);">
+          <button onclick="bmAddSub(${ci})"
+            style="background:none;border:1px dashed var(--gray-300);border-radius:6px;color:var(--primary);font-size:12px;font-weight:700;padding:4px 10px;cursor:pointer;font-family:inherit;">
+            + Add Sub-category
+          </button>
+        </div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function bmToggleExpand(ci) {
+  bmState[ci].expanded = !bmState[ci].expanded;
+  bmRender();
+}
+
+function bmAddSub(ci) {
+  bmState[ci].subs.push({ origName: null, name: '', budget: 0 });
+  bmState[ci].expanded = true;
+  bmRender();
+}
+
+function bmDeleteSub(ci, si) {
+  bmState[ci].subs.splice(si, 1);
+  bmRender();
+}
+
+function bmDeleteCat(ci) {
+  bmState.splice(ci, 1);
+  bmRender();
+  updateBudgetRemaining();
+}
+
+function bmAddCategory() {
+  bmState.push({ origName: null, name: '', budget: 0, subs: [], expanded: false });
+  bmRender();
+  // focus the new name input
+  const inputs = $$('bm-cats').querySelectorAll('input[type="text"]');
+  if (inputs.length) inputs[inputs.length - 1].focus();
 }
 
 function updateBudgetRemaining() {
   const overall = parseFloat($$('bm-overall')?.value) || 0;
-  const catInputs = $$('bm-cats')?.querySelectorAll('input[data-cat]') || [];
-  const allocated = Array.from(catInputs).reduce((s, el) => s + (parseFloat(el.value) || 0), 0);
+  const allocated = bmState.reduce((s, c) => s + c.budget, 0);
   const rem = overall - allocated;
   const el = $$('bm-remaining');
   if (el) {
@@ -2265,8 +2337,78 @@ function updateBudgetRemaining() {
 function closeBudgetModal() { $$('budget-modal').style.display = 'none'; }
 
 function submitBudgetModal() {
-  const catInputs = $$('bm-cats')?.querySelectorAll('input[data-cat]') || [];
-  catInputs.forEach(el => setBudget(el.dataset.cat, el.value));
+  // Validate: no empty category names
+  for (const cat of bmState) {
+    if (!cat.name.trim()) { toast('Category name cannot be empty', 'error'); return; }
+    for (const sub of cat.subs) {
+      if (!sub.name.trim()) { toast('Sub-category name cannot be empty', 'error'); return; }
+    }
+  }
+
+  // Collect old cat names before mutating
+  const oldCats = Object.keys(CATS).filter(c => c !== 'Income');
+  const newCatNames = bmState.map(c => c.name.trim());
+
+  // Remove deleted categories from CATS and budgets
+  oldCats.forEach(old => {
+    if (!bmState.find(c => c.origName === old)) {
+      delete CATS[old];
+      delete budgets[old];
+      (CATS[old] || []).forEach(s => delete budgets[old + '/' + s]);
+    }
+  });
+
+  // Apply renames and new cats
+  bmState.forEach(cat => {
+    const newName = cat.name.trim();
+    const oldName = cat.origName;
+    const oldSubs = oldName ? (CATS[oldName] || []) : [];
+
+    if (oldName && oldName !== newName) {
+      // rename: move CATS entry and budgets
+      CATS[newName] = CATS[oldName];
+      delete CATS[oldName];
+      if (budgets[oldName] !== undefined) { budgets[newName] = budgets[oldName]; delete budgets[oldName]; }
+      oldSubs.forEach(s => {
+        const ok = oldName + '/' + s, nk = newName + '/' + s;
+        if (budgets[ok] !== undefined) { budgets[nk] = budgets[ok]; delete budgets[ok]; }
+      });
+      if (CAT_COLOR[oldName]) { CAT_COLOR[newName] = CAT_COLOR[oldName]; delete CAT_COLOR[oldName]; }
+    } else if (!oldName) {
+      // new category
+      CATS[newName] = [];
+      if (!CAT_COLOR[newName]) CAT_COLOR[newName] = '#6B7280';
+    }
+
+    // Save category budget
+    setBudget(newName, cat.budget);
+
+    // Sync sub-cats
+    const newSubs = cat.subs.map(s => s.name.trim());
+    const currentSubs = CATS[newName] || [];
+
+    // Remove deleted sub-cats
+    currentSubs.forEach(s => {
+      if (!cat.subs.find(sub => sub.origName === s)) {
+        delete budgets[newName + '/' + s];
+      }
+    });
+
+    // Apply sub renames + new subs
+    cat.subs.forEach(sub => {
+      const sNew = sub.name.trim();
+      const sOld = sub.origName;
+      if (sOld && sOld !== sNew) {
+        const ok = newName + '/' + sOld, nk = newName + '/' + sNew;
+        if (budgets[ok] !== undefined) { budgets[nk] = budgets[ok]; delete budgets[ok]; }
+      }
+      setBudget(newName + '/' + sNew, sub.budget);
+    });
+
+    CATS[newName] = newSubs;
+  });
+
+  saveCats();
   renderBudget();
   closeBudgetModal();
   toast('Budgets saved');
@@ -2320,52 +2462,31 @@ function renderBudget() {
       const sPct      = sHas ? Math.min(sSpent / sBudget * 100, 100) : 0;
       const sOver     = sHas && sSpent > sBudget;
       const sBarColor = sOver ? 'var(--red-mid)' : (sPct > 80 ? '#F97316' : color);
+      if (!sHas && sSpent === 0) return '';
       return `<div style="padding:8px 0 8px 32px;border-top:1px solid var(--gray-100);">
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
           <div style="flex:1;font-size:12.5px;color:var(--gray-600);">${esc(sub)}</div>
-          <div class="budget-input-wrap" style="min-width:90px;">
-            <span>$</span>
-            <input class="budget-input" type="number" min="0" step="1"
-              value="${sHas ? sBudget : ''}"
-              placeholder="—"
-              onchange="setBudget('${esc(key)}', this.value)"
-              onclick="event.stopPropagation()">
-          </div>
+          <div style="font-size:12.5px;font-weight:600;color:${sOver?'var(--red-mid)':color};">${sHas ? (sOver?'−'+fmt(Math.abs(sBudget-sSpent))+' over':fmt(sSpent)+' / '+fmt(sBudget)) : fmt(sSpent)+' spent'}</div>
         </div>
-        ${sHas || sSpent > 0 ? `<div style="margin-top:5px;">
-          <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${sPct}%;background:${sBarColor};"></div></div>
-          <div class="budget-meta ${sOver?'over':''}" style="font-size:10.5px;">
-            ${sHas ? (sOver ? '−'+fmt(Math.abs(sBudget-sSpent))+' over' : fmt(sSpent)+' of '+fmt(sBudget)) : (sSpent > 0 ? fmt(sSpent)+' spent' : '')}
-          </div>
-        </div>` : ''}
+        <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${sPct}%;background:${sBarColor};"></div></div>
       </div>`;
-    }).join('');
+    }).filter(Boolean).join('');
 
     return `<div class="budget-row" style="padding-bottom:0;">
       <div class="budget-row-top">
         <div class="budget-cat-icon" style="background:${color}22;"><div style="width:12px;height:12px;border-radius:50%;background:${color};"></div></div>
         <div class="budget-cat-name">${esc(cat)}</div>
-        <div class="budget-input-wrap">
-          <span>$</span>
-          <input class="budget-input" type="number" min="0" step="1"
-            value="${hasBudget ? budget : ''}"
-            placeholder="—"
-            onchange="setBudget('${esc(cat)}', this.value)"
-            onclick="event.stopPropagation()">
+        <div style="font-size:14px;font-weight:700;color:${over?'var(--red-mid)':color};">
+          ${hasBudget ? (over ? '−'+fmt(Math.abs(remAmt))+' over' : fmt(spentAmt)+' / '+fmt(budget)) : (spentAmt > 0 ? fmt(spentAmt)+' spent' : '<span style="color:var(--gray-300);">No budget</span>')}
         </div>
       </div>
       <div class="budget-progress-row">
         <div class="budget-bar-track">
           <div class="budget-bar-fill" style="width:${pct}%;background:${barColor};"></div>
         </div>
-        ${hasBudget
-          ? `<div class="budget-meta ${over?'over':''}">
-              ${over ? '−'+fmt(Math.abs(remAmt))+' over' : fmt(spentAmt)+' of '+fmt(budget)}
-            </div>`
-          : `<div class="budget-meta">${spentAmt > 0 ? fmt(spentAmt)+' spent' : ''}</div>`
-        }
+        ${hasBudget ? `<div class="budget-meta ${over?'over':''}">${Math.round(pct)}% used</div>` : ''}
       </div>
-      ${subs.length ? subRows : ''}
+      ${subRows}
     </div>`;
   }).join('');
 }
