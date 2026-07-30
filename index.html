@@ -1115,7 +1115,10 @@ select.form-control {
 
     <!-- MANAGE -->
     <div class="page" id="pg-manage">
-      <div class="settings-sec">Categories &amp; Sub-Categories</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="settings-sec" style="margin:0;">Categories &amp; Sub-Categories</div>
+        <button onclick="saveManage()" id="manage-save-btn" style="display:none;padding:8px 18px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>
+      </div>
       <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">
         <div id="manage-cats-list"></div>
         <div style="padding:12px 20px;border-top:1px solid var(--gray-100);">
@@ -1564,6 +1567,10 @@ function updateCount() {
 
 // ── Navigation ─────────────────────────────────────────────────
 function goTo(page) {
+  if (curPage === 'manage' && page !== 'manage' && manageIsDirty()) {
+    if (!confirm('You have unsaved changes. Leave without saving?')) return;
+    manageSnapshot = null;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item, .sb-item').forEach(n => n.classList.remove('active'));
   $$('pg-' + page).classList.add('active');
@@ -1573,7 +1580,7 @@ function goTo(page) {
   sessionStorage.setItem('bt_page', page);
   const titles = { dashboard:'Overview', transactions:'Transactions', budgeting:'Budgeting', settings:'Settings', manage:'Manage', utilities:'Utilities' };
   $$('hdr-title').textContent = titles[page] || page;
-  $$('hdr-badge').textContent = page === 'transactions' ? txs.length + ' entries' : '';
+  updateHdrBadge(page);
   const sub = $$('hdr-subtitle');
   const subMap = { utilities: 'Compare bills and provider quotes', dashboard: 'Your finances at a glance' };
   if (sub) { sub.textContent = subMap[page] || ''; sub.style.display = subMap[page] ? '' : 'none'; }
@@ -1581,8 +1588,23 @@ function goTo(page) {
   if (page === 'dashboard')    renderDash();
   if (page === 'transactions') renderTx();
   if (page === 'budgeting')    renderBudget();
-  if (page === 'manage')       renderManage();
+  if (page === 'manage')       { manageSnapshot = null; renderManage(); }
   if (page === 'utilities')    renderUtilities();
+}
+
+function updateHdrBadge(page) {
+  const el = $$('hdr-badge');
+  if (!el) return;
+  if (page === 'transactions') {
+    el.textContent = txs.length + ' entries';
+    el.style.display = '';
+  } else if (page === 'budgeting') {
+    el.textContent = budgetPeriod.charAt(0).toUpperCase() + budgetPeriod.slice(1);
+    el.style.display = '';
+  } else {
+    el.textContent = '';
+    el.style.display = 'none';
+  }
 }
 
 function openAddModal() {
@@ -2114,6 +2136,7 @@ function setBudgetPeriod(p) {
     $$('bpill-' + k)?.classList.toggle('active', k === p);
   });
   renderBudget();
+  if (curPage === 'budgeting') updateHdrBadge('budgeting');
 }
 
 function setBudget(cat, val) {
@@ -4067,7 +4090,29 @@ function submitShare() {
 }
 
 // ── Manage page ────────────────────────────────────────────────
+let manageSnapshot = null;
+let manageExpanded = {};
+
+function manageIsDirty() {
+  if (!manageSnapshot) return false;
+  return JSON.stringify({ cats: CATS, accounts: userAccounts }) !== manageSnapshot;
+}
+
+function markManageDirty() {
+  const btn = $$('manage-save-btn');
+  if (btn) btn.style.display = manageIsDirty() ? '' : 'none';
+}
+
+function saveManage() {
+  saveCats(); saveAccounts();
+  manageSnapshot = JSON.stringify({ cats: CATS, accounts: userAccounts });
+  const btn = $$('manage-save-btn');
+  if (btn) btn.style.display = 'none';
+  toast('Changes saved');
+}
+
 function renderManage() {
+  manageSnapshot = JSON.stringify({ cats: CATS, accounts: userAccounts });
   renderManageCats();
   renderManageAccounts();
 }
@@ -4080,37 +4125,54 @@ const inputStyle = `flex:1;font-size:13.5px;padding:6px 10px;border:1.5px solid 
 // ── Categories (with inline sub-cats) ──────────────────────────
 function renderManageCats() {
   const el = $$('manage-cats-list');
-  el.innerHTML = Object.keys(CATS).map((cat, ci) => {
+  el.innerHTML = Object.keys(CATS).map((cat) => {
     const k = catKey(cat);
     const color = CAT_COLOR[cat] || '#6B7280';
     const subs = CATS[cat] || [];
+    const expanded = !!manageExpanded[k];
     const subRows = subs.map((s, si) => {
       const sk = k + '_s' + si;
-      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 20px 7px 44px;border-top:1px solid var(--gray-100);" id="msub-row-${sk}">
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 20px 7px 44px;border-top:1px solid var(--gray-100);">
         <input type="text" style="${inputStyle}" id="msub-in-${sk}" value="${esc(s)}"
+          oninput="markManageDirty()"
           onblur="saveSubInline('${esc(cat)}',${si},this.value)"
           onkeydown="if(event.key==='Enter')this.blur();">
         <button onclick="deleteSubcat('${esc(cat)}',${si})" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'" title="Delete">&times;</button>
       </div>`;
     }).join('');
 
+    const chevron = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform 0.15s;transform:rotate(${expanded?90:0}deg);flex-shrink:0;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+    const subCount = subs.length ? `<span style="font-size:11px;color:var(--gray-400);font-weight:600;flex-shrink:0;">${subs.length}</span>` : '';
+
     return `<div style="border-bottom:1px solid var(--gray-100);" id="mcat-block-${k}">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;">
+        <button onclick="toggleManageCat('${esc(cat)}')" style="background:none;border:none;cursor:pointer;padding:4px 8px 4px 0;display:flex;align-items:center;gap:6px;color:var(--gray-400);flex-shrink:0;min-width:48px;">
+          ${chevron}${subCount}
+        </button>
         <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
         <input type="text" style="${inputStyle}font-weight:600;" id="mcat-in-${k}" value="${esc(cat)}"
+          oninput="markManageDirty()"
           onblur="saveCatInline('${esc(cat)}',this.value)"
           onkeydown="if(event.key==='Enter')this.blur();">
         <button onclick="deleteCategory('${esc(cat)}')" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'" title="Delete">&times;</button>
       </div>
-      <div id="msub-list-${k}">${subRows}</div>
-      <div style="padding:6px 20px 8px 44px;">
-        <button onclick="addSubcatInline('${esc(cat)}')" style="background:none;border:none;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:2px 0;display:flex;align-items:center;gap:4px;">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add New Sub-Category
-        </button>
+      <div id="msub-list-${k}" style="display:${expanded?'block':'none'};">
+        ${subRows}
+        <div style="padding:6px 20px 8px 44px;">
+          <button onclick="addSubcatInline('${esc(cat)}')" style="background:none;border:none;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:2px 0;display:flex;align-items:center;gap:4px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add New Sub-Category
+          </button>
+        </div>
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleManageCat(cat) {
+  const k = catKey(cat);
+  manageExpanded[k] = !manageExpanded[k];
+  renderManageCats();
 }
 
 function saveCatInline(oldName, newName) {
@@ -4121,13 +4183,13 @@ function saveCatInline(oldName, newName) {
   Object.keys(CATS).forEach(c => { newCats[c === oldName ? newName : c] = CATS[c]; });
   CATS = newCats;
   txs.forEach(t => { if (t.cat === oldName) t.cat = newName; });
-  save(); saveCats(); renderManageCats();
+  save(); markManageDirty(); renderManageCats();
 }
 
 function deleteCategory(cat) {
   if (!confirm(`Delete "${cat}"? Transactions will keep their category label.`)) return;
   delete CATS[cat];
-  saveCats(); renderManageCats(); toast('Category deleted');
+  markManageDirty(); renderManageCats(); toast('Category deleted');
 }
 
 function addCategoryInline() {
@@ -4149,7 +4211,7 @@ function confirmAddCategory() {
   if (!name) { inp.focus(); return; }
   if (CATS[name]) { toast('Already exists'); inp.focus(); return; }
   CATS[name] = [];
-  saveCats(); renderManageCats(); toast('Category added');
+  markManageDirty(); renderManageCats(); toast('Category added');
 }
 
 function saveSubInline(cat, i, newName) {
@@ -4159,12 +4221,12 @@ function saveSubInline(cat, i, newName) {
   if (newName === old) return;
   CATS[cat][i] = newName;
   txs.forEach(t => { if (t.cat === cat && t.subcat === old) t.subcat = newName; });
-  save(); saveCats();
+  save(); markManageDirty();
 }
 
 function deleteSubcat(cat, i) {
   CATS[cat].splice(i, 1);
-  saveCats(); renderManageCats(); toast('Sub-category deleted');
+  markManageDirty(); renderManageCats(); toast('Sub-category deleted');
 }
 
 function addSubcatInline(cat) {
@@ -4188,7 +4250,8 @@ function confirmAddSubcat(cat) {
   if (!name) { inp.focus(); return; }
   if (CATS[cat].includes(name)) { toast('Already exists'); inp.focus(); return; }
   CATS[cat].push(name);
-  saveCats(); renderManageCats(); toast('Sub-category added');
+  manageExpanded[k] = true;
+  markManageDirty(); renderManageCats(); toast('Sub-category added');
 }
 
 // ── Accounts ────────────────────────────────────────────────────
@@ -4197,6 +4260,7 @@ function renderManageAccounts() {
   el.innerHTML = userAccounts.map((a, i) => `
     <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--gray-100);">
       <input type="text" style="${inputStyle}" id="macc-in-${i}" value="${esc(a)}"
+        oninput="markManageDirty()"
         onblur="saveAccInline(${i},this.value)"
         onkeydown="if(event.key==='Enter')this.blur();">
       <button onclick="deleteAccount(${i})" style="padding:4px 8px;background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:18px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--red-mid)'" onmouseout="this.style.color='var(--gray-300)'" title="Delete">&times;</button>
@@ -4209,7 +4273,7 @@ function saveAccInline(i, newName) {
   const old = userAccounts[i];
   userAccounts[i] = newName;
   txs.forEach(t => { if (t.account === old) t.account = newName; });
-  save(); saveAccounts();
+  save(); markManageDirty();
 }
 
 function addAccountInline() {
@@ -4230,12 +4294,12 @@ function confirmAddAccount() {
   if (!name) { inp.focus(); return; }
   if (userAccounts.includes(name)) { toast('Already exists'); inp.focus(); return; }
   userAccounts.push(name);
-  saveAccounts(); renderManageAccounts(); toast('Account added');
+  markManageDirty(); renderManageAccounts(); toast('Account added');
 }
 
 function deleteAccount(i) {
   userAccounts.splice(i, 1);
-  saveAccounts(); renderManageAccounts(); toast('Account deleted');
+  markManageDirty(); renderManageAccounts(); toast('Account deleted');
 }
 
 // ── Bulk selection ─────────────────────────────────────────────
