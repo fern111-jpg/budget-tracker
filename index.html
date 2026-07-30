@@ -570,7 +570,7 @@ select.form-control {
       </svg>
     </div>
     <div class="auth-title" id="auth-title-text">Sign in</div>
-    <div class="auth-subtitle" id="auth-subtitle">Sign in to continue</div>
+    <div class="auth-subtitle" id="auth-subtitle" style="display:none;"></div>
     <div class="auth-error" id="auth-error"></div>
 
     <!-- Login form -->
@@ -780,6 +780,21 @@ select.form-control {
         </div>
       </div>
 
+      <!-- Tasks card -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:14px;font-weight:700;color:#0f172a;">Tasks</div>
+          <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
+        </div>
+        <div id="tasks-list" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="task-input" placeholder="Add a task…"
+            style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;"
+            onkeydown="if(event.key==='Enter')addTask()">
+          <button onclick="addTask()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Add</button>
+        </div>
+      </div>
+
       <!-- Income vs expenses chart -->
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-top:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
@@ -930,10 +945,10 @@ select.form-control {
       <!-- Bulk action bar -->
       <div id="bulk-bar" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:white;border-radius:var(--radius);padding:12px 16px;display:none;align-items:center;gap:10px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.3);min-width:300px;max-width:90vw;">
         <span id="bulk-count" style="font-size:13px;font-weight:600;flex:1;">0 selected</span>
-        <button onclick="bulkMarkPaid()" style="padding:8px 14px;background:#10b981;color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✓ Mark Paid</button>
-        <button onclick="bulkMarkUnpaid()" style="padding:8px 14px;background:#6b7280;color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Mark Unpaid</button>
-        <button onclick="openBulkSplit()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">÷ Split</button>
-        <button onclick="clearBulkSelection()" style="padding:8px 10px;background:transparent;color:var(--gray-400);border:none;font-size:18px;cursor:pointer;line-height:1;">✕</button>
+        <button onclick="bulkMarkPaid()" style="padding:7px 13px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">✓ Mark Paid</button>
+        <button onclick="bulkMarkUnpaid()" style="padding:7px 13px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">✕ Mark Unpaid</button>
+        <button onclick="openBulkSplit()" style="padding:7px 13px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">+ Split</button>
+        <button onclick="clearBulkSelection()" style="padding:6px 10px;background:transparent;color:rgba(255,255,255,0.5);border:none;font-size:18px;cursor:pointer;line-height:1;">✕</button>
       </div>
     </div>
 
@@ -983,6 +998,7 @@ select.form-control {
         <div><div class="bsum-label">Spent</div><div class="bsum-val" id="b-total-spent">—</div></div>
         <div><div class="bsum-label">Remaining</div><div class="bsum-val" id="b-total-rem">—</div></div>
       </div>
+      <div id="budget-donut-wrap" style="display:none;margin-bottom:20px;"></div>
       <div class="budget-list" id="budget-list"></div>
     </div>
 
@@ -1723,6 +1739,51 @@ function changePeriod(d) {
   renderDash();
 }
 
+// ── Tasks ──────────────────────────────────────────────────────
+let userTasks = [];
+function loadTasks() {
+  try { userTasks = JSON.parse(localStorage.getItem('bt_tasks_' + currentUser) || '[]'); } catch { userTasks = []; }
+}
+function saveTasks() { localStorage.setItem('bt_tasks_' + currentUser, JSON.stringify(userTasks)); }
+function renderTasks() {
+  const list = $$('tasks-list');
+  if (!list) return;
+  const count = $$('tasks-count');
+  const done = userTasks.filter(t => t.done).length;
+  if (count) count.textContent = userTasks.length ? `${done}/${userTasks.length} done` : '';
+  if (!userTasks.length) {
+    list.innerHTML = `<div style="text-align:center;padding:20px 0;color:var(--gray-300);font-size:13px;">No tasks yet</div>`;
+    return;
+  }
+  list.innerHTML = userTasks.map((t, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--gray-100);">
+      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})"
+        style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);flex-shrink:0;">
+      <span style="flex:1;font-size:13px;color:${t.done ? 'var(--gray-300)' : 'var(--gray-700)'};text-decoration:${t.done ? 'line-through' : 'none'};">${esc(t.text)}</span>
+      <button onclick="deleteTask(${i})" style="background:none;border:none;cursor:pointer;color:var(--gray-300);font-size:15px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
+    </div>`).join('');
+}
+function addTask() {
+  const inp = $$('task-input');
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) return;
+  userTasks.push({ text, done: false });
+  saveTasks();
+  inp.value = '';
+  renderTasks();
+}
+function toggleTask(i) {
+  userTasks[i].done = !userTasks[i].done;
+  saveTasks();
+  renderTasks();
+}
+function deleteTask(i) {
+  userTasks.splice(i, 1);
+  saveTasks();
+  renderTasks();
+}
+
 function renderDash() {
   let period, periodLabel;
   if (dashView === 'week') {
@@ -1844,7 +1905,11 @@ function renderDash() {
           <div style="font-size:14px;font-weight:700;color:#0f172a;flex-shrink:0;">${isIncome?'+':'-'}${fmt(amt)}</div>
         </div>`;
       }).join('')
-    : `<div style="text-align:center;color:var(--gray-400);font-size:13px;padding:16px 0;">${emptyMsg.replace('expenses','transactions')}</div>`;
+    : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;min-height:220px;">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--gray-200)" stroke-width="1.5" style="margin-bottom:12px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <div style="font-size:13.5px;font-weight:600;color:var(--gray-400);margin-bottom:4px;">No transactions</div>
+        <div style="font-size:12px;color:var(--gray-300);">Transactions you add will appear here</div>
+      </div>`;
 
   // Income vs expenses bar chart (last 6 months)
   const now = new Date();
@@ -1874,6 +1939,9 @@ function renderDash() {
       </div>`;
     }).join('')}
   </div>`;
+
+  loadTasks();
+  renderTasks();
 }
 
 function openDashFilter() {
@@ -2255,27 +2323,27 @@ function bmRender() {
         <input type="text" value="${esc(sub.name)}" placeholder="Sub-category name"
           style="flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:12.5px;font-family:inherit;outline:none;min-width:0;"
           oninput="bmState[${ci}].subs[${si}].name=this.value">
-        <span style="font-size:12px;color:var(--gray-400);">$</span>
-        <input type="number" min="0" step="1" placeholder="0" value="${sub.budget || ''}"
+        <input type="number" min="0" step="1" placeholder="$" value="${sub.budget || ''}"
           style="width:80px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:12.5px;font-family:inherit;text-align:right;outline:none;"
           oninput="bmState[${ci}].subs[${si}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
         <button onclick="bmDeleteSub(${ci},${si})" title="Remove"
           style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
       </div>`).join('');
-    const subCount = cat.subs.length;
+    const chevron = cat.expanded
+      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>`
+      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>`;
     return `<div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--gray-50);">
         <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
         <input type="text" value="${esc(cat.name)}" placeholder="Category name"
           style="flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-weight:600;font-family:inherit;outline:none;min-width:0;background:var(--white);"
           oninput="bmState[${ci}].name=this.value">
-        <span style="font-size:12px;color:var(--gray-400);">$</span>
-        <input type="number" min="0" step="1" placeholder="0" value="${cat.budget || ''}"
+        <input type="number" min="0" step="1" placeholder="$" value="${cat.budget || ''}"
           style="width:90px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;text-align:right;outline:none;background:var(--white);"
           oninput="bmState[${ci}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
         <button onclick="bmToggleExpand(${ci})" title="Sub-categories"
-          style="background:none;border:1px solid var(--gray-200);border-radius:6px;cursor:pointer;color:var(--gray-600);font-size:11px;font-weight:700;padding:4px 8px;font-family:inherit;white-space:nowrap;">
-          ${subCount} sub${cat.expanded ? ' ▲' : ' ▼'}
+          style="background:none;border:1px solid var(--gray-200);border-radius:6px;cursor:pointer;color:var(--gray-500);padding:4px 6px;line-height:0;display:flex;align-items:center;">
+          ${chevron}
         </button>
         <button onclick="bmDeleteCat(${ci})" title="Delete category"
           style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
@@ -2434,6 +2502,82 @@ function renderBudgetSummary() {
   }
 }
 
+function renderBudgetDonut(spent) {
+  const wrap = $$('budget-donut-wrap');
+  if (!wrap) return;
+  const cats = Object.keys(CATS).filter(c => c !== 'Income');
+  const hasBudget = cats.some(c => budgets[c] > 0);
+  if (!hasBudget) { wrap.style.display = 'none'; return; }
+
+  // Build slices: use budgeted amounts for allocation, spent for context
+  const slices = cats.map(c => ({
+    name: c,
+    color: CAT_COLOR[c] || '#6B7280',
+    budget: budgets[c] || 0,
+    spent: spent[c] || 0
+  })).filter(s => s.budget > 0);
+
+  const total = slices.reduce((s, x) => s + x.budget, 0);
+  const totalSpent = slices.reduce((s, x) => s + x.spent, 0);
+  const pctUsed = total > 0 ? Math.min(totalSpent / total * 100, 100) : 0;
+  const rem = total - totalSpent;
+  const over = totalSpent > total;
+
+  // SVG donut
+  const R = 70, cx = 90, cy = 90, stroke = 22;
+  const circ = 2 * Math.PI * R;
+  let offset = 0;
+  const gap = 1.5; // degrees gap between slices
+  const gapRad = (gap / 360) * circ;
+
+  const svgSlices = slices.map(s => {
+    const frac = s.budget / total;
+    const len = frac * circ - gapRad;
+    const dash = `${Math.max(0, len)} ${circ - Math.max(0, len)}`;
+    const el = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${s.color}" stroke-width="${stroke}"
+      stroke-dasharray="${dash}" stroke-dashoffset="${-offset}" stroke-linecap="butt"
+      style="transition:stroke-dasharray 0.4s ease;"/>`;
+    offset += frac * circ;
+    return el;
+  }).join('');
+
+  // Inner text: remaining or over
+  const centerLabel = over
+    ? `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--red-mid)" font-family="Inter,sans-serif">−${fmt(Math.abs(rem))}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="var(--gray-500)" font-family="Inter,sans-serif">over budget</text>`
+    : `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--gray-800)" font-family="Inter,sans-serif">${fmt(rem)}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="var(--gray-500)" font-family="Inter,sans-serif">remaining</text>`;
+
+  const svg = `<svg viewBox="0 0 180 180" width="180" height="180" style="flex-shrink:0;transform:rotate(-90deg);">
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--gray-100)" stroke-width="${stroke}"/>
+    ${svgSlices}
+    <g transform="rotate(90,${cx},${cy})">${centerLabel}</g>
+  </svg>`;
+
+  // Legend rows
+  const legend = slices.map(s => {
+    const pct = Math.round(s.budget / total * 100);
+    const sOver = s.spent > s.budget;
+    const spentPct = s.budget > 0 ? Math.min(s.spent / s.budget * 100, 100) : 0;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+      <div style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0;"></div>
+      <div style="flex:1;font-size:12.5px;font-weight:600;color:var(--gray-700);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.name)}</div>
+      <div style="font-size:11.5px;color:var(--gray-500);white-space:nowrap;">${pct}%</div>
+      <div style="font-size:12px;font-weight:700;color:${sOver?'var(--red-mid)':s.color};white-space:nowrap;">${fmt(s.budget)}</div>
+    </div>`;
+  }).join('');
+
+  wrap.style.display = 'flex';
+  wrap.innerHTML = `<div class="card" style="display:flex;gap:20px;align-items:center;padding:20px;flex-wrap:wrap;">
+    <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;">
+      ${svg}
+      <div style="font-size:11px;color:var(--gray-400);font-weight:600;">${Math.round(pctUsed)}% of budget used</div>
+    </div>
+    <div style="flex:1;min-width:160px;display:flex;flex-direction:column;border-left:1px solid var(--gray-100);padding-left:20px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--sb-bg);margin-bottom:8px;">Allocation</div>
+      ${legend}
+    </div>
+  </div>`;
+}
+
 function renderBudget() {
   // sync period pills
   ['week','fortnight','month'].forEach(k => {
@@ -2442,6 +2586,7 @@ function renderBudget() {
 
   const spent = budgetSpentByPeriod();
   renderBudgetSummary();
+  renderBudgetDonut(spent);
 
   $$('budget-list').innerHTML = Object.keys(CATS).filter(c => c !== 'Income').map(cat => {
     const color    = CAT_COLOR[cat] || '#6B7280';
@@ -2879,7 +3024,7 @@ function showAuthLogin() {
   $$('auth-register-form').style.display = 'none';
   $$('auth-reset-form').style.display = 'none';
   $$('auth-title-text').textContent = 'Sign in';
-  $$('auth-subtitle').textContent = 'Sign in to continue';
+  $$('auth-subtitle').textContent = '';
   hideAuthError();
 }
 
@@ -3004,6 +3149,7 @@ function bootApp() {
   CATS         = JSON.parse(localStorage.getItem('bt_cats_'         + currentUser) || 'null') || JSON.parse(JSON.stringify(DEFAULT_CATS));
   userAccounts = JSON.parse(localStorage.getItem('bt_accounts_'     + currentUser) || 'null') || [...DEFAULT_ACCOUNTS];
   utilBills    = JSON.parse(localStorage.getItem('bt_util_bills_'   + currentUser) || '[]');
+  loadTasks();
   $$('auth-overlay').classList.remove('show');
   const lbl = $$('current-user-label');
   if (lbl) lbl.textContent = currentUser;
