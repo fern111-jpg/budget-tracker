@@ -720,10 +720,6 @@ select.form-control {
     <!-- DASHBOARD -->
     <div class="page active" id="pg-dashboard">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <button onclick="openAddModal()" style="padding:9px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add transaction
-        </button>
         <div class="month-picker" style="flex:1;margin-bottom:0;">
           <button class="month-btn" onclick="changePeriod(-1)">
             <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -743,6 +739,12 @@ select.form-control {
         <button onclick="openDashFilter()" style="display:flex;align-items:center;gap:6px;padding:9px 14px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);box-shadow:var(--shadow);font-size:13px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;white-space:nowrap;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
           Filter
+        </button>
+      </div>
+      <div style="margin-bottom:10px;">
+        <button onclick="openAddModal()" style="padding:9px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add transaction
         </button>
       </div>
 
@@ -784,23 +786,24 @@ select.form-control {
         </div>
       </div>
 
-      <!-- Tasks card -->
-      <div class="card" style="padding:18px;margin-top:0;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <div style="font-size:14px;font-weight:700;color:#0f172a;">Tasks</div>
-          <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
+      <!-- Tasks + Income vs expenses row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+        <div class="card" style="padding:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;">Tasks</div>
+            <span id="tasks-count" style="font-size:11px;font-weight:700;color:var(--gray-400);"></span>
+          </div>
+          <div id="tasks-list" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="task-input" placeholder="Add a task…"
+              style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;"
+              onkeydown="if(event.key==='Enter')addTask()">
+            <button onclick="addTask()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Add</button>
+          </div>
         </div>
-        <div id="tasks-list" style="display:flex;flex-direction:column;gap:2px;margin-bottom:12px;"></div>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="task-input" placeholder="Add a task…"
-            style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;"
-            onkeydown="if(event.key==='Enter')addTask()">
-          <button onclick="addTask()" style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Add</button>
-        </div>
-      </div>
 
-      <!-- Income vs expenses chart -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-top:16px;">
+        <!-- Income vs expenses chart -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
           <div style="font-size:14px;font-weight:700;color:#0f172a;">Income vs. expenses</div>
           <button onclick="goTo('budgeting')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">Manage budgets</button>
@@ -810,7 +813,8 @@ select.form-control {
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;"><div style="width:10px;height:10px;border-radius:2px;background:var(--primary);"></div>Income</div>
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;"><div style="width:10px;height:10px;border-radius:2px;background:#cbd5e1;"></div>Expenses</div>
         </div>
-      </div>
+        </div><!-- end income vs expenses card -->
+      </div><!-- end tasks+chart row -->
     </div>
 
     <!-- ADD TRANSACTION MODAL -->
