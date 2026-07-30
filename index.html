@@ -515,7 +515,7 @@ select.form-control {
   .sum-card.full { grid-column: auto; }
   .sum-amount { font-size: 24px; }
 
-  .dash-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .dash-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
   .dash-bottom .sec-title { margin-top: 0; }
 
   /* Transactions: hide cards, show table */
@@ -767,7 +767,7 @@ select.form-control {
       <!-- Dashboard bottom: 2-col on desktop -->
       <div class="dash-bottom">
         <div>
-          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;height:100%;box-sizing:border-box;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;">
               <div class="bsum-label" style="margin-bottom:0;">Recent transactions</div>
               <button onclick="goTo('transactions')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">View all</button>
@@ -776,7 +776,7 @@ select.form-control {
           </div>
         </div>
         <div>
-          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;padding:16px 18px;">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;padding:16px 18px;height:100%;box-sizing:border-box;">
             <div class="bsum-label">Spending by category</div>
             <div id="cat-donut" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
             <div id="cat-legend"></div>
@@ -804,13 +804,13 @@ select.form-control {
         </div>
 
         <!-- Income vs expenses chart -->
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;height:320px;box-sizing:border-box;overflow:hidden;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 18px 48px;height:320px;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0;">
           <div class="bsum-label" style="margin-bottom:0;">Income vs. expenses</div>
           <button onclick="goTo('budgeting')" style="background:none;border:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;font-family:inherit;">Manage budgets</button>
         </div>
-        <div id="income-expense-chart"></div>
-        <div style="display:flex;gap:16px;margin-top:12px;">
+        <div id="income-expense-chart" style="flex:1;min-height:0;"></div>
+        <div style="display:flex;gap:16px;margin-top:24px;flex-shrink:0;justify-content:center;">
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;"><div style="width:10px;height:10px;border-radius:2px;background:var(--primary);"></div>Income</div>
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;"><div style="width:10px;height:10px;border-radius:2px;background:#cbd5e1;"></div>Expenses</div>
         </div>
@@ -1835,6 +1835,34 @@ function deleteTask(i) {
   renderTasks();
 }
 
+function showDonutTip(e, cat, pct, amt) {
+  let tip = document.getElementById('donut-tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'donut-tip';
+    tip.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;background:var(--sb-bg);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;font-family:\'Inter\',sans-serif;line-height:1.6;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.1s;';
+    document.body.appendChild(tip);
+  }
+  tip.innerHTML = `<div style="font-weight:700;font-size:13px;margin-bottom:2px;">${cat}</div><div style="color:#94a3b8;">${pct}% &nbsp;·&nbsp; ${amt}</div>`;
+  tip.style.opacity = '1';
+  moveDonutTip(e);
+}
+function moveDonutTip(e) {
+  const tip = document.getElementById('donut-tip');
+  if (!tip) return;
+  const offset = 14;
+  let x = e.clientX + offset, y = e.clientY + offset;
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  if (x + tw > window.innerWidth - 8) x = e.clientX - tw - offset;
+  if (y + th > window.innerHeight - 8) y = e.clientY - th - offset;
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+}
+function hideDonutTip() {
+  const tip = document.getElementById('donut-tip');
+  if (tip) tip.style.opacity = '0';
+}
+
 function renderDash() {
   let period, periodLabel;
   if (dashView === 'week') {
@@ -1916,11 +1944,16 @@ function renderDash() {
       const ix2 = cx + r * Math.cos(endAngle),   iy2 = cy + r * Math.sin(endAngle);
       const largeArc = angle > Math.PI ? 1 : 0;
       const col = CAT_COLOR[cat] || '#6B7280';
+      const pct = Math.round(val / totalSpent * 100);
       const d = `M${x1.toFixed(2)},${y1.toFixed(2)} A${R},${R} 0 ${largeArc},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${ix2.toFixed(2)},${iy2.toFixed(2)} A${r},${r} 0 ${largeArc},0 ${ix1.toFixed(2)},${iy1.toFixed(2)} Z`;
       startAngle = endAngle;
-      return `<path d="${d}" fill="${col}" opacity="0.9"/>`;
+      return `<path d="${d}" fill="${col}" opacity="0.9" style="cursor:pointer;transition:opacity 0.15s;"
+        onmouseenter="showDonutTip(event,'${esc(cat)}','${pct}','${esc(fmt(val))}')"
+        onmousemove="moveDonutTip(event)"
+        onmouseleave="hideDonutTip()"
+        onmousedown="this.style.opacity='0.7'" onmouseup="this.style.opacity='1'"/>`;
     }).join('');
-    $$('cat-donut').innerHTML = `<svg width="180" height="180" viewBox="0 0 180 180">
+    $$('cat-donut').innerHTML = `<svg width="180" height="180" viewBox="0 0 180 180" style="overflow:visible;">
       ${paths}
       <text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="10" fill="#94a3b8" font-family="inherit">Total spent</text>
       <text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a" font-family="'Inter',sans-serif">${fmt(totalSpent)}</text>
@@ -1974,17 +2007,16 @@ function renderDash() {
     return { label, inc, exp };
   });
   const chartMax = Math.max(...chartData.map(d => Math.max(d.inc, d.exp)), 1);
-  const barH = 80;
-  $$('income-expense-chart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:12px;height:${barH+24}px;">
+  $$('income-expense-chart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:12px;height:100%;">
     ${chartData.map(({ label, inc, exp }) => {
-      const ih = Math.round(inc / chartMax * barH);
-      const eh = Math.round(exp / chartMax * barH);
-      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
-        <div style="display:flex;align-items:flex-end;gap:3px;height:${barH}px;">
-          <div style="width:14px;background:var(--primary);border-radius:3px 3px 0 0;height:${ih}px;min-height:${inc>0?2:0}px;" title="${fmt(inc)}"></div>
-          <div style="width:14px;background:#cbd5e1;border-radius:3px 3px 0 0;height:${eh}px;min-height:${exp>0?2:0}px;" title="${fmt(exp)}"></div>
+      const ih = Math.round(inc / chartMax * 100);
+      const eh = Math.round(exp / chartMax * 100);
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;height:100%;">
+        <div style="display:flex;align-items:flex-end;gap:3px;flex:1;width:100%;justify-content:center;">
+          <div style="width:14px;background:var(--primary);border-radius:3px 3px 0 0;height:${ih}%;min-height:${inc>0?2:0}px;" title="${fmt(inc)}"></div>
+          <div style="width:14px;background:#cbd5e1;border-radius:3px 3px 0 0;height:${eh}%;min-height:${exp>0?2:0}px;" title="${fmt(exp)}"></div>
         </div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:6px;">${label}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:6px;flex-shrink:0;">${label}</div>
       </div>`;
     }).join('')}
   </div>`;
