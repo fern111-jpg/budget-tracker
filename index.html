@@ -2428,32 +2428,49 @@ function openBudgetModal() {
   $$('budget-modal').style.display = 'flex';
 }
 
+let bmDragIdx = null;
+
 function bmRender() {
+  const dragHandle = `<span style="cursor:grab;color:var(--gray-300);display:flex;align-items:center;flex-shrink:0;padding:0 2px 0 0;" title="Drag to reorder">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+  </span>`;
+
   $$('bm-cats').innerHTML = bmState.map((cat, ci) => {
     const color = CAT_COLOR[cat.origName] || CAT_COLOR[cat.name] || '#6B7280';
     const subHtml = cat.subs.map((sub, si) => `
       <div style="display:flex;align-items:center;gap:8px;padding:7px 0 7px 28px;border-top:1px solid var(--gray-100);">
-        <input type="text" value="${esc(sub.name)}" placeholder="Sub-category name"
-          style="flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:12.5px;font-family:inherit;outline:none;min-width:0;"
-          oninput="bmState[${ci}].subs[${si}].name=this.value">
-        <input type="number" min="0" step="1" placeholder="$" value="${sub.budget || ''}"
-          style="width:80px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:12.5px;font-family:inherit;text-align:right;outline:none;"
-          oninput="bmState[${ci}].subs[${si}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
+        <span onclick="bmStartEdit(this,${ci},${si})"
+          style="flex:1;font-size:12.5px;font-family:inherit;color:${sub.name?'var(--gray-700)':'var(--gray-300)'};padding:5px 6px;border-radius:6px;cursor:text;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background 0.12s;"
+          onmouseenter="this.style.background='var(--gray-100)'" onmouseleave="this.style.background=''"
+          title="Click to rename">${esc(sub.name) || 'Sub-category name'}</span>
+        <div style="display:flex;align-items:center;width:80px;border:1px solid var(--gray-200);border-radius:6px;background:var(--white);overflow:hidden;">
+          <span style="padding:0 4px 0 8px;font-size:12.5px;color:var(--gray-500);font-family:inherit;">$</span>
+          <input type="number" min="0" step="1" value="${sub.budget || ''}"
+            style="width:100%;border:none;padding:5px 8px 5px 0;font-size:12.5px;font-family:inherit;text-align:right;outline:none;background:transparent;"
+            oninput="bmState[${ci}].subs[${si}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
+        </div>
         <button onclick="bmDeleteSub(${ci},${si})" title="Remove"
           style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0;">&times;</button>
       </div>`).join('');
     const chevron = cat.expanded
       ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>`
       : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>`;
-    return `<div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;">
+    return `<div class="bm-cat-row" draggable="true" data-ci="${ci}"
+      ondragstart="bmDragStart(event,${ci})" ondragover="bmDragOver(event,${ci})" ondrop="bmDrop(event,${ci})" ondragend="bmDragEnd()"
+      style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;transition:opacity 0.15s,border-color 0.15s;">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--gray-50);">
+        ${dragHandle}
         <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-        <input type="text" value="${esc(cat.name)}" placeholder="Category name"
-          style="flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-weight:600;font-family:inherit;outline:none;min-width:0;background:var(--white);"
-          oninput="bmState[${ci}].name=this.value">
-        <input type="number" min="0" step="1" placeholder="$" value="${cat.budget || ''}"
-          style="width:90px;border:1px solid var(--gray-200);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;text-align:right;outline:none;background:var(--white);"
-          oninput="bmState[${ci}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
+        <span onclick="bmStartEdit(this,${ci})"
+          style="flex:1;font-size:13px;font-weight:600;font-family:inherit;color:${cat.name?'var(--gray-800)':'var(--gray-300)'};padding:5px 6px;border-radius:6px;cursor:text;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background 0.12s;"
+          onmouseenter="this.style.background='var(--gray-200)'" onmouseleave="this.style.background=''"
+          title="Click to rename">${esc(cat.name) || 'Category name'}</span>
+        <div style="display:flex;align-items:center;width:90px;border:1px solid var(--gray-200);border-radius:6px;background:var(--white);overflow:hidden;">
+          <span style="padding:0 4px 0 8px;font-size:13px;color:var(--gray-500);font-family:inherit;">$</span>
+          <input type="number" min="0" step="1" value="${cat.budget || ''}"
+            style="width:100%;border:none;padding:5px 8px 5px 0;font-size:13px;font-family:inherit;text-align:right;outline:none;background:transparent;"
+            oninput="bmState[${ci}].budget=parseFloat(this.value)||0;updateBudgetRemaining()">
+        </div>
         <button onclick="bmToggleExpand(${ci})" title="Sub-categories"
           style="background:none;border:1px solid var(--gray-200);border-radius:6px;cursor:pointer;color:var(--gray-500);padding:4px 6px;line-height:0;display:flex;align-items:center;">
           ${chevron}
@@ -2472,6 +2489,55 @@ function bmRender() {
       </div>` : ''}
     </div>`;
   }).join('');
+}
+
+function bmStartEdit(el, ci, si) {
+  const isSub = si !== undefined;
+  const currentName = isSub ? bmState[ci].subs[si].name : bmState[ci].name;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = currentName;
+  input.placeholder = isSub ? 'Sub-category name' : 'Category name';
+  input.style.cssText = `flex:1;border:1.5px solid var(--primary);border-radius:6px;padding:5px 8px;font-size:${isSub?'12.5':'13'}px;font-weight:${isSub?'400':'600'};font-family:inherit;outline:none;min-width:0;background:var(--white);width:100%;box-sizing:border-box;`;
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+  const save = () => {
+    const val = input.value.trim();
+    if (isSub) bmState[ci].subs[si].name = val || currentName;
+    else bmState[ci].name = val || currentName;
+    bmRender();
+  };
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { input.value = currentName; input.blur(); }
+  });
+}
+
+function bmDragStart(e, ci) {
+  bmDragIdx = ci;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => { const el = e.currentTarget; if (el) el.style.opacity = '0.4'; }, 0);
+}
+function bmDragOver(e, ci) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.bm-cat-row').forEach((r, i) => {
+    r.style.borderColor = (i === ci && ci !== bmDragIdx) ? 'var(--primary)' : 'var(--gray-200)';
+  });
+}
+function bmDrop(e, ci) {
+  e.preventDefault();
+  if (bmDragIdx === null || bmDragIdx === ci) return;
+  const moved = bmState.splice(bmDragIdx, 1)[0];
+  bmState.splice(ci, 0, moved);
+  bmDragIdx = null;
+  bmRender();
+}
+function bmDragEnd() {
+  bmDragIdx = null;
+  document.querySelectorAll('.bm-cat-row').forEach(r => { r.style.opacity = '1'; r.style.borderColor = 'var(--gray-200)'; });
 }
 
 function bmToggleExpand(ci) {
@@ -2499,9 +2565,9 @@ function bmDeleteCat(ci) {
 function bmAddCategory() {
   bmState.push({ origName: null, name: '', budget: 0, subs: [], expanded: false });
   bmRender();
-  // focus the new name input
-  const inputs = $$('bm-cats').querySelectorAll('input[type="text"]');
-  if (inputs.length) inputs[inputs.length - 1].focus();
+  // click into the new name span to start editing
+  const spans = $$('bm-cats').querySelectorAll('.bm-cat-row > div > span[onclick]');
+  if (spans.length) spans[spans.length - 1].click();
 }
 
 function updateBudgetRemaining() {
@@ -2588,6 +2654,18 @@ function submitBudgetModal() {
 
     CATS[newName] = newSubs;
   });
+
+  // Rebuild CATS in bmState order so dropdowns reflect reordering
+  const income = CATS['Income'];
+  const reordered = {};
+  if (income !== undefined) reordered['Income'] = income;
+  bmState.forEach(cat => {
+    const n = cat.name.trim();
+    reordered[n] = CATS[n] || [];
+  });
+  Object.keys(CATS).forEach(k => { if (!(k in reordered)) reordered[k] = CATS[k]; });
+  Object.keys(CATS).forEach(k => delete CATS[k]);
+  Object.assign(CATS, reordered);
 
   saveCats();
   renderBudget();
