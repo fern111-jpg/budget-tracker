@@ -4104,7 +4104,7 @@ function closeQuoteForm() {
 }
 
 function quoteFormDelete() {
-  if (editingQuoteId) { const t = currentFormType; closeQuoteForm(); deleteQuote(editingQuoteId, t); }
+  if (editingQuoteId) { const id = editingQuoteId; const t = currentFormType; closeQuoteForm(); deleteQuote(id, t); }
 }
 
 function handleQuoteAttachment(input) {
