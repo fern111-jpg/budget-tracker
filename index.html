@@ -2909,7 +2909,7 @@ function csvLine(s) {
 }
 
 function exportBackup() {
-  const u = curUser;
+  const u = currentUser;
   const keys = Object.keys(localStorage).filter(k => k.includes('_'+u) || k === 'bt_users');
   const backup = {};
   keys.forEach(k => { backup[k] = localStorage.getItem(k); });
