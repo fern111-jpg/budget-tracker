@@ -1124,8 +1124,17 @@ select.form-control {
           <span class="settings-label">Import from CSV</span>
           <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         </div>
+        <div class="settings-row" onclick="exportBackup()">
+          <span class="settings-label">Export full backup</span>
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </div>
+        <div class="settings-row" onclick="document.getElementById('import-backup-file').click()">
+          <span class="settings-label">Import full backup</span>
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        </div>
       </div>
       <input type="file" id="import-file" accept=".csv" style="display:none" onchange="doImport(this)">
+      <input type="file" id="import-backup-file" accept=".json" style="display:none" onchange="importBackup(this)">
 
       <div class="settings-sec">Danger Zone</div>
       <div class="settings-group">
@@ -2897,6 +2906,35 @@ function csvLine(s) {
     else c+=s[i];
   }
   r.push(c); return r.map(v=>v.replace(/^"|"$/g,''));
+}
+
+function exportBackup() {
+  const u = curUser;
+  const keys = Object.keys(localStorage).filter(k => k.includes('_'+u) || k === 'bt_users');
+  const backup = {};
+  keys.forEach(k => { backup[k] = localStorage.getItem(k); });
+  const json = JSON.stringify(backup);
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([json], {type:'application/json'})),
+    download: 'backup_'+u+'_'+new Date().toISOString().slice(0,10)+'.json'
+  });
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('Backup exported!');
+}
+
+function importBackup(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const backup = JSON.parse(e.target.result);
+      Object.entries(backup).forEach(([k,v]) => localStorage.setItem(k, v));
+      input.value = '';
+      toast('Backup imported — reloading…');
+      setTimeout(() => location.reload(), 1200);
+    } catch { toast('Invalid backup file'); input.value = ''; }
+  };
+  reader.readAsText(file);
 }
 
 function clearAll() {
