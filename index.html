@@ -3398,6 +3398,13 @@ function bootApp() {
       b.ratePeriods = [{ name: b.rateName || 'General Usage', rate: b.rate, usage: b.usage || 0 }];
     }
     b.ratePeriods = b.ratePeriods || [];
+    b.quotes = (b.quotes || []).map(q => {
+      if (!q.ratePeriods && q.rate != null) {
+        q.ratePeriods = [{ name: q.rateName || 'General Usage', rate: q.rate }];
+      }
+      q.ratePeriods = q.ratePeriods || [];
+      return q;
+    });
     return b;
   });
   loadTasks();
