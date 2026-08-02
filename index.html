@@ -517,6 +517,8 @@ select.form-control {
   .sum-amount { font-size: 24px; }
 
   .dash-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+  .dash-cta-group { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; align-self: stretch; justify-content: center; }
+  .dash-tasks-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   .dash-bottom .sec-title { margin-top: 0; }
 
   /* Transactions: hide cards, show table */
@@ -533,6 +535,18 @@ select.form-control {
 
   /* Month picker on dashboard */
   .month-picker { max-width: 300px; }
+}
+
+@media (max-width: 767px) {
+  .dash-tasks-row { grid-template-columns: 1fr; }
+  .dash-bottom     { grid-template-columns: 1fr; }
+  .dash-picker-row { flex-wrap: wrap !important; }
+  .dash-picker-row .month-picker { width: 100%; flex: none !important; }
+  .dash-cta-group  { width: 100%; flex-direction: row; }
+  .dash-cta-group button { flex: 1; justify-content: center; }
+  #pg-dashboard .card,
+  #pg-dashboard [style*="border-radius:12px"],
+  #pg-dashboard [style*="border-radius: 12px"] { margin-left: 0; margin-right: 0; }
 }
 
 @media (min-width: 1024px) {
@@ -720,7 +734,7 @@ select.form-control {
 
     <!-- DASHBOARD -->
     <div class="page active" id="pg-dashboard">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div class="dash-picker-row" style="display:flex;align-items:stretch;gap:10px;margin-bottom:10px;">
         <div class="month-picker" style="flex:1;margin-bottom:0;">
           <button class="month-btn" onclick="changePeriod(-1)">
             <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -737,14 +751,16 @@ select.form-control {
             <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>
-        <button onclick="openDashFilter()" style="display:flex;align-items:center;gap:6px;padding:9px 14px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);box-shadow:var(--shadow);font-size:13px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;white-space:nowrap;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          Filter
-        </button>
-        <button onclick="openAddModal()" style="margin-left:auto;padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add transaction
-        </button>
+        <div class="dash-cta-group">
+          <button onclick="openAddModal()" style="padding:10px 16px;background:var(--primary);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;width:100%;justify-content:center;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add transaction
+          </button>
+          <button onclick="openDashFilter()" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);box-shadow:var(--shadow);font-size:13px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;white-space:nowrap;width:100%;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filter
+          </button>
+        </div>
       </div>
 
       <div class="budget-summary-bar" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px;">
@@ -786,7 +802,7 @@ select.form-control {
       </div>
 
       <!-- Tasks + Income vs expenses row -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div class="dash-tasks-row">
         <div class="card" style="padding:0;display:flex;flex-direction:column;height:320px;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;flex-shrink:0;">
             <div class="bsum-label" style="margin-bottom:0;">Tasks</div>
