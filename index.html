@@ -3377,7 +3377,13 @@ function bootApp() {
   syncCfg      = JSON.parse(localStorage.getItem('bt_sync_'         + currentUser) || 'null');
   CATS         = JSON.parse(localStorage.getItem('bt_cats_'         + currentUser) || 'null') || JSON.parse(JSON.stringify(DEFAULT_CATS));
   userAccounts = JSON.parse(localStorage.getItem('bt_accounts_'     + currentUser) || 'null') || [...DEFAULT_ACCOUNTS];
-  utilBills    = JSON.parse(localStorage.getItem('bt_util_bills_'   + currentUser) || '[]');
+  utilBills    = JSON.parse(localStorage.getItem('bt_util_bills_'   + currentUser) || '[]').map(b => {
+    if (!b.ratePeriods && b.rate != null) {
+      b.ratePeriods = [{ name: b.rateName || 'General Usage', rate: b.rate, usage: b.usage || 0 }];
+    }
+    b.ratePeriods = b.ratePeriods || [];
+    return b;
+  });
   loadTasks();
   $$('auth-overlay').classList.remove('show');
   const lbl = $$('current-user-label');
