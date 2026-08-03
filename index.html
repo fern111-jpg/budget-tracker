@@ -3365,7 +3365,13 @@ async function syncPull() {
       const data = await r.json();
       if (Array.isArray(data.record?.txs)) {
         const rec = data.record;
-        txs = rec.txs;
+        // Merge transactions by ID — union of local + remote, remote wins on conflict
+        const merged = [...txs];
+        for (const rt of rec.txs) {
+          const idx = merged.findIndex(lt => lt.id === rt.id);
+          if (idx >= 0) merged[idx] = rt; else merged.push(rt);
+        }
+        txs = merged;
         localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs));
         if (Array.isArray(rec.utilBills)) {
           utilBills = rec.utilBills.map(b => {
@@ -3396,7 +3402,9 @@ async function syncPull() {
         if (curPage === 'transactions') renderTx();
         if (curPage === 'utilities')    renderUtilities();
         if (curPage === 'budgeting')    renderBudget();
-        toast('Synced — ' + txs.length + ' transactions loaded');
+        toast('Synced — ' + txs.length + ' transactions');
+        // Push merged result back so all devices converge
+        syncPush();
       } else {
         toast('Sync: no data found in bin');
       }
