@@ -3400,7 +3400,7 @@ async function syncPull() {
         if (curPage === 'transactions') renderTx();
         if (curPage === 'utilities')    renderUtilities();
         if (curPage === 'budgeting')    renderBudget();
-        toast('bin: ' + Object.keys(rec).join(', ') + ' | util=' + (rec.utilBills?.length ?? 'none'));
+        toast('Synced — ' + txs.length + ' transactions');
         // Only push back if phone had local-only transactions to contribute
         if (localOnlyTxs.length > 0) syncPush();
       } else {
