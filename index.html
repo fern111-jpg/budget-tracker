@@ -3358,8 +3358,8 @@ async function syncPull() {
   if (!syncCfg?.key || !syncCfg?.binId) return;
   toast('Syncing…');
   try {
-    const r = await fetch(`${JSONBIN}/b/${syncCfg.binId}/latest`, {
-      headers: { 'X-Master-Key': syncCfg.key }
+    const r = await fetch(`${JSONBIN}/b/${syncCfg.binId}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': syncCfg.key, 'Cache-Control': 'no-cache' }
     });
     if (r.ok) {
       const data = await r.json();
