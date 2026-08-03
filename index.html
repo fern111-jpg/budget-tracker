@@ -1733,6 +1733,7 @@ function goTo(page) {
   if (page === 'budgeting')    renderBudget();
   if (page === 'manage')       { manageSnapshot = null; renderManage(); }
   if (page === 'utilities')    renderUtilities();
+  if (page === 'settings')     updateSyncUI();
 }
 
 function updateHdrBadge(page) {
@@ -3093,7 +3094,7 @@ async function syncPush() {
   try {
     const r = await fetch(`${JSONBIN}/b/${syncCfg.binId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Access-Key': syncCfg.key },
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': syncCfg.key },
       body: JSON.stringify({ txs })
     });
     if (r.ok) {
@@ -3111,7 +3112,7 @@ async function syncPull() {
   toast('Syncing…');
   try {
     const r = await fetch(`${JSONBIN}/b/${syncCfg.binId}/latest`, {
-      headers: { 'X-Access-Key': syncCfg.key }
+      headers: { 'X-Master-Key': syncCfg.key }
     });
     if (r.ok) {
       const data = await r.json();
@@ -3144,7 +3145,7 @@ async function syncCreate() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Access-Key': key,
+        'X-Master-Key': key,
         'X-Bin-Name': 'Budget Tracker',
         'X-Bin-Private': 'true'
       },
