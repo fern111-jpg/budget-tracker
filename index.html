@@ -6,8 +6,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Budget">
 <title>Budget Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary: #1d4ed8;
@@ -53,7 +51,7 @@
 ::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
 
 body {
-  font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--gray-800);
   min-height: 100vh;
@@ -94,13 +92,13 @@ body {
 .sb-logo {
   width: 30px; height: 30px; border-radius: 8px;
   background: var(--primary); display: flex; align-items: center; justify-content: center;
-  font-family: 'Inter', sans-serif; font-weight: 700; color: #fff; font-size: 15px;
+  font-family: inherit; font-weight: 700; color: #fff; font-size: 15px;
   flex-shrink: 0;
 }
 /* Text labels — hidden when collapsed, visible when expanded */
 .sb-name {
   font-size: 18px; font-weight: 700; color: #ffffff;
-  font-family: 'Inter', sans-serif; letter-spacing: -0.3px;
+  font-family: inherit; letter-spacing: -0.3px;
   white-space: nowrap; overflow: hidden;
   max-width: 0; opacity: 0;
   transition: max-width 0.22s ease, opacity 0.15s ease;
@@ -164,14 +162,53 @@ body {
   z-index: 90;
   background: var(--white);
   border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.hdr-row {
   height: var(--header-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 18px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  flex-shrink: 0;
 }
-.header-title { font-size: 17px; font-weight: 600; color: var(--gray-900); font-family: 'Inter', sans-serif; }
+.util-md-tabs {
+  display: none;
+  border-top: 1px solid var(--gray-100);
+}
+.util-md-tabs.visible { display: flex; }
+.util-md-tab {
+  flex: 1;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--gray-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  transition: color 0.18s;
+}
+.util-md-tab.active { color: var(--primary); font-weight: 600; }
+.util-md-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 16px; right: 16px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 3px 3px 0 0;
+  transform: scaleX(0);
+  transition: transform 0.2s cubic-bezier(.4,0,.2,1);
+}
+.util-md-tab.active::after { transform: scaleX(1); }
+.header-title { font-size: 17px; font-weight: 600; color: var(--gray-900); font-family: inherit; }
 .header-badge { font-size: 12px; font-weight: 600; color: var(--gray-400); background: var(--gray-100); padding: 4px 10px; border-radius: 20px; }
 
 /* ── Pages ───────────────────────────────── */
@@ -211,7 +248,7 @@ body {
 .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .sum-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 14px 16px; }
 .sum-label { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 4px; }
-.sum-amount { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: 'Inter', sans-serif; }
+.sum-amount { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: inherit; }
 .sum-amount.income  { color: var(--gray-900); }
 .sum-amount.expense { color: var(--gray-900); }
 .sum-amount.pos     { color: var(--gray-900); }
@@ -242,7 +279,7 @@ body {
 .tx-meta { font-size: 11.5px; color: var(--gray-400); margin-top: 2px; }
 .tx-right { text-align: right; flex-shrink: 0; }
 .tx-amount { font-size: 15px; font-weight: 700; }
-.tx-amount.income  { color: var(--green-mid); }
+.tx-amount.income  { color: var(--gray-900); }
 .tx-amount.expense { color: var(--gray-800); }
 .tx-true { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
 
@@ -277,7 +314,7 @@ body {
 .tx-table tbody tr:nth-child(even):hover { background: #eff6ff; }
 .tx-table td { padding: 10px 12px; color: var(--gray-700); vertical-align: middle; }
 .tx-table td.r { text-align: right; font-weight: 600; }
-.tx-table td.income-cell  { color: var(--green-mid); font-weight: 700; text-align: right; }
+.tx-table td.income-cell  { color: var(--gray-900); font-weight: 700; text-align: right; }
 .tx-table td.expense-cell { color: var(--gray-800); font-weight: 600; text-align: right; }
 .tx-table td.muted { color: var(--gray-400); font-size: 12px; }
 .cat-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; flex-shrink: 0; }
@@ -299,11 +336,11 @@ body {
   padding: 24px; margin-bottom: 14px;
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 48px;
 }
-.bsum-label { font-size: 11px; font-weight: 600; color: var(--sb-bg); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-family: 'Inter', sans-serif; }
+.bsum-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-family: inherit; }
 .budget-summary-bar .bsum-label { margin-bottom: 12px; }
-.bsum-val   { font-size: 20px; font-weight: 700; color: var(--gray-900); font-family: 'Inter', sans-serif; }
-.bsum-val.ok  { color: var(--green-mid); }
-.bsum-val.over { color: var(--red-mid); }
+.bsum-val   { font-size: 20px; font-weight: 600; color: var(--gray-900); font-family: inherit; }
+.bsum-val.ok  { color: var(--gray-900); }
+.bsum-val.over { color: var(--gray-900); }
 .budget-list { display: flex; flex-direction: column; gap: 10px; }
 .budget-row {
   background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200);
@@ -325,7 +362,7 @@ body {
 .budget-bar-track { flex: 1; height: 7px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
 .budget-bar-fill  { height: 100%; border-radius: 4px; transition: width 0.3s; }
 .budget-meta { font-size: 11px; font-weight: 600; color: var(--gray-400); white-space: nowrap; }
-.budget-meta.over { color: var(--red-mid); }
+.budget-meta.over { color: var(--gray-600); }
 .budget-unset { font-size: 12px; color: var(--gray-400); font-style: italic; }
 
 /* ── Kebab menu ──────────────────────────── */
@@ -355,8 +392,8 @@ body {
 .kebab-item:hover { background: var(--gray-50); color: var(--gray-900); }
 .paid-check { color: var(--green-mid); font-weight: 700; font-size: 15px; }
 .table-totals-row td { font-weight: 700; background: var(--gray-50); border-top: 2px solid var(--gray-200); color: var(--gray-700); }
-.table-totals-row td.income-cell  { color: var(--green-mid); }
-.table-totals-row td.expense-cell { color: var(--red-mid); }
+.table-totals-row td.income-cell  { color: var(--gray-900); }
+.table-totals-row td.expense-cell { color: var(--gray-900); }
 
 /* ── Empty state ─────────────────────────── */
 .empty { text-align: center; padding: 40px 20px; }
@@ -421,7 +458,7 @@ select.form-control {
 .modal { width: 100%; max-width: 480px; background: var(--white); border-radius: 22px 22px 0 0; padding: 0 18px 40px; max-height: 92vh; overflow-y: auto; animation: slideUp 0.28s cubic-bezier(.4,0,.2,1); }
 @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
 .modal-handle { width: 38px; height: 4px; background: var(--gray-200); border-radius: 2px; margin: 14px auto 18px; }
-.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; color: var(--gray-900); font-family: 'Inter', sans-serif; }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; color: var(--gray-900); font-family: inherit; }
 
 /* ── Settings ────────────────────────────── */
 .settings-group { margin-bottom: 6px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--gray-200); }
@@ -429,7 +466,7 @@ select.form-control {
 .settings-row:last-child { border-bottom: none; }
 .settings-label { font-size: 14px; font-weight: 500; color: var(--gray-800); }
 .settings-row svg { width: 16px; height: 16px; stroke: var(--gray-400); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-.settings-sec { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray-400); margin: 18px 4px 6px; }
+.settings-sec { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; margin: 18px 4px 6px; }
 .about-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 16px; font-size: 13px; color: var(--gray-500); line-height: 1.7; }
 
 /* ── Person tags ─────────────────────────── */
@@ -476,8 +513,8 @@ select.form-control {
 #auth-overlay.show { display: flex; }
 .auth-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--gray-200); padding: 36px 32px; width: 100%; max-width: 380px; margin: 20px; }
 .auth-logo { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-.auth-logo-inner { width: 34px; height: 34px; border-radius: 9px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 700; color: #fff; font-size: 16px; }
-.auth-title { font-size: 20px; font-weight: 700; color: var(--gray-900); margin-bottom: 32px; font-family: 'Inter', sans-serif; }
+.auth-logo-inner { width: 34px; height: 34px; border-radius: 9px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-family: inherit; font-weight: 700; color: #fff; font-size: 16px; }
+.auth-title { font-size: 20px; font-weight: 700; color: var(--gray-900); margin-bottom: 32px; font-family: inherit; }
 .auth-subtitle { font-size: 13.5px; color: var(--gray-500); margin-bottom: 24px; }
 .auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: var(--gray-500); }
 .auth-switch a { color: var(--primary); font-weight: 600; cursor: pointer; }
@@ -710,7 +747,7 @@ select.form-control {
     </nav>
     <div class="sb-footer">
       <div style="display:flex;align-items:center;gap:10px;">
-        <div id="sb-avatar" style="width:32px;height:32px;border-radius:50%;background:var(--sb-border);display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12.5px;font-weight:600;font-family:'Inter',sans-serif;flex-shrink:0;"></div>
+        <div id="sb-avatar" style="width:32px;height:32px;border-radius:50%;background:var(--sb-border);display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12.5px;font-weight:600;font-family:inherit;flex-shrink:0;"></div>
         <div class="sb-footer-text" style="min-width:0;">
           <div id="sb-username" style="font-size:13px;font-weight:600;color:#e2e8f0;white-space:nowrap;"></div>
           <div style="font-size:11px;color:var(--sb-text);white-space:nowrap;">Personal account</div>
@@ -722,19 +759,26 @@ select.form-control {
   <!-- ── Main ─────────────────────────── -->
   <div class="main">
     <header class="header">
-      <div>
-        <div class="header-title" id="hdr-title">Overview</div>
-        <div id="hdr-subtitle" style="font-size:13px;color:var(--gray-500);margin-top:1px;display:none;"></div>
+      <div class="hdr-row">
+        <div>
+          <div class="header-title" id="hdr-title">Overview</div>
+          <div id="hdr-subtitle" style="font-size:13px;color:var(--gray-500);margin-top:1px;display:none;"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="header-badge" id="hdr-badge"></div>
+          <div id="hdr-actions"></div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="header-badge" id="hdr-badge"></div>
-        <div id="hdr-actions"></div>
+      <div class="util-md-tabs" id="util-md-tabs">
+        <button class="util-md-tab active" id="utab-md-electricity" onclick="setUtilTab('electricity')">Electricity</button>
+        <button class="util-md-tab" id="utab-md-gas" onclick="setUtilTab('gas')">Gas</button>
+        <button class="util-md-tab" id="utab-md-internet" onclick="setUtilTab('internet')">Internet</button>
       </div>
     </header>
 
     <!-- DASHBOARD -->
     <div class="page active" id="pg-dashboard">
-      <div class="dash-picker-row" style="display:flex;align-items:stretch;gap:10px;margin-bottom:10px;">
+      <div class="dash-picker-row" style="display:flex;align-items:stretch;justify-content:space-between;gap:10px;margin-bottom:10px;">
         <div class="month-picker" style="flex:1;margin-bottom:0;">
           <button class="month-btn" onclick="changePeriod(-1)">
             <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -1055,13 +1099,13 @@ select.form-control {
               <div style="display:flex;align-items:center;gap:4px;">
                 <span style="font-size:15px;font-weight:700;color:var(--primary);">$</span>
                 <input type="number" id="bm-overall" min="0" step="1" placeholder="0"
-                  style="width:100%;border:none;background:transparent;font-size:22px;font-weight:700;color:var(--primary);font-family:'Inter',sans-serif;outline:none;"
+                  style="width:100%;border:none;background:transparent;font-size:22px;font-weight:700;color:var(--primary);font-family:inherit;outline:none;"
                   oninput="updateBudgetRemaining()">
               </div>
             </div>
             <div style="text-align:right;flex-shrink:0;">
               <div style="font-size:11px;color:var(--primary);font-weight:600;margin-bottom:2px;">Remaining</div>
-              <div id="bm-remaining" style="font-size:18px;font-weight:700;color:var(--primary);font-family:'Inter',sans-serif;">$0</div>
+              <div id="bm-remaining" style="font-size:18px;font-weight:700;color:var(--primary);font-family:inherit;">$0</div>
             </div>
           </div>
         </div>
@@ -1171,31 +1215,40 @@ select.form-control {
 
     <!-- UTILITIES -->
     <div class="page" id="pg-utilities">
-      <!-- Utility type tabs + CTA inline -->
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="util-type-tabs">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="pill active" id="utab-electricity" onclick="setUtilTab('electricity')">Electricity</button>
-          <button class="pill" id="utab-gas" onclick="setUtilTab('gas')">Gas</button>
-          <button class="pill" id="utab-internet" onclick="setUtilTab('internet')">Internet</button>
-        </div>
-        <div id="util-inline-cta"></div>
-      </div>
-
-      <!-- Electricity panel -->
-      <div id="util-panel-electricity">
-        <!-- Period filter bar -->
-        <div style="margin-bottom:14px;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+      <!-- Top action bar: pills left, CTA right -->
+      <div id="util-type-tabs" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
+          <!-- Electricity filter controls -->
+          <div id="util-filter-bar" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
             <div id="util-month-pills" style="display:contents;"></div>
             <button id="util-filter-toggle" onclick="toggleUtilFilterRange()" style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;">Filter</button>
           </div>
-          <div id="util-filter-range" style="display:none;margin-top:8px;display:none;gap:8px;align-items:center;flex-wrap:wrap;">
+          <div id="util-filter-range" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;">
             <input type="month" id="util-filter-from" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyUtilRange()">
             <span style="font-size:12px;color:var(--gray-400);">to</span>
             <input type="month" id="util-filter-to" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyUtilRange()">
             <button onclick="clearUtilFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
           </div>
+          <!-- Gas filter controls -->
+          <div id="gas-filter-bar" style="display:none;flex-direction:column;gap:6px;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <div id="gas-month-pills" style="display:contents;"></div>
+              <button id="gas-filter-toggle" onclick="toggleGasFilterRange()" style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;">Filter</button>
+            </div>
+            <div id="gas-filter-range" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input type="month" id="gas-filter-from" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyGasRange()">
+              <span style="font-size:12px;color:var(--gray-400);">to</span>
+              <input type="month" id="gas-filter-to" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyGasRange()">
+              <button onclick="clearGasFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
+            </div>
+          </div>
         </div>
+        <div id="util-inline-cta" style="flex-shrink:0;"></div>
+      </div>
+
+      <!-- Electricity panel -->
+      <div id="util-panel-electricity">
+        <div style="margin-bottom:0;"></div>
 
         <div style="margin-top:24px;margin-bottom:12px;">
           <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Saved Bills</div>
@@ -1214,18 +1267,6 @@ select.form-control {
 
       <!-- Gas panel -->
       <div id="util-panel-gas" style="display:none;">
-        <div style="margin-bottom:14px;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            <div id="gas-month-pills" style="display:contents;"></div>
-            <button id="gas-filter-toggle" onclick="toggleGasFilterRange()" style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;">Filter</button>
-          </div>
-          <div id="gas-filter-range" style="display:none;margin-top:8px;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="month" id="gas-filter-from" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyGasRange()">
-            <span style="font-size:12px;color:var(--gray-400);">to</span>
-            <input type="month" id="gas-filter-to" class="form-control" style="width:150px;font-size:13px;color:var(--gray-400);" placeholder="Select Date" onchange="applyGasRange()">
-            <button onclick="clearGasFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
-          </div>
-        </div>
         <div style="margin-top:24px;margin-bottom:12px;">
           <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Saved Bills</div>
         </div>
@@ -1734,6 +1775,8 @@ function goTo(page) {
   if (page === 'manage')       { manageSnapshot = null; renderManage(); }
   if (page === 'utilities')    renderUtilities();
   if (page === 'settings')     updateSyncUI();
+  const mdTabs = $$('util-md-tabs');
+  if (mdTabs) mdTabs.classList.toggle('visible', page === 'utilities');
 }
 
 function updateHdrBadge(page) {
@@ -2096,7 +2139,7 @@ function txCardHTML(t) {
   const checked = selectedIds.has(t.id);
   return `<label class="tx-item" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;" onclick="event.preventDefault()">
     <input type="checkbox" class="bulk-cb" data-id="${t.id}" ${checked?'checked':''} onchange="bulkToggleId('${t.id}',this.checked)" style="width:18px;height:18px;accent-color:var(--primary);flex-shrink:0;cursor:pointer;">
-    <div class="tx-icon" style="background:${col}22;color:${col};font-size:15px;font-weight:700;font-family:'Inter',sans-serif;">${(t.desc||'?')[0].toUpperCase()}</div>
+    <div class="tx-icon" style="background:${col}22;color:${col};font-size:15px;font-weight:700;font-family:inherit;">${(t.desc||'?')[0].toUpperCase()}</div>
     <div class="tx-body" style="flex:1;min-width:0;">
       <div class="tx-desc">${esc(t.desc||'No description')}</div>
       <div class="tx-meta">${fmtShort(t.date)}${t.account?' · '+esc(t.account):''}${t.subcat?' · '+esc(t.subcat):''}${t.split?' · Split'+(t.paid?' ✓':''):''}</div>
@@ -2174,7 +2217,7 @@ function renderTx() {
       </td>
       <td class="${isIncome?'income-cell':'expense-cell'}" style="white-space:nowrap;text-align:right;">
         ${isSplit
-          ? `<span style="font-weight:700;">${isIncome?'':'-'}${fmt(myShare)}</span><br><span style="font-size:11px;color:var(--gray-400);">of -${fmt(fullAmt)}</span>`
+          ? `<span style="font-weight:700;">${isIncome?'':'-'}${fmt(myShare)}</span><br><span style="font-size:11px;color:var(--gray-400);font-weight:400;">of -${fmt(fullAmt)}</span>`
           : `<span style="font-weight:700;">${isIncome?'':'-'}${fmt(fullAmt)}</span>`
         }
       </td>
@@ -2603,7 +2646,7 @@ function updateBudgetRemaining() {
   const el = $$('bm-remaining');
   if (el) {
     el.textContent = (rem < 0 ? '-' : '') + '$' + Math.abs(rem).toFixed(0);
-    el.style.color = rem < 0 ? 'var(--red-mid)' : 'var(--primary)';
+    el.style.color = 'var(--primary)';
   }
 }
 
@@ -2760,7 +2803,7 @@ function renderBudgetDonut(spent) {
 
   // Inner text: remaining or over
   const centerLabel = over
-    ? `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--red-mid)" font-family="Inter,sans-serif">−${fmt(Math.abs(rem))}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="var(--gray-500)" font-family="Inter,sans-serif">over budget</text>`
+    ? `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--gray-900)" font-family="inherit">−${fmt(Math.abs(rem))}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="var(--gray-500)" font-family="inherit">over budget</text>`
     : `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--gray-800)" font-family="Inter,sans-serif">${fmt(rem)}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="var(--gray-500)" font-family="Inter,sans-serif">remaining</text>`;
 
   const svg = `<svg viewBox="0 0 180 180" width="180" height="180" style="flex-shrink:0;transform:rotate(-90deg);">
@@ -2778,7 +2821,7 @@ function renderBudgetDonut(spent) {
       <div style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0;"></div>
       <div style="flex:1;font-size:12.5px;font-weight:600;color:var(--gray-700);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.name)}</div>
       <div style="font-size:11.5px;color:var(--gray-500);white-space:nowrap;">${pct}%</div>
-      <div style="font-size:12px;font-weight:700;color:${sOver?'var(--red-mid)':s.color};white-space:nowrap;">${fmt(s.budget)}</div>
+      <div style="font-size:12px;font-weight:700;color:${s.color};white-space:nowrap;">${fmt(s.budget)}</div>
     </div>`;
   }).join('');
 
@@ -2812,7 +2855,7 @@ function renderBudget() {
     const hasBudget = budget > 0;
     const pct      = hasBudget ? Math.min(spentAmt / budget * 100, 100) : 0;
     const over     = hasBudget && spentAmt > budget;
-    const barColor = over ? 'var(--red-mid)' : (pct > 80 ? '#F97316' : color);
+    const barColor = pct > 80 ? '#F97316' : color;
     const remAmt   = budget - spentAmt;
 
     const subs = (CATS[cat] || []);
@@ -2823,12 +2866,12 @@ function renderBudget() {
       const sHas      = sBudget > 0;
       const sPct      = sHas ? Math.min(sSpent / sBudget * 100, 100) : 0;
       const sOver     = sHas && sSpent > sBudget;
-      const sBarColor = sOver ? 'var(--red-mid)' : (sPct > 80 ? '#F97316' : color);
+      const sBarColor = sPct > 80 ? '#F97316' : color;
       if (!sHas && sSpent === 0) return '';
       return `<div style="padding:8px 0 8px 32px;border-top:1px solid var(--gray-100);">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
           <div style="flex:1;font-size:12.5px;color:var(--gray-600);">${esc(sub)}</div>
-          <div style="font-size:12.5px;font-weight:600;color:${sOver?'var(--red-mid)':color};">${sHas ? (sOver?'−'+fmt(Math.abs(sBudget-sSpent))+' over':fmt(sSpent)+' / '+fmt(sBudget)) : fmt(sSpent)+' spent'}</div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--gray-900);">${sHas ? (sOver?'−'+fmt(Math.abs(sBudget-sSpent))+' over':fmt(sSpent)+'<span style="color:var(--gray-400);font-weight:500;"> / '+fmt(sBudget)+'</span>') : fmt(sSpent)+' spent'}</div>
         </div>
         <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${sPct}%;background:${sBarColor};"></div></div>
       </div>`;
@@ -2838,8 +2881,8 @@ function renderBudget() {
       <div class="budget-row-top">
         <div class="budget-cat-icon" style="background:${color}22;"><div style="width:12px;height:12px;border-radius:50%;background:${color};"></div></div>
         <div class="budget-cat-name">${esc(cat)}</div>
-        <div style="font-size:14px;font-weight:700;color:${over?'var(--red-mid)':color};">
-          ${hasBudget ? (over ? '−'+fmt(Math.abs(remAmt))+' over' : fmt(spentAmt)+' / '+fmt(budget)) : (spentAmt > 0 ? fmt(spentAmt)+' spent' : '<span style="color:var(--gray-300);">No budget</span>')}
+        <div style="font-size:14px;font-weight:700;color:var(--gray-900);">
+          ${hasBudget ? (over ? '−'+fmt(Math.abs(remAmt))+' over' : fmt(spentAmt)+'<span style="color:var(--gray-400);font-weight:500;"> / '+fmt(budget)+'</span>') : (spentAmt > 0 ? fmt(spentAmt)+' spent' : '<span style="color:var(--gray-300);font-weight:500;">No budget</span>')}
         </div>
       </div>
       <div class="budget-progress-row">
@@ -3454,10 +3497,14 @@ function renderUtilInlineCta() {
 
 function setUtilTab(tab) {
   utilTab = tab;
-  document.querySelectorAll('#util-type-tabs .pill').forEach(b => b.classList.remove('active'));
-  $$('utab-' + tab)?.classList.add('active');
+  document.querySelectorAll('.util-md-tab').forEach(b => b.classList.remove('active'));
+  $$('utab-md-' + tab)?.classList.add('active');
   document.querySelectorAll('[id^="util-panel-"]').forEach(p => p.style.display = 'none');
   $$('util-panel-' + tab).style.display = '';
+  const elecBar = $$('util-filter-bar');
+  const gasBar  = $$('gas-filter-bar');
+  if (elecBar) elecBar.style.display = tab === 'electricity' ? 'flex' : 'none';
+  if (gasBar)  gasBar.style.display  = tab === 'gas'         ? 'flex' : 'none';
   updateHdrActions('utilities');
   renderUtilInlineCta();
   renderUtilities();
@@ -3597,7 +3644,7 @@ function renderBillsList() {
           <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          <div style="font-family:'Inter',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
+          <div style="font-family:inherit;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
           ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
         </div>
       </div>
@@ -4277,7 +4324,7 @@ function renderGasBillsList() {
           <div style="font-size:12px;color:#64748b;">${periodLabel}</div>
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          <div style="font-family:'Inter',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
+          <div style="font-family:inherit;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.total).toFixed(2)}</div>
           ${perDay?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${perDay}</div>`:''}
         </div>
       </div>
@@ -4324,7 +4371,7 @@ function renderInternetBillsList() {
         ${subtitle?`<div style="font-size:12px;color:#64748b;">${subtitle}</div>`:''}
       </div>
       <div style="text-align:right;flex-shrink:0;">
-        <div style="font-family:'Inter',sans-serif;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.monthlyRate).toFixed(2)}</div>
+        <div style="font-family:inherit;font-size:17px;font-weight:700;color:#0f172a;">$${(+b.monthlyRate).toFixed(2)}</div>
         <div style="font-size:12px;color:#64748b;margin-top:2px;">/month</div>
       </div>
     </div>`;
