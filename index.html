@@ -306,7 +306,7 @@ body {
 .tx-table thead th:hover { color: var(--sb-bg); opacity: 0.75; }
 .tx-table thead th.sort-asc::after  { content: ' ▲'; font-size: 9px; }
 .tx-table thead th.sort-desc::after { content: ' ▼'; font-size: 9px; }
-.tx-table thead th.r { text-align: right; }
+.tx-table thead th.r { text-align: center; }
 .tx-table tbody tr { border-bottom: 1px solid var(--gray-100); cursor: pointer; transition: background 0.1s; }
 .tx-table tbody tr:last-child { border-bottom: none; }
 .tx-table tbody tr:hover { background: #eff6ff; }
@@ -314,13 +314,17 @@ body {
 .tx-table tbody tr:nth-child(even):hover { background: #eff6ff; }
 .tx-table td { padding: 10px 12px; color: var(--gray-700); vertical-align: middle; }
 .tx-table td.r { text-align: right; font-weight: 600; }
-.tx-table td.income-cell  { color: var(--gray-900); font-weight: 700; text-align: right; }
-.tx-table td.expense-cell { color: var(--gray-800); font-weight: 600; text-align: right; }
+.tx-table td.income-cell  { color: var(--gray-900); font-weight: 700; text-align: center; font-size: 15px; padding-left: 28px; padding-right: 28px; }
+.tx-table td.expense-cell { color: var(--gray-800); font-weight: 600; text-align: center; font-size: 15px; padding-left: 28px; padding-right: 28px; }
 .tx-table td.muted { color: var(--gray-400); font-size: 12px; }
 .cat-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; flex-shrink: 0; }
 .cat-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
-.tx-table td.expense-cell { color: var(--gray-800); font-weight: 700; text-align: right; }
+.tx-table td.expense-cell { color: var(--gray-800); font-weight: 700; text-align: center; font-size: 15px; padding-left: 28px; padding-right: 28px; }
 .split-badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; background: #DBEAFE; color: #1D4ED8; }
+.tx-table th[draggable] { cursor: grab; }
+.tx-table th[draggable]:active { cursor: grabbing; }
+.tx-table th.col-dragging { opacity: 0.4; }
+.tx-table th.col-drag-over { background: var(--primary); color: white; border-radius: 4px; }
 
 /* ── Budget page ─────────────────────────── */
 .budget-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
@@ -346,7 +350,13 @@ body {
   background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200);
   padding: 14px 16px;
 }
-.budget-row-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.budget-row-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; user-select: none; border-radius: 8px; padding: 4px; margin: -4px -4px 6px; transition: background 0.15s; }
+.budget-row-top:hover { background: var(--gray-100); }
+.budget-row-top:active { background: var(--gray-200); }
+.budget-chevron { width: 16px; height: 16px; stroke: var(--gray-400); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; transition: transform 0.2s; }
+.budget-row.expanded .budget-chevron { transform: rotate(180deg); }
+.budget-subcats { display: none; }
+.budget-row.expanded .budget-subcats { display: block; }
 .budget-cat-icon { font-size: 18px; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .budget-cat-name { font-size: 14px; font-weight: 700; color: var(--gray-800); flex: 1; }
 .budget-input-wrap { display: flex; align-items: center; gap: 4px; }
@@ -391,6 +401,7 @@ body {
 }
 .kebab-item:hover { background: var(--gray-50); color: var(--gray-900); }
 .paid-check { color: var(--green-mid); font-weight: 700; font-size: 15px; }
+#tx-tfoot { position: sticky; bottom: 0; z-index: 2; }
 .table-totals-row td { font-weight: 700; background: var(--gray-50); border-top: 2px solid var(--gray-200); color: var(--gray-700); }
 .table-totals-row td.income-cell  { color: var(--gray-900); }
 .table-totals-row td.expense-cell { color: var(--gray-900); }
@@ -993,6 +1004,10 @@ select.form-control {
           style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
           Date range
         </button>
+        <button id="tx-adv-filter-btn" onclick="toggleAdvFilter()"
+          style="padding:5px 12px;border:1.5px solid var(--gray-200);border-radius:20px;background:var(--white);font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
+          Filter
+        </button>
       </div>
       <div id="tx-date-filter-panel" style="display:none;margin-top:8px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);display:none;gap:8px;align-items:center;flex-wrap:wrap;">
         <label style="font-size:12px;font-weight:600;color:var(--gray-500);">From</label>
@@ -1000,6 +1015,27 @@ select.form-control {
         <label style="font-size:12px;font-weight:600;color:var(--gray-500);">To</label>
         <input type="date" id="tx-date-to" class="form-control" style="width:150px;font-size:13px;" onchange="applyTxDateFilter()">
         <button onclick="clearTxDateFilter()" style="padding:5px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;">Clear</button>
+      </div>
+      <div id="tx-adv-filter-panel" style="display:none;margin-top:6px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.05em;">Account</label>
+          <select id="tx-filter-account" onchange="applyAdvFilter()" style="padding:6px 10px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:13px;background:var(--white);color:var(--gray-800);font-family:inherit;min-width:140px;">
+            <option value="">All accounts</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.05em;">Category</label>
+          <select id="tx-filter-cat" onchange="applyAdvFilter()" style="padding:6px 10px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:13px;background:var(--white);color:var(--gray-800);font-family:inherit;min-width:160px;">
+            <option value="">All categories</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.05em;">Subcategory</label>
+          <select id="tx-filter-subcat" onchange="applyAdvFilter()" style="padding:6px 10px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:13px;background:var(--white);color:var(--gray-800);font-family:inherit;min-width:160px;" disabled>
+            <option value="">All subcategories</option>
+          </select>
+        </div>
+        <button onclick="clearAdvFilter()" style="padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:inherit;margin-top:2px;">Clear</button>
       </div>
 
       <!-- Mobile cards -->
@@ -1715,6 +1751,7 @@ let dashWeekStart = (function() {
 let activePill = '';
 let sortState = { col: 'date', dir: -1 };
 let txDateFrom = '', txDateTo = '';
+let txFilterAccount = '', txFilterCat = '', txFilterSubcat = '';
 
 function save() { localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs)); updateCount(); syncSave(); }
 function saveCats() { localStorage.setItem('bt_cats_' + currentUser, JSON.stringify(CATS)); }
@@ -2129,6 +2166,61 @@ function clearTxDateFilter() {
   renderTx();
 }
 
+function toggleAdvFilter() {
+  const panel = $$('tx-adv-filter-panel');
+  const btn   = $$('tx-adv-filter-btn');
+  const open  = panel.style.display === 'flex';
+  panel.style.display = open ? 'none' : 'flex';
+  const hasFilter = txFilterAccount || txFilterCat || txFilterSubcat;
+  if (btn) { btn.style.borderColor = hasFilter ? 'var(--primary)' : 'var(--gray-200)'; btn.style.color = hasFilter ? 'var(--primary)' : 'var(--gray-400)'; }
+  if (!open) populateAdvFilterOptions();
+}
+
+function populateAdvFilterOptions() {
+  const accounts = [...new Set(txs.map(t => t.account).filter(Boolean))].sort();
+  const acctSel = $$('tx-filter-account');
+  const savedAcct = txFilterAccount;
+  acctSel.innerHTML = '<option value="">All accounts</option>' + accounts.map(a => `<option value="${a}"${a===savedAcct?' selected':''}>${a}</option>`).join('');
+
+  const cats = [...new Set(txs.map(t => t.cat).filter(Boolean))].sort();
+  const catSel = $$('tx-filter-cat');
+  const savedCat = txFilterCat;
+  catSel.innerHTML = '<option value="">All categories</option>' + cats.map(c => `<option value="${c}"${c===savedCat?' selected':''}>${c}</option>`).join('');
+
+  populateSubcatOptions(txFilterCat);
+}
+
+function populateSubcatOptions(cat) {
+  const subcatSel = $$('tx-filter-subcat');
+  if (!cat) { subcatSel.innerHTML = '<option value="">All subcategories</option>'; subcatSel.disabled = true; return; }
+  const subcats = [...new Set(txs.filter(t => t.cat === cat).map(t => t.subcat).filter(Boolean))].sort();
+  subcatSel.innerHTML = '<option value="">All subcategories</option>' + subcats.map(s => `<option value="${s}"${s===txFilterSubcat?' selected':''}>${s}</option>`).join('');
+  subcatSel.disabled = subcats.length === 0;
+}
+
+function applyAdvFilter() {
+  txFilterAccount = $$('tx-filter-account').value;
+  txFilterCat     = $$('tx-filter-cat').value;
+  if (txFilterCat !== ($$('tx-filter-cat').dataset.lastCat || '')) {
+    txFilterSubcat = '';
+    $$('tx-filter-cat').dataset.lastCat = txFilterCat;
+  }
+  populateSubcatOptions(txFilterCat);
+  txFilterSubcat  = $$('tx-filter-subcat').value;
+  const btn = $$('tx-adv-filter-btn');
+  const hasFilter = txFilterAccount || txFilterCat || txFilterSubcat;
+  if (btn) { btn.style.borderColor = hasFilter ? 'var(--primary)' : 'var(--gray-200)'; btn.style.color = hasFilter ? 'var(--primary)' : 'var(--gray-400)'; }
+  renderTx();
+}
+
+function clearAdvFilter() {
+  txFilterAccount = ''; txFilterCat = ''; txFilterSubcat = '';
+  populateAdvFilterOptions();
+  const btn = $$('tx-adv-filter-btn');
+  if (btn) { btn.style.borderColor = 'var(--gray-200)'; btn.style.color = 'var(--gray-400)'; }
+  renderTx();
+}
+
 // ── Mobile card HTML ───────────────────────────────────────────
 function txCardHTML(t) {
   const isIncome = t.cat === 'Income';
@@ -2174,7 +2266,10 @@ function renderTx() {
       (t.cat||'').toLowerCase().includes(q) ||
       (t.subcat||'').toLowerCase().includes(q) ||
       (t.account||'').toLowerCase().includes(q);
-    return mOk && dOk && qOk;
+    const aOk = !txFilterAccount || t.account === txFilterAccount;
+    const cOk = !txFilterCat    || t.cat     === txFilterCat;
+    const sOk = !txFilterSubcat || t.subcat  === txFilterSubcat;
+    return mOk && dOk && qOk && aOk && cOk && sOk;
   });
 
   // Sort
@@ -2215,7 +2310,7 @@ function renderTx() {
         <span class="cat-chip" style="background:${col}18;color:${col};">${esc(t.cat||'')}</span>
         ${t.subcat?`<div style="font-size:11px;color:var(--gray-400);margin-top:3px;padding-left:2px;">${esc(t.subcat)}</div>`:''}
       </td>
-      <td class="${isIncome?'income-cell':'expense-cell'}" style="white-space:nowrap;text-align:right;">
+      <td class="${isIncome?'income-cell':'expense-cell'}" style="white-space:nowrap;text-align:center;">
         ${isSplit
           ? `<span style="font-weight:700;">${isIncome?'':'-'}${fmt(myShare)}</span><br><span style="font-size:11px;color:var(--gray-400);font-weight:400;">of -${fmt(fullAmt)}</span>`
           : `<span style="font-weight:700;">${isIncome?'':'-'}${fmt(fullAmt)}</span>`
@@ -2229,12 +2324,13 @@ function renderTx() {
   // Totals footer
   const income   = list.filter(t => t.cat==='Income').reduce((s,t) => s+(t.amount||0), 0);
   const expenses = list.filter(t => t.cat!=='Income').reduce((s,t) => s+(t.trueAmt??t.amount??0), 0);
-  $$('tx-tfoot').innerHTML = `
-    <tr class="table-totals-row">
-      <td colspan="5" style="font-size:12px;color:var(--gray-500);">${list.length} transaction${list.length!==1?'s':''}</td>
-      <td style="white-space:nowrap;text-align:right;"><span class="income-cell">+${fmt(income)}</span><br><span class="expense-cell" style="font-size:11px;">-${fmt(expenses)}</span></td>
-      <td colspan="2"></td>
-    </tr>`;
+  const net = income - expenses;
+  const netFmt = (net >= 0 ? '+' : '-') + fmt(Math.abs(net));
+  const count = `${list.length} transaction${list.length!==1?'s':''}`;
+  $$('tx-tfoot')._lastFooterData = { count, netFmt };
+  renderTxFooter();
+
+  initColDrag();
 
   // Update sort headers
   ['date','account','desc','amount','cat','subcat'].forEach(col => {
@@ -2243,6 +2339,72 @@ function renderTx() {
       th.className = (th.className||'').replace(/\s*(sort-asc|sort-desc)/g, '') + (sortState.col===col ? (sortState.dir===1?' sort-asc':' sort-desc') : '');
     }
   });
+}
+
+let _dragColIdx = null;
+let colOrder = ['bulk','date','account','desc','cat','amount','split','paid'];
+
+function initColDrag() {
+  const ths = Array.from(document.querySelectorAll('#tx-table thead th'));
+  ths.forEach((th, i) => {
+    if (i === 0) return; // keep bulk checkbox fixed
+    th.draggable = true;
+    th.ondragstart = e => {
+      _dragColIdx = i;
+      th.classList.add('col-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    };
+    th.ondragend = () => {
+      _dragColIdx = null;
+      ths.forEach(t => t.classList.remove('col-dragging', 'col-drag-over'));
+    };
+    th.ondragover = e => {
+      e.preventDefault();
+      if (_dragColIdx !== null && _dragColIdx !== i) {
+        ths.forEach(t => t.classList.remove('col-drag-over'));
+        th.classList.add('col-drag-over');
+      }
+    };
+    th.ondragleave = () => th.classList.remove('col-drag-over');
+    th.ondrop = e => {
+      e.preventDefault();
+      if (_dragColIdx !== null && _dragColIdx !== i) moveTableColumn(_dragColIdx, i);
+    };
+  });
+}
+
+function moveTableColumn(from, to) {
+  const table = document.getElementById('tx-table');
+  Array.from(table.rows).forEach(row => {
+    const cells = Array.from(row.cells);
+    if (from >= cells.length || to >= cells.length) return;
+    const moving = cells[from];
+    if (from < to) row.insertBefore(moving, cells[to].nextSibling);
+    else           row.insertBefore(moving, cells[to]);
+  });
+  // Update colOrder to match new positions
+  const moved = colOrder.splice(from, 1)[0];
+  colOrder.splice(to, 0, moved);
+  renderTxFooter();
+  initColDrag();
+}
+
+function renderTxFooter() {
+  const tfoot = $$('tx-tfoot');
+  if (!tfoot || !tfoot._lastFooterData) return;
+  const { count, netFmt } = tfoot._lastFooterData;
+  const amtIdx = colOrder.indexOf('amount');
+  const total  = colOrder.length;
+  const before = amtIdx;
+  const after  = total - amtIdx - 1;
+  tfoot.innerHTML = `
+    <tr class="table-totals-row">
+      <td colspan="${before}" style="font-size:12px;color:var(--gray-500);">${count}</td>
+      <td style="white-space:nowrap;text-align:center;">
+        <span style="font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:0.07em;text-transform:uppercase;margin-right:8px;">Total</span><span style="font-size:15px;font-weight:700;color:var(--primary);">${netFmt}</span>
+      </td>
+      ${after > 0 ? `<td colspan="${after}"></td>` : ''}
+    </tr>`;
 }
 
 function setPill(m) { activePill = m; renderTx(); }
@@ -2877,13 +3039,15 @@ function renderBudget() {
       </div>`;
     }).filter(Boolean).join('');
 
+    const hasSubs = subRows.length > 0;
     return `<div class="budget-row" style="padding-bottom:0;">
-      <div class="budget-row-top">
+      <div class="budget-row-top" ${hasSubs ? `onclick="event.stopPropagation();this.closest('.budget-row').classList.toggle('expanded')"` : ''}>
         <div class="budget-cat-icon" style="background:${color}22;"><div style="width:12px;height:12px;border-radius:50%;background:${color};"></div></div>
         <div class="budget-cat-name">${esc(cat)}</div>
         <div style="font-size:14px;font-weight:700;color:var(--gray-900);">
           ${hasBudget ? (over ? '−'+fmt(Math.abs(remAmt))+' over' : fmt(spentAmt)+'<span style="color:var(--gray-400);font-weight:500;"> / '+fmt(budget)+'</span>') : (spentAmt > 0 ? fmt(spentAmt)+' spent' : '<span style="color:var(--gray-300);font-weight:500;">No budget</span>')}
         </div>
+        ${hasSubs ? `<svg class="budget-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>` : ''}
       </div>
       <div class="budget-progress-row">
         <div class="budget-bar-track">
@@ -2891,7 +3055,7 @@ function renderBudget() {
         </div>
         ${hasBudget ? `<div class="budget-meta ${over?'over':''}">${Math.round(pct)}% used</div>` : ''}
       </div>
-      ${subRows}
+      <div class="budget-subcats">${subRows}</div>
     </div>`;
   }).join('');
 }
