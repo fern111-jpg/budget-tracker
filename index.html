@@ -3365,14 +3365,12 @@ async function syncPull() {
       const data = await r.json();
       if (Array.isArray(data.record?.txs)) {
         const rec = data.record;
-        // Merge transactions by ID — union of local + remote, remote wins on conflict
-        const merged = [...txs];
-        for (const rt of rec.txs) {
-          const idx = merged.findIndex(lt => lt.id === rt.id);
-          if (idx >= 0) merged[idx] = rt; else merged.push(rt);
-        }
+        // Merge transactions by ID — find local-only txs first, then union
+        const localOnlyTxs = txs.filter(lt => !rec.txs.find(rt => rt.id === lt.id));
+        const merged = [...rec.txs, ...localOnlyTxs];
         txs = merged;
         localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs));
+        // All other data: remote is source of truth
         if (Array.isArray(rec.utilBills)) {
           utilBills = rec.utilBills.map(b => {
             if (!b.ratePeriods && b.rate != null) b.ratePeriods = [{ name: b.rateName || 'General Usage', rate: b.rate, usage: b.usage || 0 }];
@@ -3403,8 +3401,8 @@ async function syncPull() {
         if (curPage === 'utilities')    renderUtilities();
         if (curPage === 'budgeting')    renderBudget();
         toast('Synced — ' + txs.length + ' tx, ' + utilBills.length + ' bills');
-        // Push merged result back so all devices converge
-        syncPush();
+        // Only push back if phone had local-only transactions to contribute
+        if (localOnlyTxs.length > 0) syncPush();
       } else {
         toast('Sync: no data found in bin');
       }
