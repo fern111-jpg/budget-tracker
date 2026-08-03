@@ -3328,7 +3328,7 @@ function syncSave() {
 }
 
 async function syncPush() {
-  if (!syncCfg?.key || !syncCfg?.binId) return;
+  if (!syncCfg?.key || !syncCfg?.binId) { toast('Sync not configured — check Settings'); return; }
   try {
     // Strip attachments from utilBills quotes — base64 data can exceed JSONBin's size limit
     const utilBillsClean = utilBills.map(b => ({
