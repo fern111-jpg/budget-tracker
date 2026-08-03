@@ -1396,7 +1396,7 @@ select.form-control {
       </div>
       <div class="form-group">
         <label class="form-label">Days</label>
-        <input type="number" class="form-control" id="bf-days" placeholder="90" min="1" oninput="calcBillTotal()">
+        <input type="number" class="form-control" id="bf-days" placeholder="90" min="1" oninput="updateBillTo()">
       </div>
     </div>
     <div class="form-group">
@@ -1544,6 +1544,37 @@ select.form-control {
     <div style="margin-bottom:6px;">
       <label class="form-label">Rates (c/kWh) — matched to your bill's usage periods</label>
       <div id="qf-rate-rows"></div>
+    </div>
+
+    <!-- Gas seasonal tiers -->
+    <div id="qf-gas-tiers" style="display:none;margin-top:14px;">
+      <label class="form-label" style="margin-bottom:8px;display:block;">Seasonal Rate Tiers</label>
+      <div style="display:grid;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="flex:1;font-size:13px;color:var(--gray-700);">Winter — First</span>
+          <input type="number" class="form-control" id="qf-g-wf-threshold" placeholder="MJ" min="0" step="1" style="width:90px;font-size:13px;">
+          <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
+          <input type="number" class="form-control" id="qf-g-wf-rate" placeholder="c/MJ" min="0" step="0.0001" style="width:90px;font-size:13px;">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="flex:1;font-size:13px;color:var(--gray-700);">Winter — Next</span>
+          <input type="number" class="form-control" id="qf-g-wn-threshold" placeholder="MJ" min="0" step="1" style="width:90px;font-size:13px;">
+          <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
+          <input type="number" class="form-control" id="qf-g-wn-rate" placeholder="c/MJ" min="0" step="0.0001" style="width:90px;font-size:13px;">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="flex:1;font-size:13px;color:var(--gray-700);">Summer — First</span>
+          <input type="number" class="form-control" id="qf-g-sf-threshold" placeholder="MJ" min="0" step="1" style="width:90px;font-size:13px;">
+          <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
+          <input type="number" class="form-control" id="qf-g-sf-rate" placeholder="c/MJ" min="0" step="0.0001" style="width:90px;font-size:13px;">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="flex:1;font-size:13px;color:var(--gray-700);">Summer — Next</span>
+          <input type="number" class="form-control" id="qf-g-sn-threshold" placeholder="MJ" min="0" step="1" style="width:90px;font-size:13px;">
+          <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
+          <input type="number" class="form-control" id="qf-g-sn-rate" placeholder="c/MJ" min="0" step="0.0001" style="width:90px;font-size:13px;">
+        </div>
+      </div>
     </div>
 
     <!-- Bonuses -->
@@ -1756,7 +1787,7 @@ let txFilterAccount = '', txFilterCat = '', txFilterSubcat = '';
 function save() { localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs)); updateCount(); syncSave(); }
 function saveCats() { localStorage.setItem('bt_cats_' + currentUser, JSON.stringify(CATS)); }
 function saveAccounts() { localStorage.setItem('bt_accounts_' + currentUser, JSON.stringify(userAccounts)); }
-function saveUtilBills() { localStorage.setItem('bt_util_bills_' + currentUser, JSON.stringify(utilBills)); }
+function saveUtilBills() { localStorage.setItem('bt_util_bills_' + currentUser, JSON.stringify(utilBills)); syncSave(); }
 function saveBudgets() { localStorage.setItem('bt_budgets_' + currentUser, JSON.stringify(budgets)); }
 function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function $$(id) { return document.getElementById(id); }
@@ -3302,7 +3333,7 @@ async function syncPush() {
     const r = await fetch(`${JSONBIN}/b/${syncCfg.binId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': syncCfg.key },
-      body: JSON.stringify({ txs })
+      body: JSON.stringify({ txs, utilBills, cats: CATS, accounts: userAccounts, budgets })
     });
     if (r.ok) {
       syncCfg.lastSync = new Date().toISOString();
@@ -3324,14 +3355,33 @@ async function syncPull() {
     if (r.ok) {
       const data = await r.json();
       if (Array.isArray(data.record?.txs)) {
-        txs = data.record.txs;
+        const rec = data.record;
+        txs = rec.txs;
         localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs));
+        if (Array.isArray(rec.utilBills)) {
+          utilBills = rec.utilBills;
+          localStorage.setItem('bt_util_bills_' + currentUser, JSON.stringify(utilBills));
+        }
+        if (rec.cats) {
+          CATS = rec.cats;
+          localStorage.setItem('bt_cats_' + currentUser, JSON.stringify(CATS));
+        }
+        if (Array.isArray(rec.accounts)) {
+          userAccounts = rec.accounts;
+          localStorage.setItem('bt_accounts_' + currentUser, JSON.stringify(userAccounts));
+        }
+        if (rec.budgets) {
+          budgets = rec.budgets;
+          localStorage.setItem('bt_budgets_' + currentUser, JSON.stringify(budgets));
+        }
         syncCfg.lastSync = new Date().toISOString();
         localStorage.setItem('bt_sync_' + currentUser, JSON.stringify(syncCfg));
         updateCount();
         updateSyncUI();
         if (curPage === 'dashboard')    renderDash();
         if (curPage === 'transactions') renderTx();
+        if (curPage === 'utilities')    renderUtilities();
+        if (curPage === 'budgeting')    renderBudget();
         toast('Synced — ' + txs.length + ' transactions loaded');
       } else {
         toast('Sync: no data found in bin');
@@ -3356,7 +3406,7 @@ async function syncCreate() {
         'X-Bin-Name': 'Budget Tracker',
         'X-Bin-Private': 'true'
       },
-      body: JSON.stringify({ txs })
+      body: JSON.stringify({ txs, utilBills, cats: CATS, accounts: userAccounts, budgets })
     });
     if (r.ok) {
       const data = await r.json();
@@ -4083,6 +4133,20 @@ function updateBillDays() {
   if (from && to) {
     const d = Math.round((new Date(to) - new Date(from)) / 86400000);
     if (d > 0) $$('bf-days').value = d;
+  } else if (from && $$('bf-days').value) {
+    updateBillTo();
+    return;
+  }
+  calcBillTotal();
+}
+
+function updateBillTo() {
+  const from = $$('bf-from').value;
+  const days = parseInt($$('bf-days').value);
+  if (from && days > 0) {
+    const toDate = new Date(from);
+    toDate.setDate(toDate.getDate() + days);
+    $$('bf-to').value = toDate.toISOString().slice(0, 10);
   }
   calcBillTotal();
 }
@@ -4285,6 +4349,22 @@ function openQuoteForm(quoteId, type) {
     inputs[3].value = b.amortizeMonths || 12;
   });
   $$('qf-comment').value = existing?.comment || '';
+  // Gas seasonal tiers
+  const gasTiers = $$('qf-gas-tiers');
+  if (gasTiers) {
+    gasTiers.style.display = currentFormType === 'gas' ? '' : 'none';
+    if (currentFormType === 'gas') {
+      const t = existing?.gasTiers || {};
+      $$('qf-g-wf-threshold').value = t.winterFirstThreshold ?? '';
+      $$('qf-g-wf-rate').value      = t.winterFirstRate      ?? '';
+      $$('qf-g-wn-threshold').value = t.winterNextThreshold  ?? '';
+      $$('qf-g-wn-rate').value      = t.winterNextRate       ?? '';
+      $$('qf-g-sf-threshold').value = t.summerFirstThreshold ?? '';
+      $$('qf-g-sf-rate').value      = t.summerFirstRate      ?? '';
+      $$('qf-g-sn-threshold').value = t.summerNextThreshold  ?? '';
+      $$('qf-g-sn-rate').value      = t.summerNextRate       ?? '';
+    }
+  }
   // Restore attachment
   $$('qf-attachment-input').value = '';
   const preview = $$('qf-attachment-preview');
@@ -4381,7 +4461,17 @@ function submitQuoteForm() {
   const attachPrev = $$('qf-attachment-preview');
   const attachmentDataUrl = attachPrev.dataset.dataUrl || '';
   const attachmentName = attachPrev.dataset.fileName || '';
-  const quoteData = { provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses, comment, attachmentDataUrl, attachmentName };
+  const gasTiers = isGas ? {
+    winterFirstThreshold: parseFloat($$('qf-g-wf-threshold').value) || null,
+    winterFirstRate:      parseFloat($$('qf-g-wf-rate').value)      || null,
+    winterNextThreshold:  parseFloat($$('qf-g-wn-threshold').value)  || null,
+    winterNextRate:       parseFloat($$('qf-g-wn-rate').value)       || null,
+    summerFirstThreshold: parseFloat($$('qf-g-sf-threshold').value) || null,
+    summerFirstRate:      parseFloat($$('qf-g-sf-rate').value)      || null,
+    summerNextThreshold:  parseFloat($$('qf-g-sn-threshold').value)  || null,
+    summerNextRate:       parseFloat($$('qf-g-sn-rate').value)       || null,
+  } : undefined;
+  const quoteData = { provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses, comment, attachmentDataUrl, attachmentName, ...(gasTiers ? { gasTiers } : {}) };
   if (isGas) {
     if (editingQuoteId) {
       const idx = gasQuotes.findIndex(q => q.id === editingQuoteId);
