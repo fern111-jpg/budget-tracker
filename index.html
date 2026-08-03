@@ -3330,19 +3330,28 @@ function syncSave() {
 async function syncPush() {
   if (!syncCfg?.key || !syncCfg?.binId) return;
   try {
+    // Strip attachments from utilBills quotes — base64 data can exceed JSONBin's size limit
+    const utilBillsClean = utilBills.map(b => ({
+      ...b,
+      quotes: (b.quotes || []).map(q => { const { attachmentDataUrl, ...rest } = q; return rest; })
+    }));
+    const payload = { txs, utilBills: utilBillsClean, cats: CATS, accounts: userAccounts, budgets };
     const r = await fetch(`${JSONBIN}/b/${syncCfg.binId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': syncCfg.key },
-      body: JSON.stringify({ txs, utilBills, cats: CATS, accounts: userAccounts, budgets })
+      body: JSON.stringify(payload)
     });
     if (r.ok) {
       syncCfg.lastSync = new Date().toISOString();
       localStorage.setItem('bt_sync_' + currentUser, JSON.stringify(syncCfg));
       updateSyncUI();
+      toast('Pushed — data synced');
     } else {
-      console.warn('Sync push failed', r.status);
+      const txt = await r.text().catch(() => '');
+      toast('Push failed (' + r.status + ')' + (txt ? ': ' + txt.slice(0,60) : ''));
+      console.warn('Sync push failed', r.status, txt);
     }
-  } catch(e) { console.warn('Sync push error', e); }
+  } catch(e) { toast('Push error — check connection'); console.warn('Sync push error', e); }
 }
 
 async function syncPull() {
