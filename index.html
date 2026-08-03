@@ -3359,7 +3359,12 @@ async function syncPull() {
         txs = rec.txs;
         localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs));
         if (Array.isArray(rec.utilBills)) {
-          utilBills = rec.utilBills;
+          utilBills = rec.utilBills.map(b => {
+            if (!b.ratePeriods && b.rate != null) b.ratePeriods = [{ name: b.rateName || 'General Usage', rate: b.rate, usage: b.usage || 0 }];
+            b.ratePeriods = b.ratePeriods || [];
+            b.quotes = (b.quotes || []).map(q => { if (!q.ratePeriods && q.rate != null) q.ratePeriods = [{ name: q.rateName || 'General Usage', rate: q.rate }]; q.ratePeriods = q.ratePeriods || []; return q; });
+            return b;
+          });
           localStorage.setItem('bt_util_bills_' + currentUser, JSON.stringify(utilBills));
         }
         if (rec.cats) {
