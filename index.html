@@ -1313,7 +1313,13 @@ select.form-control {
         <div id="gas-compare-section" style="display:none;margin-top:24px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
             <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Quote Comparison</div>
-            <button onclick="openQuoteForm(null,'gas')" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Quote</button>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="display:flex;background:var(--gray-100);border-radius:20px;padding:2px;">
+                <button id="gas-season-winter" onclick="setGasSeason('winter')" style="padding:4px 12px;border:none;border-radius:18px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:var(--primary);color:#fff;transition:all 0.15s;">Winter</button>
+                <button id="gas-season-summer" onclick="setGasSeason('summer')" style="padding:4px 12px;border:none;border-radius:18px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:none;color:var(--gray-500);transition:all 0.15s;">Summer</button>
+              </div>
+              <button onclick="openQuoteForm(null,'gas')" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Quote</button>
+            </div>
           </div>
           <div id="gas-compare-table"></div>
         </div>
@@ -1407,11 +1413,31 @@ select.form-control {
       <input type="number" class="form-control" id="bf-supply" placeholder="1.20" step="0.0001" min="0" oninput="calcBillTotal()">
     </div>
 
-    <!-- Rate periods -->
-    <div style="margin-bottom:6px;">
+    <!-- Rate periods (electricity) -->
+    <div id="bf-elec-rates" style="margin-bottom:6px;">
       <label class="form-label">Usage Rate Periods</label>
       <div id="bf-rate-rows"></div>
       <button type="button" onclick="addBillRateRow()" style="margin-top:8px;padding:6px 12px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Rate Period</button>
+    </div>
+
+    <!-- Gas seasonal tiers -->
+    <div id="bf-gas-seasons" style="display:none;">
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <label class="form-label" style="margin:0;">Winter Usage &amp; Rates</label>
+          <input type="number" class="form-control" id="bf-winter-usage" placeholder="MJ" min="0" step="1" oninput="calcBillTotal()" style="width:100px;font-size:13px;">
+        </div>
+        <div id="bf-winter-tiers"></div>
+        <button type="button" onclick="addGasBillTier('winter')" style="margin-top:6px;padding:5px 10px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Winter Tier</button>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <label class="form-label" style="margin:0;">Summer Usage &amp; Rates</label>
+          <input type="number" class="form-control" id="bf-summer-usage" placeholder="MJ" min="0" step="1" oninput="calcBillTotal()" style="width:100px;font-size:13px;">
+        </div>
+        <div id="bf-summer-tiers"></div>
+        <button type="button" onclick="addGasBillTier('summer')" style="margin-top:6px;padding:5px 10px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Summer Tier</button>
+      </div>
     </div>
 
     <div class="form-group" style="margin-top:12px;">
@@ -1552,31 +1578,15 @@ select.form-control {
     <!-- Gas seasonal tiers -->
     <div id="qf-gas-tiers" style="display:none;margin-top:14px;">
       <label class="form-label" style="margin-bottom:8px;display:block;">Seasonal Rate Tiers</label>
-      <div style="display:grid;gap:8px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="flex:1;font-size:13px;color:var(--gray-700);">Winter — First</span>
-          <input type="number" class="form-control" id="qf-g-wf-threshold" placeholder="MJ" min="0" step="1" style="width:90px;font-size:13px;">
-          <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
-          <input type="number" class="form-control" id="qf-g-wf-rate" placeholder="c/MJ" min="0" step="0.0001" style="width:90px;font-size:13px;">
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="flex:1;font-size:13px;color:var(--gray-700);">Winter — Next</span>
-          <input type="number" class="form-control" id="qf-g-wn-threshold" placeholder="MJ" min="0" step="1" style="width:90px;font-size:13px;">
-          <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
-          <input type="number" class="form-control" id="qf-g-wn-rate" placeholder="c/MJ" min="0" step="0.0001" style="width:90px;font-size:13px;">
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="flex:1;font-size:13px;color:var(--gray-700);">Summer — First</span>
-          <input type="number" class="form-control" id="qf-g-sf-threshold" placeholder="MJ" min="0" step="1" style="width:90px;font-size:13px;">
-          <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
-          <input type="number" class="form-control" id="qf-g-sf-rate" placeholder="c/MJ" min="0" step="0.0001" style="width:90px;font-size:13px;">
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="flex:1;font-size:13px;color:var(--gray-700);">Summer — Next</span>
-          <input type="number" class="form-control" id="qf-g-sn-threshold" placeholder="MJ" min="0" step="1" style="width:90px;font-size:13px;">
-          <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
-          <input type="number" class="form-control" id="qf-g-sn-rate" placeholder="c/MJ" min="0" step="0.0001" style="width:90px;font-size:13px;">
-        </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Winter</div>
+        <div id="qf-winter-tiers"></div>
+        <button type="button" onclick="addQuoteGasTier('winter')" style="margin-top:6px;padding:5px 10px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Winter Tier</button>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Summer</div>
+        <div id="qf-summer-tiers"></div>
+        <button type="button" onclick="addQuoteGasTier('summer')" style="margin-top:6px;padding:5px 10px;background:var(--gray-100);border:none;border-radius:6px;font-size:12px;font-weight:600;color:var(--gray-700);cursor:pointer;font-family:inherit;">+ Add Summer Tier</button>
       </div>
     </div>
 
@@ -1764,6 +1774,11 @@ let editingQuoteId = null;
 let currentFormType = 'electricity';
 let gasCompBill = null;
 let gasQuotes = [];
+let gasSeason = 'winter';
+let bfGasWinterTiers = [];
+let bfGasSummerTiers = [];
+let qfWinterTiers = [];
+let qfSummerTiers = [];
 let gasFilterFrom = '';
 let gasFilterTo = '';
 let internetCompBill = null;
@@ -3991,9 +4006,27 @@ function renderCompareTable(type) {
   ].concat(quotes.map(q => ({ ...q })));
 
   // Calculations
+  const isGasType = type === 'gas';
   const calcs = cols.map(col => {
-    if (col.isCurrent) return { periodCost: null, supplyCost: null, gross: +col.total, bonusAnnual: 0, netAnnual: +col.total * 365/days, netMonthly: +col.total * 365/days/12 };
+    const bonusAnnual = (col.bonuses||[]).reduce((s,bon) => {
+      const amt = +bon.amount||0;
+      return s + (bon.type==='annual' ? amt : amt / ((+bon.amortizeMonths||12)/12));
+    }, 0);
+    if (col.isCurrent) {
+      const gross = +col.total;
+      const netAnnual = gross * 365/days - bonusAnnual;
+      return { supplyCost: null, periodCosts: [], gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
+    }
     const supplyCost = (+col.supply||0) * days;
+    if (isGasType) {
+      const wTiers = col.gasTiers?.winterTiers || [];
+      const sTiers = col.gasTiers?.summerTiers || [];
+      const winterCost = calcSeasonalCost(b.winterUsage||0, wTiers);
+      const summerCost = calcSeasonalCost(b.summerUsage||0, sTiers);
+      const gross = supplyCost + winterCost + summerCost;
+      const netAnnual = gross * 365/days - bonusAnnual;
+      return { supplyCost, winterCost, summerCost, wTiers, sTiers, gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
+    }
     let periodCosts = [];
     b.ratePeriods.forEach(bp => {
       const match = col.ratePeriods.find(r => r.name.toLowerCase() === bp.name.toLowerCase());
@@ -4001,10 +4034,6 @@ function renderCompareTable(type) {
     });
     const usageCost = periodCosts.reduce((s,p) => s + (p.cost||0), 0);
     const gross = supplyCost + usageCost;
-    const bonusAnnual = (col.bonuses||[]).reduce((s,bon) => {
-      const amt = +bon.amount||0;
-      return s + (bon.type==='annual' ? amt : amt / ((+bon.amortizeMonths||12)/12));
-    }, 0);
     const netAnnual = gross * 365/days - bonusAnnual;
     return { supplyCost, periodCosts, gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
   });
@@ -4051,7 +4080,33 @@ function renderCompareTable(type) {
           <td style="${TD_LABEL}" data-base="#f8fafc">Daily Supply</td>
           ${cols.map((col,ci) => `<td style="${tdVal(ci)}" data-base="${multiCol&&ci===cheapestIdx?'#eff6ff':''}">${col.supply ? `${(+col.supply).toFixed(4)}/day` : fmtC(null)}</td>`).join('')}
         </tr>
-        ${b.ratePeriods.map(bp => `
+        ${isGasType ? (() => {
+          const season = gasSeason;
+          const usage = season === 'winter' ? (b.winterUsage||0) : (b.summerUsage||0);
+          const tierRows = [];
+          const maxTiers = Math.max(...cols.map((_,ci) => {
+            if (cols[ci].isCurrent) return (season==='winter'?b.winterTiers:b.summerTiers)?.length||0;
+            return (season==='winter'?calcs[ci].wTiers:calcs[ci].sTiers)?.length||0;
+          }), 1);
+          for (let ti = 0; ti < maxTiers; ti++) {
+            const isLastTier = ti === maxTiers - 1;
+            const tierLabel = isLastTier ? `${season==='winter'?'Winter':'Summer'} Next (${usage}MJ total)` : `${season==='winter'?'Winter':'Summer'} First`;
+            tierRows.push(`<tr ${hoverRow}>
+              <td style="${TD_LABEL}" data-base="#f8fafc">${tierLabel}</td>
+              ${cols.map((_,ci) => {
+                const base = multiCol&&ci===cheapestIdx?'#eff6ff':'';
+                const tiers = cols[ci].isCurrent
+                  ? (season==='winter'?b.winterTiers:b.summerTiers)||[]
+                  : (season==='winter'?calcs[ci].wTiers:calcs[ci].sTiers)||[];
+                const t = tiers[ti];
+                if (!t) return `<td style="${tdVal(ci)}" data-base="${base}"><span style="color:#cbd5e1;">—</span></td>`;
+                const threshStr = (!isLastTier && t.threshold) ? `first ${t.threshold}MJ` : 'remaining';
+                return `<td style="${tdVal(ci)}" data-base="${base}">${t.rate||0}c/MJ <span style="color:#94a3b8;font-size:11px;">(${threshStr})</span></td>`;
+              }).join('')}
+            </tr>`);
+          }
+          return tierRows.join('');
+        })() : b.ratePeriods.map(bp => `
         <tr ${hoverRow}>
           <td style="${TD_LABEL}" data-base="#f8fafc">${esc(bp.name)} <span style="color:#94a3b8;font-size:11px;">(${bp.usage}${unitLabel})</span></td>
           ${calcs.map((calc,ci) => {
@@ -4065,6 +4120,15 @@ function renderCompareTable(type) {
           <td style="${TD_LABEL}" data-base="#f8fafc">Supply Cost (${days}d)</td>
           ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${c.supplyCost!=null ? fmtC(c.supplyCost) : fmtC(null)}</td>`; }).join('')}
         </tr>
+        ${isGasType ? `
+        <tr ${hoverRow}>
+          <td style="${TD_LABEL}" data-base="#f8fafc">Winter Usage Cost <span style="color:#94a3b8;font-size:11px;">(${b.winterUsage||0}MJ)</span></td>
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${cols[ci].isCurrent ? fmtC(null) : fmtC(c.winterCost)}</td>`; }).join('')}
+        </tr>
+        <tr ${hoverRow}>
+          <td style="${TD_LABEL}" data-base="#f8fafc">Summer Usage Cost <span style="color:#94a3b8;font-size:11px;">(${b.summerUsage||0}MJ)</span></td>
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${cols[ci].isCurrent ? fmtC(null) : fmtC(c.summerCost)}</td>`; }).join('')}
+        </tr>` : ''}
         <tr ${hoverRow}>
           <td style="padding:11px 16px;font-size:12.5px;font-weight:700;color:var(--primary);background:#f8fafc;border-top:2px solid #e2e8f0;" data-base="#f8fafc">Bill Period Total</td>
           ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci,'font-weight:700;color:var(--primary);border-top:2px solid #e2e8f0;')}" data-base="${base}">${fmtC(c.gross)}</td>`; }).join('')}
@@ -4100,7 +4164,7 @@ function renderCompareTable(type) {
 function deleteQuote(id, type) {
   if (type === 'gas') {
     gasQuotes = gasQuotes.filter(q => q.id !== id);
-    saveGasQuotes(); renderGasCompareTable();
+    saveGasQuotes(); renderGasCompareSection();
   } else {
     utilQuotes = utilQuotes.filter(q => q.id !== id);
     saveQuotes(); renderCompareTable();
@@ -4123,8 +4187,18 @@ function openBillForm(prefill, type) {
   $$('bill-upload-status').innerHTML = '📄 Upload PDF or photo to auto-fill — <strong>click to browse</strong>';
   $$('bill-upload-preview').innerHTML = '';
   $$('bill-file-input').value = '';
-  bfRateRows = prefill?.ratePeriods ? prefill.ratePeriods.map(r=>({...r})) : [{ name: currentFormType === 'gas' ? 'General Usage' : 'General Usage', rate:'', usage:'' }];
-  renderBillRateRows();
+  const isGas = currentFormType === 'gas';
+  $$('bf-elec-rates').style.display = isGas ? 'none' : '';
+  $$('bf-gas-seasons').style.display = isGas ? '' : 'none';
+  bfRateRows = prefill?.ratePeriods ? prefill.ratePeriods.map(r=>({...r})) : [{ name:'General Usage', rate:'', usage:'' }];
+  if (!isGas) renderBillRateRows();
+  if (isGas) {
+    $$('bf-winter-usage').value = prefill?.winterUsage ?? '';
+    $$('bf-summer-usage').value = prefill?.summerUsage ?? '';
+    bfGasWinterTiers = prefill?.winterTiers ? prefill.winterTiers.map(t=>({...t})) : [{threshold:'',rate:''}];
+    bfGasSummerTiers = prefill?.summerTiers ? prefill.summerTiers.map(t=>({...t})) : [{threshold:'',rate:''}];
+    renderGasBillTiers();
+  }
   calcBillTotal();
   const editActions = $$('bill-form-edit-actions');
   if (editActions) editActions.style.display = editingBillId ? 'flex' : 'none';
@@ -4168,6 +4242,54 @@ function removeBillRateRow(i) {
   renderBillRateRows(); calcBillTotal();
 }
 
+function calcSeasonalCost(usageMJ, tiers) {
+  if (!tiers || !tiers.length || !usageMJ) return 0;
+  let remaining = usageMJ, cost = 0;
+  for (let i = 0; i < tiers.length; i++) {
+    const rate = +tiers[i].rate || 0;
+    const isLast = i === tiers.length - 1;
+    const threshold = isLast ? Infinity : (+tiers[i].threshold || 0);
+    const used = isLast ? remaining : Math.min(remaining, threshold);
+    cost += used * rate / 100;
+    remaining -= used;
+    if (remaining <= 0) break;
+  }
+  return cost;
+}
+
+function renderGasBillTiers() {
+  ['winter', 'summer'].forEach(season => {
+    const tiers = season === 'winter' ? bfGasWinterTiers : bfGasSummerTiers;
+    const container = $$('bf-' + season + '-tiers');
+    if (!container) return;
+    container.innerHTML = tiers.map((t, i) => {
+      const isLast = i === tiers.length - 1;
+      const varName = season === 'winter' ? 'bfGasWinterTiers' : 'bfGasSummerTiers';
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <input type="number" class="form-control" placeholder="${isLast ? '∞ MJ' : 'First X MJ'}" value="${t.threshold||''}"
+          ${isLast ? 'disabled style="opacity:0.4;width:90px;font-size:13px;"' : `oninput="${varName}[${i}].threshold=+this.value||'';calcBillTotal()" style="width:90px;font-size:13px;"`}>
+        <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
+        <input type="number" class="form-control" placeholder="c/MJ" value="${t.rate||''}"
+          oninput="${varName}[${i}].rate=+this.value;calcBillTotal()" min="0" step="0.0001" style="width:90px;font-size:13px;">
+        <button onclick="removeGasBillTier('${season}',${i})" style="background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;padding:0 4px;">&times;</button>
+      </div>`;
+    }).join('');
+  });
+}
+
+function addGasBillTier(season) {
+  if (season === 'winter') bfGasWinterTiers.push({threshold:'',rate:''});
+  else bfGasSummerTiers.push({threshold:'',rate:''});
+  renderGasBillTiers(); calcBillTotal();
+}
+
+function removeGasBillTier(season, i) {
+  const arr = season === 'winter' ? bfGasWinterTiers : bfGasSummerTiers;
+  if (arr.length < 2) return;
+  arr.splice(i, 1);
+  renderGasBillTiers(); calcBillTotal();
+}
+
 function updateBillDays() {
   const from = $$('bf-from').value, to = $$('bf-to').value;
   if (from && to) {
@@ -4195,15 +4317,28 @@ function calcBillTotal() {
   const days   = parseFloat($$('bf-days')?.value)   || 0;
   const supply = parseFloat($$('bf-supply')?.value) || 0;
   const supplyCost = supply * days;
-  const usageCost  = bfRateRows.reduce((s, r) => s + ((+r.rate||0) * (+r.usage||0) / 100), 0);
+  const isGas = currentFormType === 'gas';
+  let usageCost = 0;
+  const parts = [];
+  if (isGas) {
+    const winterUsage = parseFloat($$('bf-winter-usage')?.value) || 0;
+    const summerUsage = parseFloat($$('bf-summer-usage')?.value) || 0;
+    const winterCost = calcSeasonalCost(winterUsage, bfGasWinterTiers);
+    const summerCost = calcSeasonalCost(summerUsage, bfGasSummerTiers);
+    usageCost = winterCost + summerCost;
+    if (supplyCost) parts.push(`supply $${supplyCost.toFixed(2)}`);
+    if (winterCost) parts.push(`winter $${winterCost.toFixed(2)}`);
+    if (summerCost) parts.push(`summer $${summerCost.toFixed(2)}`);
+  } else {
+    usageCost = bfRateRows.reduce((s, r) => s + ((+r.rate||0) * (+r.usage||0) / 100), 0);
+    if (supplyCost) parts.push(`supply $${supplyCost.toFixed(2)}`);
+    if (usageCost)  parts.push(`usage $${usageCost.toFixed(2)}`);
+  }
   const total = supplyCost + usageCost;
   const el = $$('bf-total');
   const bd = $$('bf-total-breakdown');
   if (total > 0) {
     el.value = total.toFixed(2);
-    const parts = [];
-    if (supplyCost) parts.push(`supply $${supplyCost.toFixed(2)}`);
-    if (usageCost)  parts.push(`usage $${usageCost.toFixed(2)}`);
     if (bd) bd.textContent = parts.length ? `= ${parts.join(' + ')}` : '';
   } else {
     el.value = '';
@@ -4216,6 +4351,7 @@ function submitBillForm() {
   const total    = parseFloat($$('bf-total').value);
   if (!provider) { toast('Enter the energy company name'); return; }
   if (isNaN(total) || total <= 0) { toast('Add rate periods with usage to calculate a total'); return; }
+  const isGas = currentFormType === 'gas';
   const bill = {
     id: editingBillId || uid(),
     type: currentFormType,
@@ -4225,7 +4361,13 @@ function submitBillForm() {
     to:   $$('bf-to').value,
     days: parseInt($$('bf-days').value) || null,
     supply: parseFloat($$('bf-supply').value) || null,
-    ratePeriods: bfRateRows.filter(r => r.name).map(r => ({ name: r.name, rate: +r.rate||0, usage: +r.usage||0 })),
+    ratePeriods: isGas ? [] : bfRateRows.filter(r => r.name).map(r => ({ name: r.name, rate: +r.rate||0, usage: +r.usage||0 })),
+    ...(isGas ? {
+      winterUsage: parseFloat($$('bf-winter-usage').value) || 0,
+      summerUsage: parseFloat($$('bf-summer-usage').value) || 0,
+      winterTiers: bfGasWinterTiers.map(t => ({ threshold: +t.threshold||null, rate: +t.rate||0 })),
+      summerTiers: bfGasSummerTiers.map(t => ({ threshold: +t.threshold||null, rate: +t.rate||0 })),
+    } : {}),
     notes: $$('bf-notes').value.trim(),
     savedAt: new Date().toISOString()
   };
@@ -4395,14 +4537,9 @@ function openQuoteForm(quoteId, type) {
     gasTiers.style.display = currentFormType === 'gas' ? '' : 'none';
     if (currentFormType === 'gas') {
       const t = existing?.gasTiers || {};
-      $$('qf-g-wf-threshold').value = t.winterFirstThreshold ?? '';
-      $$('qf-g-wf-rate').value      = t.winterFirstRate      ?? '';
-      $$('qf-g-wn-threshold').value = t.winterNextThreshold  ?? '';
-      $$('qf-g-wn-rate').value      = t.winterNextRate       ?? '';
-      $$('qf-g-sf-threshold').value = t.summerFirstThreshold ?? '';
-      $$('qf-g-sf-rate').value      = t.summerFirstRate      ?? '';
-      $$('qf-g-sn-threshold').value = t.summerNextThreshold  ?? '';
-      $$('qf-g-sn-rate').value      = t.summerNextRate       ?? '';
+      qfWinterTiers = (t.winterTiers && t.winterTiers.length) ? t.winterTiers.map(x=>({...x})) : [{threshold:'',rate:''}];
+      qfSummerTiers = (t.summerTiers && t.summerTiers.length) ? t.summerTiers.map(x=>({...x})) : [{threshold:'',rate:''}];
+      renderQuoteGasTiers();
     }
   }
   // Restore attachment
@@ -4484,6 +4621,48 @@ function addBonusRow() {
   $$('qf-bonus-rows').appendChild(row);
 }
 
+function renderQuoteGasTiers() {
+  ['winter', 'summer'].forEach(season => {
+    const tiers = season === 'winter' ? qfWinterTiers : qfSummerTiers;
+    const container = $$('qf-' + season + '-tiers');
+    if (!container) return;
+    const varName = season === 'winter' ? 'qfWinterTiers' : 'qfSummerTiers';
+    container.innerHTML = tiers.map((t, i) => {
+      const isLast = i === tiers.length - 1;
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <input type="number" class="form-control" placeholder="${isLast ? '∞ MJ' : 'First X MJ'}" value="${t.threshold||''}"
+          ${isLast ? 'disabled style="opacity:0.4;width:90px;font-size:13px;"' : `oninput="${varName}[${i}].threshold=+this.value||''" style="width:90px;font-size:13px;"`}>
+        <span style="font-size:12px;color:var(--gray-400);">MJ @</span>
+        <input type="number" class="form-control" placeholder="c/MJ" value="${t.rate||''}"
+          oninput="${varName}[${i}].rate=+this.value" min="0" step="0.0001" style="width:90px;font-size:13px;">
+        <button onclick="removeQuoteGasTier('${season}',${i})" style="background:none;border:none;cursor:pointer;color:var(--red-mid);font-size:18px;line-height:1;padding:0 4px;">&times;</button>
+      </div>`;
+    }).join('');
+  });
+}
+
+function addQuoteGasTier(season) {
+  if (season === 'winter') qfWinterTiers.push({threshold:'',rate:''});
+  else qfSummerTiers.push({threshold:'',rate:''});
+  renderQuoteGasTiers();
+}
+
+function removeQuoteGasTier(season, i) {
+  const arr = season === 'winter' ? qfWinterTiers : qfSummerTiers;
+  if (arr.length < 2) return;
+  arr.splice(i, 1);
+  renderQuoteGasTiers();
+}
+
+function setGasSeason(season) {
+  gasSeason = season;
+  const winterBtn = $$('gas-season-winter');
+  const summerBtn = $$('gas-season-summer');
+  if (winterBtn) { winterBtn.style.background = season === 'winter' ? 'var(--primary)' : 'none'; winterBtn.style.color = season === 'winter' ? '#fff' : 'var(--gray-500)'; }
+  if (summerBtn) { summerBtn.style.background = season === 'summer' ? 'var(--primary)' : 'none'; summerBtn.style.color = season === 'summer' ? '#fff' : 'var(--gray-500)'; }
+  renderCompareTable('gas');
+}
+
 function submitQuoteForm() {
   const provider = $$('qf-provider').value.trim();
   if (!provider) { toast('Enter a provider name'); return; }
@@ -4502,14 +4681,8 @@ function submitQuoteForm() {
   const attachmentDataUrl = attachPrev.dataset.dataUrl || '';
   const attachmentName = attachPrev.dataset.fileName || '';
   const gasTiers = isGas ? {
-    winterFirstThreshold: parseFloat($$('qf-g-wf-threshold').value) || null,
-    winterFirstRate:      parseFloat($$('qf-g-wf-rate').value)      || null,
-    winterNextThreshold:  parseFloat($$('qf-g-wn-threshold').value)  || null,
-    winterNextRate:       parseFloat($$('qf-g-wn-rate').value)       || null,
-    summerFirstThreshold: parseFloat($$('qf-g-sf-threshold').value) || null,
-    summerFirstRate:      parseFloat($$('qf-g-sf-rate').value)      || null,
-    summerNextThreshold:  parseFloat($$('qf-g-sn-threshold').value)  || null,
-    summerNextRate:       parseFloat($$('qf-g-sn-rate').value)       || null,
+    winterTiers: qfWinterTiers.map(t => ({ threshold: +t.threshold||null, rate: +t.rate||0 })),
+    summerTiers: qfSummerTiers.map(t => ({ threshold: +t.threshold||null, rate: +t.rate||0 })),
   } : undefined;
   const quoteData = { provider, supply: parseFloat($$('qf-supply').value)||0, ratePeriods, bonuses, comment, attachmentDataUrl, attachmentName, ...(gasTiers ? { gasTiers } : {}) };
   if (isGas) {
