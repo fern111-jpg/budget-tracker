@@ -3360,7 +3360,7 @@ async function syncPush() {
       syncCfg.lastSync = new Date().toISOString();
       localStorage.setItem('bt_sync_' + currentUser, JSON.stringify(syncCfg));
       updateSyncUI();
-      toast('Pushed — ' + txs.length + ' transactions, ' + utilBillsClean.length + ' bills');
+      toast('bin:' + syncCfg.binId.slice(-4) + ' pushed util=' + utilBillsClean.length + ' tx=' + txs.length);
     } else {
       const txt = await r.text().catch(() => '');
       toast('Push failed (' + r.status + ')' + (txt ? ': ' + txt.slice(0,60) : ''));
@@ -3415,7 +3415,7 @@ async function syncPull() {
         if (curPage === 'transactions') renderTx();
         if (curPage === 'utilities')    renderUtilities();
         if (curPage === 'budgeting')    renderBudget();
-        toast('raw: ' + (rec.utilBills?.length ?? 'missing') + ' bills, ' + rec.txs.length + ' tx | local: ' + utilBills.length + ' bills');
+        toast('bin:' + syncCfg.binId.slice(-4) + ' util=' + (rec.utilBills?.length ?? '?') + ' tx=' + rec.txs.length);
         // Only push back if phone had local-only transactions to contribute
         if (localOnlyTxs.length > 0) syncPush();
       } else {
