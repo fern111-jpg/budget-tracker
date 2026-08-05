@@ -3415,7 +3415,7 @@ async function syncPull() {
         if (curPage === 'transactions') renderTx();
         if (curPage === 'utilities')    renderUtilities();
         if (curPage === 'budgeting')    renderBudget();
-        toast('Synced — ' + txs.length + ' transactions, ' + utilBills.length + ' bills');
+        toast('raw: ' + (rec.utilBills?.length ?? 'missing') + ' bills, ' + rec.txs.length + ' tx | local: ' + utilBills.length + ' bills');
         // Only push back if phone had local-only transactions to contribute
         if (localOnlyTxs.length > 0) syncPush();
       } else {
