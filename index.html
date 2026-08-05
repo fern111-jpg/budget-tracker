@@ -3330,8 +3330,23 @@ function syncSave() {
 async function syncPush() {
   if (!syncCfg?.key || !syncCfg?.binId) { toast('Sync not configured — check Settings'); return; }
   try {
-    // Strip attachments from utilBills quotes — base64 data can exceed JSONBin's size limit
-    const utilBillsClean = utilBills.map(b => ({
+    // If local utilBills is empty, fetch existing bin data to avoid overwriting bills
+    // added on another device that haven't been pulled yet
+    let billsToPush = utilBills;
+    if (utilBills.length === 0) {
+      try {
+        const check = await fetch(`${JSONBIN}/b/${syncCfg.binId}/latest?t=${Date.now()}`, {
+          headers: { 'X-Master-Key': syncCfg.key, 'Cache-Control': 'no-cache' }
+        });
+        if (check.ok) {
+          const existing = await check.json();
+          if (Array.isArray(existing.record?.utilBills) && existing.record.utilBills.length > 0) {
+            billsToPush = existing.record.utilBills;
+          }
+        }
+      } catch(e) { /* proceed with empty utilBills if fetch fails */ }
+    }
+    const utilBillsClean = billsToPush.map(b => ({
       ...b,
       quotes: (b.quotes || []).map(q => { const { attachmentDataUrl, ...rest } = q; return rest; })
     }));
@@ -3345,7 +3360,7 @@ async function syncPush() {
       syncCfg.lastSync = new Date().toISOString();
       localStorage.setItem('bt_sync_' + currentUser, JSON.stringify(syncCfg));
       updateSyncUI();
-      toast('Pushed — ' + txs.length + ' tx, ' + utilBills.length + ' bills');
+      toast('Pushed — data synced');
     } else {
       const txt = await r.text().catch(() => '');
       toast('Push failed (' + r.status + ')' + (txt ? ': ' + txt.slice(0,60) : ''));
