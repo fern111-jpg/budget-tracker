@@ -3397,6 +3397,9 @@ async function syncPull() {
             return b;
           });
           localStorage.setItem('bt_util_bills_' + currentUser, JSON.stringify(utilBills));
+          // Refresh active comparison bills so quotes update immediately
+          if (gasCompBill) { const u = utilBills.find(b => b.id === gasCompBill.id); if (u) { gasCompBill = u; gasQuotes = u.quotes || []; } }
+          if (utilCompBill) { const u = utilBills.find(b => b.id === utilCompBill.id); if (u) { utilCompBill = u; utilQuotes = u.quotes || []; } }
         }
         if (rec.cats) {
           CATS = rec.cats;
