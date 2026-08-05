@@ -1841,7 +1841,7 @@ function goTo(page) {
   if (page === 'transactions') renderTx();
   if (page === 'budgeting')    renderBudget();
   if (page === 'manage')       { manageSnapshot = null; renderManage(); }
-  if (page === 'utilities')    { renderUtilities(); if (syncCfg?.key && syncCfg?.binId) syncPull(); }
+  if (page === 'utilities')    renderUtilities();
   if (page === 'settings')     updateSyncUI();
   const mdTabs = $$('util-md-tabs');
   if (mdTabs) mdTabs.classList.toggle('visible', page === 'utilities');
@@ -3386,7 +3386,7 @@ async function syncPull() {
         txs = merged;
         localStorage.setItem('bt_txs_' + currentUser, JSON.stringify(txs));
         // All other data: remote is source of truth
-        if (Array.isArray(rec.utilBills)) {
+        if (Array.isArray(rec.utilBills) && rec.utilBills.length > 0) {
           utilBills = rec.utilBills.map(b => {
             if (!b.ratePeriods && b.rate != null) b.ratePeriods = [{ name: b.rateName || 'General Usage', rate: b.rate, usage: b.usage || 0 }];
             b.ratePeriods = b.ratePeriods || [];
@@ -3711,10 +3711,6 @@ function bootApp() {
   updateSyncUI();
   setBudgetPeriod(budgetPeriod);
   loadThemeColors();
-  // Pull on visibility change — fires when user opens app or switches back to tab
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && syncCfg?.key && syncCfg?.binId) syncPull();
-  });
 }
 
 // ── Utilities page ─────────────────────────────────────────────
