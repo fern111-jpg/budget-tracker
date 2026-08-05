@@ -3710,8 +3710,11 @@ function bootApp() {
   goTo(savedPage);
   updateSyncUI();
   setBudgetPeriod(budgetPeriod);
-  // Auto-pull removed — use manual Pull in Settings to get latest data
   loadThemeColors();
+  // Pull on visibility change — fires when user opens app or switches back to tab
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && syncCfg?.key && syncCfg?.binId) syncPull();
+  });
 }
 
 // ── Utilities page ─────────────────────────────────────────────
