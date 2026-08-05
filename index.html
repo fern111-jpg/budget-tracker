@@ -1841,7 +1841,7 @@ function goTo(page) {
   if (page === 'transactions') renderTx();
   if (page === 'budgeting')    renderBudget();
   if (page === 'manage')       { manageSnapshot = null; renderManage(); }
-  if (page === 'utilities')    renderUtilities();
+  if (page === 'utilities')    { renderUtilities(); if (syncCfg?.key && syncCfg?.binId) syncPull(); }
   if (page === 'settings')     updateSyncUI();
   const mdTabs = $$('util-md-tabs');
   if (mdTabs) mdTabs.classList.toggle('visible', page === 'utilities');
