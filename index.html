@@ -4280,21 +4280,22 @@ function renderCompareTable(type) {
   const colBg = (ci) => multiCol && ci === cheapestIdx ? '#f0fdf4' : '';
   const colBorder = (ci) => multiCol && ci === cheapestIdx ? '2px solid #10b981' : '';
 
-  const TH_METRIC = `padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;background:#f8fafc;border-bottom:1px solid #e2e8f0;min-width:160px;`;
+  const STICKY_COL = `position:sticky;left:0;z-index:1;box-shadow:2px 0 5px rgba(0,0,0,0.05);`;
+  const TH_METRIC = `${STICKY_COL}padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;background:#f8fafc;border-bottom:1px solid #e2e8f0;width:140px;min-width:140px;max-width:160px;`;
   const thCol = (ci) => {
     const cheap = multiCol && ci === cheapestIdx;
     const cur   = cols[ci].isCurrent;
-    return `padding:12px 16px;text-align:left;min-width:150px;vertical-align:top;border-bottom:1px solid #e2e8f0;border-left:1px solid #f1f5f9;${cheap?'background:#eff6ff;border-top:2px solid var(--primary);':cur?'':'cursor:pointer;'}`;
+    return `padding:12px 16px;text-align:left;min-width:160px;vertical-align:top;border-bottom:1px solid #e2e8f0;border-left:1px solid #f1f5f9;${cheap?'background:#eff6ff;border-top:2px solid var(--primary);':cur?'':'cursor:pointer;'}`;
   };
-  const TD_LABEL = `padding:11px 16px;font-size:12.5px;font-weight:600;color:#475569;background:#f8fafc;border-top:1px solid #f1f5f9;`;
+  const TD_LABEL = `${STICKY_COL}padding:11px 16px;font-size:12.5px;font-weight:600;color:#475569;background:#f8fafc;border-top:1px solid #f1f5f9;width:140px;min-width:140px;max-width:160px;`;
   const tdVal = (ci, extra='') => `padding:11px 16px;text-align:right;font-size:13px;color:#334155;border-top:1px solid #f1f5f9;border-left:1px solid #f1f5f9;${multiCol&&ci===cheapestIdx?'background:#eff6ff;':''}${extra}`;
   const hoverRow = `onmouseover="Array.from(this.cells).forEach(c=>c.style.background=(c.dataset.base||c.style.background)==='#f8fafc'?'#eef2f7':c.dataset.base==='#eff6ff'?'#dbeafe':'#f0f4ff')" onmouseout="Array.from(this.cells).forEach(c=>c.style.background=c.dataset.base||'')"`;
 
   const setBase = (ci, base) => `data-base="${base||''}"`;
 
   el.innerHTML = `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
-  <div style="overflow-x:auto;">
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table style="width:max-content;min-width:100%;border-collapse:collapse;font-size:13px;">
       <thead>
         <tr>
           <th style="${TH_METRIC}">Metric</th>
@@ -4601,6 +4602,7 @@ function submitBillForm() {
   if (!provider) { toast('Enter the energy company name'); return; }
   if (isNaN(total) || total <= 0) { toast('Add rate periods with usage to calculate a total'); return; }
   const isGas = currentFormType === 'gas';
+  const existingBill = editingBillId ? utilBills.find(b => b.id === editingBillId) : null;
   const bill = {
     id: editingBillId || uid(),
     type: currentFormType,
@@ -4617,6 +4619,7 @@ function submitBillForm() {
       winterTiers: bfGasWinterTiers.map(t => ({ threshold: +t.threshold||null, rate: +t.rate||0 })),
       summerTiers: bfGasSummerTiers.map(t => ({ threshold: +t.threshold||null, rate: +t.rate||0 })),
     } : {}),
+    quotes: existingBill?.quotes,
     notes: $$('bf-notes').value.trim(),
     savedAt: new Date().toISOString()
   };
