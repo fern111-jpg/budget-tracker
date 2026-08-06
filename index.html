@@ -4289,13 +4289,17 @@ function renderCompareTable(type) {
     if (col.isCurrent) {
       const gross = +col.total;
       const netAnnual = gross * 365/days - bonusAnnual;
+      const supplyCost = (+b.supply||0) * days;
       if (isGasType) {
-        const supplyCost = (+b.supply||0) * days;
         const winterCost = calcSeasonalCost(cmpGasWinter ?? (b.winterUsage||0), b.winterTiers||[]);
         const summerCost = calcSeasonalCost(cmpGasSummer ?? (b.summerUsage||0), b.summerTiers||[]);
         return { supplyCost, winterCost, summerCost, wTiers: b.winterTiers||[], sTiers: b.summerTiers||[], gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
       }
-      return { supplyCost: null, periodCosts: [], gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
+      const periodCosts = (b.ratePeriods||[]).map(bp => {
+        const usage = cmpElecUsage[bp.name] ?? bp.usage ?? 0;
+        return { name: bp.name, usage, rate: bp.rate, cost: usage * (bp.rate||0) / 100 };
+      });
+      return { supplyCost, periodCosts, gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
     }
     const supplyCost = (+col.supply||0) * days;
     if (isGasType) {
