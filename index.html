@@ -1275,6 +1275,10 @@ select.form-control {
           <span class="settings-label">Import full backup</span>
           <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         </div>
+        <div class="settings-row" onclick="recoverQuotesFromSync()">
+          <span class="settings-label">Recover quotes from sync</span>
+          <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.51"></path></svg>
+        </div>
       </div>
       <input type="file" id="import-file" accept=".csv" style="display:none" onchange="doImport(this)">
       <input type="file" id="import-backup-file" accept=".json" style="display:none" onchange="importBackup(this)">
@@ -3392,6 +3396,43 @@ function syncSave() {
   // Debounced auto-push: 4s after last change
   clearTimeout(_pushTimer);
   _pushTimer = setTimeout(syncPush, 4000);
+}
+
+async function recoverQuotesFromSync() {
+  if (!syncCfg?.key || !syncCfg?.binId) { toast('Sync not configured'); return; }
+  toast('Fetching from sync…');
+  try {
+    const r = await fetch(`${JSONBIN}/b/${syncCfg.binId}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': syncCfg.key, 'Cache-Control': 'no-cache' }
+    });
+    if (!r.ok) { toast('Could not reach sync — check connection'); return; }
+    const data = await r.json();
+    const remoteBills = data.record?.utilBills;
+    if (!Array.isArray(remoteBills) || !remoteBills.length) { toast('No bills found in sync'); return; }
+    let restored = 0;
+    remoteBills.forEach(remote => {
+      if (!Array.isArray(remote.quotes) || !remote.quotes.length) return;
+      const local = utilBills.find(b => b.id === remote.id);
+      if (!local) return;
+      const localCount = (local.quotes || []).length;
+      if (remote.quotes.length > localCount) {
+        local.quotes = remote.quotes;
+        restored += remote.quotes.length - localCount;
+        // refresh in-memory comparison state
+        if (gasCompBill?.id === local.id) { gasCompBill = local; gasQuotes = local.quotes; }
+        if (utilCompBill?.id === local.id) { utilCompBill = local; utilQuotes = local.quotes; }
+      }
+    });
+    if (restored > 0) {
+      saveUtilBills();
+      if (curPage === 'utilities') renderUtilities();
+      toast(`Recovered ${restored} quote${restored !== 1 ? 's' : ''} from sync`);
+    } else {
+      toast('Sync has no additional quotes to restore');
+    }
+  } catch(e) {
+    toast('Recovery failed — check connection');
+  }
 }
 
 async function syncPush() {
