@@ -4289,6 +4289,12 @@ function renderCompareTable(type) {
     if (col.isCurrent) {
       const gross = +col.total;
       const netAnnual = gross * 365/days - bonusAnnual;
+      if (isGasType) {
+        const supplyCost = (+b.supply||0) * days;
+        const winterCost = calcSeasonalCost(cmpGasWinter ?? (b.winterUsage||0), b.winterTiers||[]);
+        const summerCost = calcSeasonalCost(cmpGasSummer ?? (b.summerUsage||0), b.summerTiers||[]);
+        return { supplyCost, winterCost, summerCost, wTiers: b.winterTiers||[], sTiers: b.summerTiers||[], gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
+      }
       return { supplyCost: null, periodCosts: [], gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
     }
     const supplyCost = (+col.supply||0) * days;
@@ -4394,17 +4400,17 @@ function renderCompareTable(type) {
         </tr>`).join('')}
         <tr ${hoverRow}>
           <td style="${TD_LABEL}" data-base="#f8fafc">Supply Cost (${days}d)</td>
-          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${c.supplyCost!=null ? fmtC(c.supplyCost) : fmtC(null)}</td>`; }).join('')}
+          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${fmtC(c.supplyCost)}</td>`; }).join('')}
         </tr>
-        ${isGasType ? `
-        <tr ${hoverRow}>
-          <td style="${TD_LABEL}" data-base="#f8fafc">Winter Usage Cost <span style="color:#94a3b8;font-size:11px;">(${b.winterUsage||0}MJ)</span></td>
-          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${cols[ci].isCurrent ? fmtC(null) : fmtC(c.winterCost)}</td>`; }).join('')}
-        </tr>
-        <tr ${hoverRow}>
-          <td style="${TD_LABEL}" data-base="#f8fafc">Summer Usage Cost <span style="color:#94a3b8;font-size:11px;">(${b.summerUsage||0}MJ)</span></td>
-          ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci)}" data-base="${base}">${cols[ci].isCurrent ? fmtC(null) : fmtC(c.summerCost)}</td>`; }).join('')}
-        </tr>` : ''}
+        ${isGasType ? (() => {
+          const isWinter = gasSeason === 'winter';
+          const seasonUsage = isWinter ? (cmpGasWinter ?? (b.winterUsage||0)) : (cmpGasSummer ?? (b.summerUsage||0));
+          const seasonLabel = isWinter ? 'Winter' : 'Summer';
+          return `<tr ${hoverRow}>
+            <td style="${TD_LABEL}" data-base="#f8fafc">${seasonLabel} Usage Cost <span style="color:#94a3b8;font-size:11px;">(${seasonUsage}MJ)</span></td>
+            ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; const cost = isWinter ? c.winterCost : c.summerCost; return `<td style="${tdVal(ci)}" data-base="${base}">${fmtC(cost)}</td>`; }).join('')}
+          </tr>`;
+        })() : ''}
         <tr ${hoverRow}>
           <td style="padding:11px 16px;font-size:12.5px;font-weight:700;color:var(--primary);background:#f8fafc;border-top:2px solid #e2e8f0;" data-base="#f8fafc">Bill Period Total</td>
           ${calcs.map((c,ci) => { const base=multiCol&&ci===cheapestIdx?'#eff6ff':''; return `<td style="${tdVal(ci,'font-weight:700;color:var(--primary);border-top:2px solid #e2e8f0;')}" data-base="${base}">${fmtC(c.gross)}</td>`; }).join('')}
@@ -4460,9 +4466,9 @@ function openBillForm(prefill, type) {
       prefill = {
         provider: prev.provider,
         supply: prev.supply,
-        ratePeriods: (prev.ratePeriods || []).map(r => ({ name: r.name, rate: r.rate, usage: '' })),
+        ratePeriods: (prev.ratePeriods || []).map(r => ({ name: r.name, rate: r.rate, usage: r.usage })),
         winterTiers: prev.winterTiers, summerTiers: prev.summerTiers,
-        // leave usage, from, to, days, total, notes blank
+        winterUsage: prev.winterUsage, summerUsage: prev.summerUsage,
       };
     }
   }
