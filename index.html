@@ -1344,6 +1344,7 @@ select.form-control {
             <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Quote Comparison</div>
             <button onclick="openQuoteForm()" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Quote</button>
           </div>
+          <div id="elec-usage-bar" style="margin-bottom:10px;"></div>
           <div id="util-compare-table"></div>
         </div>
       </div>
@@ -1365,6 +1366,7 @@ select.form-control {
               <button onclick="openQuoteForm(null,'gas')" style="padding:6px 14px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Quote</button>
             </div>
           </div>
+          <div id="gas-usage-bar" style="margin-bottom:10px;"></div>
           <div id="gas-compare-table"></div>
         </div>
       </div>
@@ -1823,6 +1825,9 @@ let bfGasWinterTiers = [];
 let bfGasSummerTiers = [];
 let qfWinterTiers = [];
 let qfSummerTiers = [];
+let cmpElecUsage = {};   // { [periodName]: overrideUsage } — null entries use bill value
+let cmpGasWinter = null; // null = use bill's winterUsage
+let cmpGasSummer = null; // null = use bill's summerUsage
 let gasFilterFrom = '';
 let gasFilterTo = '';
 let internetCompBill = null;
@@ -4154,11 +4159,14 @@ function renderCompareSection() {
   const sec = $$('util-compare-section');
   const bills = utilBills.filter(b => b.type === 'electricity');
   if (!bills.length) { sec.style.display = 'none'; return; }
+  const prevId = utilCompBill?.id;
   if (!utilCompBill || !bills.find(b => b.id === utilCompBill.id)) {
     utilCompBill = autoSelectCompBill('electricity');
     utilQuotes = utilCompBill ? [...(utilCompBill.quotes || [])] : [];
   }
+  if (utilCompBill?.id !== prevId) cmpElecUsage = {};
   sec.style.display = '';
+  renderUsageBar('electricity');
   renderCompareTable('electricity');
 }
 
@@ -4167,12 +4175,52 @@ function renderGasCompareSection() {
   if (!sec) return;
   const bills = utilBills.filter(b => b.type === 'gas');
   if (!bills.length) { sec.style.display = 'none'; return; }
+  const prevId = gasCompBill?.id;
   if (!gasCompBill || !bills.find(b => b.id === gasCompBill.id)) {
     gasCompBill = autoSelectCompBill('gas');
     gasQuotes = gasCompBill ? [...(gasCompBill.quotes || [])] : [];
   }
+  if (gasCompBill?.id !== prevId) { cmpGasWinter = null; cmpGasSummer = null; }
   sec.style.display = '';
+  renderUsageBar('gas');
   renderCompareTable('gas');
+}
+
+function renderUsageBar(type) {
+  const isGas = type === 'gas';
+  const bar = $$(isGas ? 'gas-usage-bar' : 'elec-usage-bar');
+  if (!bar) return;
+  const b = isGas ? gasCompBill : utilCompBill;
+  if (!b) { bar.innerHTML = ''; return; }
+  const inpStyle = 'width:72px;padding:4px 6px;border:1.5px solid var(--gray-200);border-radius:6px;font-size:12px;font-family:inherit;background:var(--white);color:var(--gray-800);text-align:right;';
+  if (isGas) {
+    const wVal = cmpGasWinter ?? (b.winterUsage || 0);
+    const sVal = cmpGasSummer ?? (b.summerUsage || 0);
+    bar.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:8px 12px;">
+      <span style="font-size:11.5px;font-weight:600;color:var(--gray-500);">Usage for quotes:</span>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray-700);">Winter
+        <input type="number" value="${wVal}" min="0" step="1" style="${inpStyle}" oninput="cmpGasWinter=+this.value;renderCompareTable('gas')"> MJ
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray-700);">Summer
+        <input type="number" value="${sVal}" min="0" step="1" style="${inpStyle}" oninput="cmpGasSummer=+this.value;renderCompareTable('gas')"> MJ
+      </label>
+      <button onclick="cmpGasWinter=null;cmpGasSummer=null;renderGasCompareSection()" style="background:none;border:none;font-size:11.5px;color:var(--primary);cursor:pointer;font-family:inherit;font-weight:600;padding:0;">Reset</button>
+    </div>`;
+  } else {
+    const periods = b.ratePeriods || [];
+    if (!periods.length) { bar.innerHTML = ''; return; }
+    const inputs = periods.map(p => {
+      const val = cmpElecUsage[p.name] ?? p.usage ?? 0;
+      return `<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray-700);">${esc(p.name)}
+        <input type="number" value="${val}" min="0" step="1" style="${inpStyle}" oninput="cmpElecUsage[${JSON.stringify(p.name)}]=+this.value;renderCompareTable('electricity')"> kWh
+      </label>`;
+    }).join('');
+    bar.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:8px 12px;">
+      <span style="font-size:11.5px;font-weight:600;color:var(--gray-500);">Usage for quotes:</span>
+      ${inputs}
+      <button onclick="cmpElecUsage={};renderCompareSection()" style="background:none;border:none;font-size:11.5px;color:var(--primary);cursor:pointer;font-family:inherit;font-weight:600;padding:0;">Reset</button>
+    </div>`;
+  }
 }
 
 function renderCompareTable(type) {
@@ -4206,16 +4254,17 @@ function renderCompareTable(type) {
     if (isGasType) {
       const wTiers = col.gasTiers?.winterTiers || [];
       const sTiers = col.gasTiers?.summerTiers || [];
-      const winterCost = calcSeasonalCost(b.winterUsage||0, wTiers);
-      const summerCost = calcSeasonalCost(b.summerUsage||0, sTiers);
+      const winterCost = calcSeasonalCost(cmpGasWinter ?? (b.winterUsage||0), wTiers);
+      const summerCost = calcSeasonalCost(cmpGasSummer ?? (b.summerUsage||0), sTiers);
       const gross = supplyCost + winterCost + summerCost;
       const netAnnual = gross * 365/days - bonusAnnual;
       return { supplyCost, winterCost, summerCost, wTiers, sTiers, gross, bonusAnnual, netAnnual, netMonthly: netAnnual/12 };
     }
     let periodCosts = [];
     b.ratePeriods.forEach(bp => {
+      const usage = cmpElecUsage[bp.name] ?? bp.usage;
       const match = col.ratePeriods.find(r => r.name.toLowerCase() === bp.name.toLowerCase());
-      periodCosts.push({ name: bp.name, usage: bp.usage, rate: match ? match.rate : null, cost: match ? bp.usage * match.rate / 100 : null });
+      periodCosts.push({ name: bp.name, usage, rate: match ? match.rate : null, cost: match ? usage * match.rate / 100 : null });
     });
     const usageCost = periodCosts.reduce((s,p) => s + (p.cost||0), 0);
     const gross = supplyCost + usageCost;
@@ -4293,7 +4342,7 @@ function renderCompareTable(type) {
           return tierRows.join('');
         })() : b.ratePeriods.map(bp => `
         <tr ${hoverRow}>
-          <td style="${TD_LABEL}" data-base="#f8fafc">${esc(bp.name)} <span style="color:#94a3b8;font-size:11px;">(${bp.usage}${unitLabel})</span></td>
+          <td style="${TD_LABEL}" data-base="#f8fafc">${esc(bp.name)} <span style="color:#94a3b8;font-size:11px;">(${cmpElecUsage[bp.name] ?? bp.usage}${unitLabel})</span></td>
           ${calcs.map((calc,ci) => {
             const base = multiCol&&ci===cheapestIdx?'#eff6ff':'';
             if (cols[ci].isCurrent) return `<td style="${tdVal(ci)}" data-base="${base}">${bp.rate}c/${unitLabel}</td>`;
@@ -4360,6 +4409,21 @@ function deleteQuote(id, type) {
 function openBillForm(prefill, type) {
   currentFormType = type || (prefill?.type) || 'electricity';
   editingBillId = prefill?.id || null;
+  // Pre-populate a new bill from the most recent bill of this type
+  if (!editingBillId && !prefill) {
+    const prev = utilBills
+      .filter(b => b.type === currentFormType)
+      .sort((a, b) => (b.to || b.from || b.savedAt || '') > (a.to || a.from || a.savedAt || '') ? 1 : -1)[0];
+    if (prev) {
+      prefill = {
+        provider: prev.provider,
+        supply: prev.supply,
+        ratePeriods: (prev.ratePeriods || []).map(r => ({ name: r.name, rate: r.rate, usage: '' })),
+        winterTiers: prev.winterTiers, summerTiers: prev.summerTiers,
+        // leave usage, from, to, days, total, notes blank
+      };
+    }
+  }
   const typeName = currentFormType === 'gas' ? 'Gas' : 'Electricity';
   $$('bill-form-title').textContent = editingBillId ? `Edit ${typeName} Bill` : `Add ${typeName} Bill`;
   $$('bf-provider').value = prefill?.provider || '';
