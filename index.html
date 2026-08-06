@@ -62,7 +62,7 @@ body {
 
 /* ── App shell ───────────────────────────── */
 #app { display: flex; min-height: 100vh; max-width: 480px; margin: 0 auto; flex-direction: column; }
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   #app { max-width: 100%; flex-direction: row; }
 }
 
@@ -222,7 +222,7 @@ body {
 /* ── Bottom Nav (mobile) ─────────────────── */
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; height: var(--nav-h);
+  width: 100%; max-width: 640px; height: var(--nav-h);
   background: var(--sb-bg); border-top: 1px solid var(--sb-border);
   display: flex; z-index: 200;
   padding-bottom: env(safe-area-inset-bottom);
@@ -543,9 +543,9 @@ select.form-control {
 .emailjs-info { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: var(--radius-sm); padding: 12px 14px; font-size: 12.5px; color: #0369a1; margin-bottom: 12px; line-height: 1.6; }
 
 /* ══════════════════════════════════════════
-   DESKTOP (≥ 768px)
+   DESKTOP (≥ 640px)
 ══════════════════════════════════════════ */
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   body { background: #E5E7EB; }
 
   /* App shell goes full-width */
@@ -606,7 +606,7 @@ select.form-control {
   #pg-dashboard [style*="border-radius: 12px"] { margin-left: 0; margin-right: 0; }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .sidebar { width: 56px; }
   .sidebar:hover { width: var(--sb-w); }
   .header { padding: 0 28px; }
